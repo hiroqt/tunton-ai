@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -400,29 +401,32 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
   late final Future<List<int>> _zooms = widget.loadZooms != null
       ? widget.loadZooms!()
       : _loadZooms();
-  bool _tileError = false;
+  TileArchive? _archive;
 
   Future<List<int>> _loadZooms() async {
-    final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-    final zooms =
-        manifest
-            .listAssets()
-            .where(
-              (path) =>
-                  RegExp(r'^assets/tiles/\d+/\d+/\d+\.png$').hasMatch(path),
-            )
-            .map((path) => int.parse(path.split('/')[2]))
-            .toSet()
-            .toList()
-          ..sort();
-    return zooms;
+    try {
+      final archive = await TileArchive.loadFromBundle(rootBundle);
+      _archive = archive;
+      return archive.zooms;
+    } catch (_) {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      final zooms =
+          manifest
+              .listAssets()
+              .where(
+                (path) =>
+                    RegExp(r'^assets/tiles/\d+/\d+/\d+\.png$').hasMatch(path),
+              )
+              .map((path) => int.parse(path.split('/')[2]))
+              .toSet()
+              .toList()
+            ..sort();
+      return zooms;
+    }
   }
 
   void _onTileError(TileImage _, Object _, StackTrace? _) {
-    if (_tileError) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !_tileError) setState(() => _tileError = true);
-    });
+    // Missing boundary tiles display the background without breaking the map.
   }
 
   @override
@@ -448,9 +452,7 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
             action: LinearProgressIndicator(),
           );
         }
-        if (snapshot.hasError ||
-            (snapshot.data?.isEmpty ?? true) ||
-            _tileError) {
+        if (snapshot.hasError || (snapshot.data?.isEmpty ?? true)) {
           return const JourneyMessage(
             icon: Icons.map_outlined,
             title: 'Offline map unavailable',
@@ -459,6 +461,38 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
           );
         }
         final zooms = snapshot.data!;
+        final LatLng center;
+        final double initialZoom;
+        if (widget.route != null && widget.route!.points.length >= 2) {
+          final points = widget.route!.points;
+          double minLat = points.first.latitude, maxLat = points.first.latitude;
+          double minLon = points.first.longitude, maxLon = points.first.longitude;
+          for (final p in points) {
+            if (p.latitude < minLat) minLat = p.latitude;
+            if (p.latitude > maxLat) maxLat = p.latitude;
+            if (p.longitude < minLon) minLon = p.longitude;
+            if (p.longitude > maxLon) maxLon = p.longitude;
+          }
+          center = LatLng((minLat + maxLat) / 2, (minLon + maxLon) / 2);
+          final span = math.max(maxLat - minLat, (maxLon - minLon) * 1.5);
+          double calculatedZoom = 16.0;
+          if (span > 0.08) {
+            calculatedZoom = 12.0;
+          } else if (span > 0.04) {
+            calculatedZoom = 13.0;
+          } else if (span > 0.02) {
+            calculatedZoom = 14.0;
+          } else if (span > 0.01) {
+            calculatedZoom = 15.0;
+          }
+          initialZoom = calculatedZoom.clamp(
+            zooms.first.toDouble(),
+            zooms.last.toDouble(),
+          );
+        } else {
+          center = widget.destination.position;
+          initialZoom = zooms.contains(17) ? 17.0 : zooms.first.toDouble();
+        }
         return ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: SizedBox(
@@ -467,22 +501,22 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
               children: [
                 FlutterMap(
                   options: MapOptions(
-                    initialCenter: widget.destination.position,
-                    initialZoom: zooms.contains(17)
-                        ? 17
-                        : zooms.first.toDouble(),
+                    initialCenter: center,
+                    initialZoom: initialZoom,
                     minZoom: zooms.first.toDouble(),
                     maxZoom: zooms.last.toDouble(),
-                    backgroundColor: theme.colorScheme.surfaceContainerLow,
+                    backgroundColor: const Color(0xFFE8E4D8),
                   ),
                   children: [
                     TileLayer(
                       urlTemplate: 'assets/tiles/{z}/{x}/{y}.png',
-                      tileProvider: AssetTileProvider(),
+                      tileProvider: _archive != null
+                          ? ArchiveTileProvider(_archive!)
+                          : AssetTileProvider(),
                       errorTileCallback: _onTileError,
                       minZoom: zooms.first.toDouble(),
                       maxZoom: zooms.last.toDouble(),
-                      maxNativeZoom: zooms.last,
+                      maxNativeZoom: 17,
                     ),
                     if ((widget.route?.points.length ?? 0) >= 2)
                       PolylineLayer(
@@ -541,5 +575,104 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
         );
       },
     );
+  }
+}
+
+class TileArchive {
+  TileArchive({
+    required this.bytes,
+    required this.count,
+    required this.zooms,
+  }) : _byteData = ByteData.sublistView(bytes);
+
+  final Uint8List bytes;
+  final ByteData _byteData;
+  final int count;
+  final List<int> zooms;
+
+  static const int _headerSize = 12;
+  static const int _entrySize = 17;
+  static const int _magic = 0x54554E54; // 'TUNT'
+
+  static TileArchive fromBytes(Uint8List bytes) {
+    if (bytes.length < _headerSize) {
+      throw const FormatException('Invalid tile archive: file too small');
+    }
+    final data = ByteData.sublistView(bytes);
+    final magic = data.getUint32(0, Endian.big);
+    if (magic != _magic) {
+      throw const FormatException('Invalid tile archive: invalid magic');
+    }
+    final count = data.getUint32(8, Endian.big);
+    final zoomsSet = <int>{};
+    for (int i = 0; i < count; i++) {
+      final pos = _headerSize + i * _entrySize;
+      zoomsSet.add(data.getUint8(pos));
+    }
+    final zooms = zoomsSet.toList()..sort();
+    return TileArchive(bytes: bytes, count: count, zooms: zooms);
+  }
+
+  static Future<TileArchive> loadFromBundle(
+    AssetBundle bundle, {
+    String path = 'assets/maps/manila_tiles.bin',
+  }) async {
+    final byteData = await bundle.load(path);
+    final uint8List = byteData.buffer.asUint8List(
+      byteData.offsetInBytes,
+      byteData.lengthInBytes,
+    );
+    return fromBytes(uint8List);
+  }
+
+  Uint8List? getTile(int z, int x, int y) {
+    int low = 0;
+    int high = count - 1;
+    while (low <= high) {
+      final mid = (low + high) >> 1;
+      final pos = _headerSize + mid * _entrySize;
+      final entryZ = _byteData.getUint8(pos);
+      final entryX = _byteData.getUint32(pos + 1, Endian.big);
+      final entryY = _byteData.getUint32(pos + 5, Endian.big);
+
+      if (entryZ == z && entryX == x && entryY == y) {
+        final offset = _byteData.getUint32(pos + 9, Endian.big);
+        final length = _byteData.getUint32(pos + 13, Endian.big);
+        return Uint8List.sublistView(bytes, offset, offset + length);
+      }
+
+      if (entryZ < z ||
+          (entryZ == z && entryX < x) ||
+          (entryZ == z && entryX == x && entryY < y)) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+    return null;
+  }
+}
+
+class ArchiveTileProvider extends TileProvider {
+  ArchiveTileProvider(this.archive);
+
+  final TileArchive archive;
+
+  static final Uint8List _transparentPng = Uint8List.fromList(const [
+    0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+    0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+    0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
+    0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+    0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
+    0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+  ]);
+
+  @override
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) {
+    final tile = archive.getTile(coordinates.z, coordinates.x, coordinates.y);
+    if (tile != null) {
+      return MemoryImage(tile);
+    }
+    return MemoryImage(_transparentPng);
   }
 }

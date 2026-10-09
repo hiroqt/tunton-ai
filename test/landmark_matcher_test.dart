@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tuntun/features/recognition/landmark_matcher.dart';
@@ -25,6 +26,51 @@ Map<String, dynamic> _decoded(
 }
 
 void main() {
+  test('best-match mode returns one clear landmark and its reference photo', () {
+    final matcher = LandmarkMatcher.fromDecodedJson(_decoded(2, [
+      ('alpha', [1.0, 0.0]),
+      ('beta', [0.0, 1.0]),
+    ]));
+    final result = matcher.matchBest([1.0, 0.0]);
+    expect(result.candidates, hasLength(1));
+    expect(result.top!.landmarkId, 'alpha');
+    expect(matcher.referencePhotos['alpha'], 'assets/images/alpha/x.png');
+  });
+
+  test('best-match mode rejects a weak top result', () {
+    final matcher = LandmarkMatcher.fromDecodedJson(_decoded(2, [
+      ('alpha', [0.7, math.sqrt(1 - 0.7 * 0.7)]),
+    ]));
+    expect(matcher.match([1.0, 0.0]).isRecognized, isTrue);
+    expect(matcher.matchBest([1.0, 0.0]).isRecognized, isFalse);
+  });
+
+  test('best-match mode rejects two similar but distinct landmarks', () {
+    final matcher = LandmarkMatcher.fromDecodedJson(_decoded(2, [
+      ('alpha', [0.91, math.sqrt(1 - 0.91 * 0.91)]),
+      ('beta', [0.90, math.sqrt(1 - 0.90 * 0.90)]),
+    ]));
+    expect(matcher.matchBest([1.0, 0.0]).candidates, isEmpty);
+  });
+
+  test('a runner-up below the ranking threshold still counts for ambiguity', () {
+    final matcher = LandmarkMatcher.fromDecodedJson(_decoded(2, [
+      ('alpha', [0.91, math.sqrt(1 - 0.91 * 0.91)]),
+      ('beta', [0.89, math.sqrt(1 - 0.89 * 0.89)]),
+    ]), scoreThreshold: 0.9);
+    expect(matcher.match([1.0, 0.0]).candidates, hasLength(1));
+    expect(matcher.matchBest([1.0, 0.0]).candidates, isEmpty);
+  });
+
+  test('multiple reference photos of the same place do not cause ambiguity', () {
+    final matcher = LandmarkMatcher.fromDecodedJson(_decoded(2, [
+      ('alpha', [1.0, 0.0]),
+      ('alpha', [0.99, math.sqrt(1 - 0.99 * 0.99)]),
+      ('beta', [0.0, 1.0]),
+    ]));
+    expect(matcher.matchBest([1.0, 0.0]).top!.landmarkId, 'alpha');
+  });
+
   test('takes the MAX similarity across a landmark reference vectors', () {
     // alpha has a weak and a strong reference; the strong one must win.
     final matcher = LandmarkMatcher.fromDecodedJson(

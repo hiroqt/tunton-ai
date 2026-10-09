@@ -38,7 +38,7 @@ class Landmark {
       lat.abs() <= 90 &&
       lon.abs() <= 180 &&
       areaId.isNotEmpty;
-  bool get isRoutable => areaId == 'intramuros' && routeNodeId != null;
+  bool get isRoutable => routeNodeId != null;
 
   /// Validates one catalog entry. `route_node_id` is optional outside the route
   /// coverage. Throws [FormatException] when required fields are invalid
@@ -55,9 +55,9 @@ class Landmark {
     final routeNodeId = rawRouteNodeId == null
         ? null
         : _requireNonBlank(rawRouteNodeId, 'route_node_id');
-    if (routeNodeId != null && areaId != 'intramuros') {
+    if (routeNodeId != null && !const {'intramuros', 'manila'}.contains(areaId)) {
       throw const FormatException(
-        'Only Intramuros landmarks may have a route node.',
+        'Only Intramuros and Manila landmarks may have a route node.',
       );
     }
     final lat = _requireCoordinate(json['lat'], 'lat', 90);

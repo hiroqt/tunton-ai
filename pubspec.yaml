@@ -69,31 +69,13 @@ flutter:
     - assets/landmarks/landmarks.json
     - assets/landmarks/reference_embeddings.json
     - assets/maps/intramuros_graph.json
+    - assets/maps/manila_tiles.bin
     - assets/images/baluarte-san-diego/
     - assets/images/casa-manila/
     - assets/images/fort-santiago/
     - assets/images/manila-cathedral/
     - assets/images/puerta-real/
     - assets/images/san-agustin/
-    - assets/tiles/15/27394/
-    - assets/tiles/15/27395/
-    - assets/tiles/16/54789/
-    - assets/tiles/16/54790/
-    - assets/tiles/16/54791/
-    - assets/tiles/17/109579/
-    - assets/tiles/17/109580/
-    - assets/tiles/17/109581/
-    - assets/tiles/17/109582/
-    - assets/tiles/17/109583/
-    - assets/tiles/18/219158/
-    - assets/tiles/18/219159/
-    - assets/tiles/18/219160/
-    - assets/tiles/18/219161/
-    - assets/tiles/18/219162/
-    - assets/tiles/18/219163/
-    - assets/tiles/18/219164/
-    - assets/tiles/18/219165/
-    - assets/tiles/18/219166/
   fonts:
     - family: Inter
       fonts:

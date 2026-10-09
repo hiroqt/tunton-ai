@@ -192,7 +192,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
           content: Text(
             destination.areaId == 'intramuros'
                 ? 'This place is recognized, but a verified walking route is unavailable.'
-                : '$area place recognition is available. Walking routes are currently supported only in Intramuros.',
+                : '$area place recognition is available. Walking routes are currently supported in Intramuros and Ermita.',
           ),
           actions: [
             TextButton(

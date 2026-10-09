@@ -217,7 +217,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('destination confirmation requires an explicit selection', (
+  testWidgets('one best match is ready for explicit destination confirmation', (
     tester,
   ) async {
     Landmark? confirmed;
@@ -232,15 +232,14 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Fixture destination'), findsOneWidget);
-    final button = find.widgetWithText(FilledButton, 'Confirm destination');
-    expect(tester.widget<FilledButton>(button).onPressed, isNull);
-    await tester.ensureVisible(find.text('Fixture start'));
-    await tester.tap(find.text('Fixture start'));
-    await tester.pump();
+    expect(find.text('Fixture start'), findsNothing);
+    expect(find.text('Ranked suggestions'), findsNothing);
+    final button = find.widgetWithText(FilledButton, 'Use this destination');
+    expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
     expect(confirmed, isNull);
     await tester.ensureVisible(button);
     await tester.tap(button);
-    expect(confirmed, origin);
+    expect(confirmed, destination);
   });
 
   testWidgets('unknown input stays unknown and offers retry', (tester) async {
@@ -252,7 +251,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Not recognized'), findsOneWidget);
     expect(find.text('Try another photo'), findsOneWidget);
-    expect(find.text('Confirm destination'), findsNothing);
+    expect(find.text('Use this destination'), findsNothing);
   });
 
   testWidgets('missing inference does not produce sample predictions', (
