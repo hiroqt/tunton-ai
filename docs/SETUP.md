@@ -22,7 +22,7 @@ You need:
 1. Flutter SDK on your PATH, Dart (ships with Flutter), Git, and an editor.
 2. Android Studio and Android SDK packages: **SDK Platform**, **Platform-Tools**, **Command-line Tools**, and whichever build tools `flutter doctor` requests.
 3. Android phone with **8 GB RAM for compatibility testing**, Android **API level 26 or newer** for the selected `tflite_flutter` package version, a USB data cable, and USB debugging enabled.
-4. Optional **Python 3** for `tools/prepare_dataset.py` on the developer machine **only**. Python is **not installed on the phone**.
+4. **Python 3.12** for `tools/prepare_dataset.py` on the developer machine **only**. The approved isolated preparation environment uses LiteRT 2.3.0, NumPy 2.5.3, Pillow 12.3.0, and OSMnx 2.1.1. Python is **not installed on the phone**.
 
 Official references: [Flutter installation](https://docs.flutter.dev/install/custom), [Flutter Android setup](https://docs.flutter.dev/platform-integration/android/setup), and [tflite_flutter](https://pub.dev/packages/tflite_flutter).
 

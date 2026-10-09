@@ -19,6 +19,10 @@
 | Storage | Read-only Flutter asset JSON, raster tiles, reference images and checkpoint | No database, network services, syncing or online asset retrieval |
 | Preparation tools | Python and optionally OSMnx **on developer Mac only** | Precompute verified walking graph and image reference index before packaging |
 
+Approved preparation-only packages (user decision, 2026-10-09): `ai-edge-litert`, `numpy`, `Pillow`, and `osmnx`, in an isolated Python environment. These prepare licensed photos, run the same MobileNetV3 checkpoint, export OSM-derived walking data, and render bundled raster tiles. They are not Android runtime dependencies. Backend evaluation photos and source/license records live under `test/datasets/` and are excluded from the APK; team-held-out photos belong in `test/datasets/held_out/team/`.
+
+Project dataset restriction (user decision, 2026-10-09): every collected reference, held-out, and unknown-test photo must depict a documented Philippine location. Preparation source records require `country: PH`, a named location, and geographic source evidence. Map data remains the Intramuros pilot extract. This restriction describes the project dataset, not the original pretraining corpus of the approved general-purpose MobileNetV3 checkpoint.
+
 Do not add dependencies because they are familiar or trendy. `image_picker`, `image`, `tflite_flutter`, `flutter_map`, `latlong2`, and `flutter_riverpod` are the only application-level packages approved for the P0 workload (plus Flutter itself / transitive dependencies).
 
 ## 2. Model artifacts and decision gate
@@ -103,6 +107,8 @@ Use real verified data; never ship placeholders like `0.0` below:
 ```
 
 Each ID is unique, coordinates lie inside the pilot area, and `route_node_id` references a **walkable entrance or connected graph node**, not an arbitrary building centroid.
+
+Approved dataset decision (2026-10-09): where OSM has no permitted pedestrian connector to the actual entrance, San Agustin and Baluarte de San Diego use an explicitly named **exterior public street approach**. The landmark marker and route endpoint are distinct recorded points. Routes stop at the mapped approach; no final connector, private-gate crossing, or current-access guarantee is implied. Endpoint source evidence and offsets are recorded in the backend map snapshot.
 
 ### `assets/landmarks/reference_embeddings.json`
 
