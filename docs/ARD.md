@@ -13,17 +13,19 @@
 | ML runtime | **`tflite_flutter`**, CPU-first | Run single local `.tflite` model directly on phone; physical Android device, API 26+ for documented package setup |
 | Primary model | **Google MobileNetV3 Small Image Embedder** | Create reusable visual feature vectors, **not GPS** |
 | Matching | L2-normalized cosine similarity **in Dart** | Rank tens of precomputed vectors without FAISS or database |
-| Map UI | `flutter_map` + `latlong2` + bundled raster tiles with `AssetTileProvider` | Render offline Intramuros tiles and route overlay |
-| Map source | Legally sourced OpenStreetMap-derived data | Local pedestrian geometry, landmark coordinates, OSM attribution |
+| Map UI | `mapbox_maps_flutter` SDK-managed offline style and tile region | Download the fixed Intramuros region while connected; render it from the SDK offline store with route overlay |
+| Map source | Mapbox basemap; separately, OSM-derived pedestrian graph | Mapbox supplies map presentation; OSM data supplies local pedestrian geometry and requires OSM attribution |
 | Route computation | **Pure Dart Dijkstra** over bundled JSON graph | Offline deterministic shortest walkable route |
-| Storage | Read-only Flutter asset JSON, raster tiles, reference images and checkpoint | No database, network services, syncing or online asset retrieval |
+| Storage | Bundled read-only JSON, reference images and checkpoint; Mapbox SDK-managed offline map store | No database, syncing, or online map use after the fixed region has downloaded |
 | Preparation tools | Python and optionally OSMnx **on developer Mac only** | Precompute verified walking graph and image reference index before packaging |
 
-Approved preparation-only packages (user decision, 2026-10-09): `ai-edge-litert`, `numpy`, `Pillow`, and `osmnx`, in an isolated Python environment. These prepare licensed photos, run the same MobileNetV3 checkpoint, export OSM-derived walking data, and render bundled raster tiles. They are not Android runtime dependencies. Backend evaluation photos and source/license records live under `test/datasets/` and are excluded from the APK; team-held-out photos belong in `test/datasets/held_out/team/`.
+**Map provider decision (user-approved 2026-10-09):** replace the planned bundled OSM-rendered basemap with one Mapbox SDK-managed Intramuros offline-region download. Retain OSM only as the pedestrian-graph source and its required attribution. The connected download is a P0 setup step; after SDK-confirmed completion, the demo journey must work offline.
+
+Approved preparation-only packages (user decision, 2026-10-09): `ai-edge-litert`, `numpy`, `Pillow`, and `osmnx`, in an isolated Python environment. These prepare licensed photos, run the same MobileNetV3 checkpoint, and export OSM-derived walking data. They are not Android runtime dependencies. Backend evaluation photos and source/license records live under `test/datasets/` and are excluded from the APK; team-held-out photos belong in `test/datasets/held_out/team/`. Mapbox map data is downloaded through the Android SDK and is not generated or redistributed by this pipeline.
 
 Project dataset restriction (user decision, 2026-10-09): every collected reference, held-out, and unknown-test photo must depict a documented Philippine location. Preparation source records require `country: PH`, a named location, and geographic source evidence. Map data remains the Intramuros pilot extract. This restriction describes the project dataset, not the original pretraining corpus of the approved general-purpose MobileNetV3 checkpoint.
 
-Do not add dependencies because they are familiar or trendy. `image_picker`, `image`, `tflite_flutter`, `flutter_map`, `latlong2`, and `flutter_riverpod` are the only application-level packages approved for the P0 workload (plus Flutter itself / transitive dependencies).
+Do not add dependencies because they are familiar or trendy. `image_picker`, `image`, `tflite_flutter`, `mapbox_maps_flutter`, and `flutter_riverpod` are the only application-level packages approved for the P0 workload (plus Flutter itself / transitive dependencies). Pin a `mapbox_maps_flutter` release compatible with the repository's actual Flutter/Dart toolchain before implementation; do not infer compatibility from current online docs alone.
 
 ## 2. Model artifacts and decision gate
 
@@ -76,8 +78,6 @@ tunton/
 │   │   └── reference_embeddings.json
 │   ├── maps/
 │   │   └── intramuros_graph.json
-│   ├── tiles/
-│   │   └── {z}/{x}/{y}.png
 │   └── images/
 │       └── [licensed reference landmark images]
 ├── tools/
@@ -160,12 +160,14 @@ This is a **schema illustration only**, not usable data. In the real file:
 - The graph must have connected walkable paths for selected demo landmark pairs.
 - Dijkstra uses `length_m`; reconstruct result from stored edge geometries, not just node-to-node straight line segments.
 
-### Bundled tiles: `assets/tiles/{z}/{x}/{y}.png`
+### Mapbox offline region (SDK-managed)
 
-- One small Intramuros coverage area with enough registered zoom levels for the demo.
-- Keep tiles, POIs, path graph and test landmarks spatially aligned.
-- `AssetTileProvider` reads assets; no online tiles or fonts as fallback.
-- Use an authorized offline tile archive/source and **© OpenStreetMap contributors** attribution. Do not bulk-fetch from prohibited public OSM tile services.
+- The app uses `mapbox_maps_flutter` and Mapbox's OfflineManager/TileStore to download the Mapbox style resources and one fixed Intramuros region while connected.
+- The downloaded SDK-managed region must cover the same pilot area and zoom range as the catalog and pedestrian graph. Confirm completion before accepting offline-ready state.
+- The SDK stores Mapbox data locally; it is never copied into `assets/`, the APK, a repository, or another distributable. Do not use a public OSM tile endpoint as a fallback.
+- Allow Mapbox network access only for the explicit region download/update. After SDK-confirmed completion, disable the Mapbox network stack using the pinned SDK's offline switch before the offline journey; missing map data must become a visible not-ready error rather than triggering a background request.
+- Require a scoped public Mapbox token at build/runtime setup, supplied through build configuration and excluded from source control. A public mobile token is extractable from the APK; restrict its scopes and allowed URLs where supported. Downloading uses Mapbox services and may incur account usage charges; verify current terms and plan before release.
+- Keep the Mapbox SDK attribution control visible. The separate OSM-derived pedestrian graph retains **© OpenStreetMap contributors** attribution.
 
 ## 5. Behavior contracts by existing files
 
@@ -176,7 +178,7 @@ This is a **schema illustration only**, not usable data. In the real file:
 | `landmark_matcher.dart` | Read reference index, compare cosine scores, aggregate per distinct landmark, reject unreliable input | P0-03, P0-04 |
 | `recognition_screen.dart` | Present up to three candidates, require confirmation | P0-05 |
 | `landmark.dart` | Model verified local ID, name, lat/lon, route-node ID | P0-08 |
-| `offline_map_screen.dart` | Render bundled map, selected destination and manual start | P0-06, P0-07 |
+| `offline_map_screen.dart` | Download/verify the fixed Mapbox offline region while connected; render it offline, selected destination and manual start | P0-06, P0-07 |
 | `landmark_markers.dart` | Render supported POI markers from catalog | P0-06 |
 | `routing_service.dart` | Read graph; run Dijkstra; reconstruct actual edge path; compute distance and estimated ETA | P0-09, P0-10 |
 | `route_result.dart` | Hold route points, distance, ETA and route-unavailable state | P0-09, P0-10, P0-12 |
@@ -202,7 +204,7 @@ This is a **schema illustration only**, not usable data. In the real file:
 3. Reject unknown/out-of-region start or destination.
 4. Run Dijkstra across permitted directed edges, weighted by `length_m`.
 5. If no route, display **Route unavailable**, not a straight line.
-6. Reconstruct ordered stored geometries; use `latlong2` LatLng points for Flutter map route overlay.
+6. Reconstruct ordered stored `[latitude, longitude]` geometries; convert to Mapbox `Position(longitude, latitude)` values for the route overlay.
 7. Distance is sum of traversed `length_m`, ETA minutes = distance meters / **75 m/min** (4.5 km/h), with an explicit estimate label.
 8. No GPS guidance, navigation rerouting, current closure data or travel-time guarantees.
 
@@ -216,7 +218,7 @@ This is a **schema illustration only**, not usable data. In the real file:
 
 ## 9. Explicit exclusions
 
-No OCR, GPS/EXIF, cloud, HTTP, server, Qwen/Gemma/GLM, multi-model runtime, downloadable maps, state framework changes, database, live turn-by-turn assistance, or generated mock coordinates/routes as product evidence. If a P0 fix appears to require architecture expansion, ask for approval first.
+No OCR, GPS/EXIF, cloud inference, app-owned network client/server, Qwen/Gemma/GLM, multi-model runtime, additional downloadable map regions, state framework changes, database, live turn-by-turn assistance, or generated mock coordinates/routes as product evidence. The fixed Mapbox offline region is the sole P0 map download. If a P0 fix appears to require other architecture expansion, ask for approval first.
 
 ## 10. References
 
@@ -224,5 +226,6 @@ No OCR, GPS/EXIF, cloud, HTTP, server, Qwen/Gemma/GLM, multi-model runtime, down
 - Official model download: https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite
 - MobileCLIP alternative (not bundled): https://huggingface.co/anton96vice/mobileclip2_tflite
 - TFLite Flutter: https://pub.dev/packages/tflite_flutter
-- Offline mapping: https://docs.fleaflet.dev/tile-servers/offline-mapping
-- OSM tile usage: https://operations.osmfoundation.org/policies/tiles/
+- Mapbox Flutter installation and token setup: https://docs.mapbox.com/flutter/maps/guides/install/
+- Mapbox Flutter offline map example: https://docs.mapbox.com/flutter/maps/examples/offline/
+- Mapbox offline map terms/constraints: https://docs.mapbox.com/ios/maps/guides/offline/concepts/

@@ -1,0 +1,5 @@
+{
+  "verdict": "APPROVED",
+  "summary": "All four backend files and tests match plan.md exactly; dot-product cosine with no re-normalization, max-per-landmark top-3-distinct with first-class Not-recognized, ETA /75.0, first-class RouteResult.unavailable() with no straight-line fallback, DIRECTED-only Dijkstra, approved packages only, UI/app/main untouched, and 31 tests (analyze clean) actually pass.",
+  "findings": []
+}

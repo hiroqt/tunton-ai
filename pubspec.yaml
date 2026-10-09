@@ -64,6 +64,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/fonts/Inter-LICENSE.txt
+    - assets/models/landmark_embedder.tflite
+    - assets/landmarks/landmarks.json
+    - assets/landmarks/reference_embeddings.json
+    - assets/maps/intramuros_graph.json
   fonts:
     - family: Inter
       fonts:

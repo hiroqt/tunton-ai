@@ -2,18 +2,18 @@
 
 > **Audience:** Hackathon teammates, co-developers, and demo operators.  
 > **Build window:** One day. **Required demo:** physical Android phone. **Minimum hardware target:** 8 GB RAM (must be measured on an actual 8 GB device).  
-> **Scope:** Photo → local MobileNetV3 Small embedding → up to 3 landmark candidates → user confirmation → bundled Intramuros map → manually selected start → local walking route, distance, and ETA.
+> **Scope:** Connected Mapbox region download → photo → local MobileNetV3 Small embedding → up to 3 landmark candidates → user confirmation → offline Intramuros map → manually selected start → local walking route, distance, and ETA.
 
 This guide is **setup, asset handoff, run, and test documentation only**. It does **not** add product features, runtime dependencies, methods, or source-code folders. If instructions conflict, `PRD.md` defines what must exist, `ARD.md` defines where/how, and `AGENTS.md` restricts implementation. Read those documents before coding.
 
 ## 0. Know what you are setting up
 
-- **Developer machine:** MacBook Air M5 running macOS. Internet is permitted to install developer tools, Python preparation libraries, open-source model weights, and properly licensed map data **before the offline demo**.
-- **Demo target:** One physical **Android** phone. The final release APK performs AI inference and routing on the phone; no Mac, localhost service, Python process, or internet is needed once installed.
+- **Developer machine:** MacBook Air M5 running macOS. Internet is permitted to install developer tools, Python preparation libraries, and model weights; the Android app downloads the Mapbox offline region from Mapbox while connected before the offline demo.
+- **Demo target:** One physical **Android** phone. The release APK performs AI inference and routing on the phone. Mapbox requires an initial connected download of the offline region after installation; after that completes, the demo needs no Mac, localhost service, Python process, or internet.
 - **Geographic coverage:** **Intramuros, Manila only**. Begin with six distinctive, verified landmarks and approximately 3–5 correctly labeled reference photos per landmark.
 - **On-device AI:** One bundled **MobileNetV3 Small image embedder** TFLite checkpoint. **Not** an ImageNet classifier, GPT/LLM, OCR engine, or remote inference service.
-- **Local mapping/navigation:** `flutter_map` + bundled authorized raster tiles; a separate vetted pedestrian graph; shortest walking path via Dijkstra in Dart.
-- **Excluded:** EXIF/GPS location inference, live position tracking, worldwide geolocation, iOS demo work, dynamic map downloads, server/backend, user accounts, and additional packages/models.
+- **Mapping/navigation:** `mapbox_maps_flutter` with one SDK-managed Intramuros offline region downloaded while connected; a separate vetted pedestrian graph; shortest walking path via Dijkstra in Dart.
+- **Excluded:** EXIF/GPS location inference, live position tracking, worldwide geolocation, iOS demo work, additional map regions, server/backend, user accounts, and additional models.
 
 ## 1. Prerequisites (install once on the Mac)
 
@@ -72,12 +72,12 @@ cd tunton
 Install **only** the dependencies approved by `ARD.md`:
 
 ```bash
-flutter pub add tflite_flutter image_picker image flutter_map latlong2 flutter_riverpod
+flutter pub add tflite_flutter image_picker image mapbox_maps_flutter flutter_riverpod
 flutter pub get
 flutter analyze
 ```
 
-Do **not** add `google_maps_flutter`, geolocation/GPS plugins, OCR, FAISS, Ollama, HTTP clients, database servers, cloud SDKs, or a second state-management system.
+Do **not** add `google_maps_flutter`, `flutter_map`, geolocation/GPS plugins, OCR, FAISS, Ollama, unrelated HTTP clients, database servers, cloud inference SDKs, or a second state-management system. Follow Mapbox's current official Flutter installation guide and pin a release compatible with the repository's actual Flutter/Dart version.
 
 `image_picker` on Android normally needs no additional Android permission configuration. If your particular Android SDK or package version requires a compatibility change, use only the standard Flutter-generated Android project files; do not build a new native feature.
 
@@ -91,7 +91,6 @@ assets/
   landmarks/landmarks.json
   landmarks/reference_embeddings.json
   maps/intramuros_graph.json
-  tiles/{z}/{x}/{y}.png
   images/                         # properly licensed landmark reference photos
 ```
 
@@ -178,30 +177,19 @@ If using OSMnx, an applicable data source is a `network_type='walk'` pedestrian 
 
 **No fake fallback:** If the approved graph data is unavailable or does not connect the selected landmarks, fix the input data or report the blocker. Do not draw invented roads.
 
-### 3E. Obtain LEGALLY distributable offline map tiles
+### 3E. Configure Mapbox and prepare its offline region
 
-Obtain or produce a **small raster tile bundle licensed for offline packaging and redistribution**, matching the chosen Intramuros area and zoom range. Store tiles using this exact convention:
+Use the official [`mapbox_maps_flutter` SDK](https://docs.mapbox.com/flutter/maps/guides/install/). Mapbox map data must be downloaded from Mapbox by the SDK; Mapbox terms do not allow packaging or redistributing downloaded offline data. Do not put Mapbox tiles or styles under `assets/`, in the repository, or in the APK.
 
-`assets/tiles/{z}/{x}/{y}.png`
+Create a scoped public Mapbox access token. Supply it through build configuration (for example, `--dart-define=ACCESS_TOKEN="$MAPBOX_ACCESS_TOKEN"`) and keep it out of source control. A mobile public token is recoverable from the APK, so restrict it to the minimum scopes and allowed URLs supported by Mapbox. Do not use a secret token in a client app. Check current account pricing and limits before release because offline downloads make Mapbox service requests.
 
-**Never scrape or prefetch `tile.openstreetmap.org` into the APK.** The OpenStreetMap Foundation explicitly prohibits bulk downloading and offline use of its standard public tile server. Use a provider/data source that affirmatively permits offline redistribution, or render tiles from appropriately licensed OSM geographic source data during preparation. [OSM tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
+Use the SDK's `OfflineManager` and `TileStore` to download the fixed Intramuros style and region while connected. Show progress/errors and mark the map ready only after the SDK confirms completion. On later launches, verify the region remains available before entering the offline journey. If it is missing or incomplete, show a clear not-ready state and offer the connected download action. Allow SDK network access only during that explicit download/update; after completion, disable the Mapbox network stack using the pinned SDK's offline switch so missing resources fail visibly instead of triggering an online fallback.
 
-The runtime map uses `flutter_map`'s `AssetTileProvider`, not an online `NetworkTileProvider`. Keep **© OpenStreetMap contributors** visible, along with any required additional attribution from the actual tile provider. Verify that the map visually covers the exact graph and photo landmarks.
-
-**Important asset trap:** Flutter does **not** automatically include all nested files under `assets/tiles/` when only the top-level directory is declared. Register **every actual lowest-level tile directory** in `pubspec.yaml`. To enumerate those directories on macOS:
-
-```bash
-find assets/tiles -type f -name '*.png' \
-  | sed 's#/[^/]*$#/#' \
-  | sort -u \
-  | sed 's#^#    - #'
-```
-
-Copy the output under `flutter: assets:`; keep the paths that **actually exist**, not examples or placeholders. Do **not** write an online tile URL or fallback into the app. Official guidance: [flutter_map offline tile providers](https://docs.fleaflet.dev/layers/tile-layer/tile-providers).
+Keep the SDK's Mapbox logo/attribution control visible; it also provides the per-user Mapbox telemetry opt-out required by the SDK terms. The SDK may send de-identified usage/location telemetry by default under its terms. The pedestrian graph remains OSM-derived, so also display **© OpenStreetMap contributors** for that separate data source. Align the Mapbox region and zoom range with the pilot graph and landmarks. See [Mapbox Flutter offline example](https://docs.mapbox.com/flutter/maps/examples/offline/), [Flutter SDK terms and telemetry](https://docs.mapbox.com/flutter/maps/guides/), [offline map restrictions](https://docs.mapbox.com/ios/maps/guides/offline/concepts/), and [installation/token setup](https://docs.mapbox.com/flutter/maps/guides/install/).
 
 ## 4. Register bundled assets in `pubspec.yaml`
 
-Keep the packages and asset tree exactly within `ARD.md`. In the existing `flutter:` section, register the concrete files below **plus your real nested tile directory paths**:
+Keep the packages and asset tree exactly within `ARD.md`. In the existing `flutter:` section, register the concrete bundled files below:
 
 ```yaml
 flutter:
@@ -212,8 +200,7 @@ flutter:
     - assets/landmarks/reference_embeddings.json
     - assets/maps/intramuros_graph.json
     - assets/images/
-    # Add the real assets/tiles/<z>/<x>/ directories here.
-    # Do not leave this comment as your only tile registration.
+    # Mapbox map data is SDK-managed; do not register it as Flutter assets.
 ```
 
 If your `assets/images/` folder has no usable images yet, do not declare it until the images exist. Maintain the indentation of the existing `pubspec.yaml` and avoid a duplicate `flutter:` block.
@@ -225,14 +212,14 @@ flutter pub get
 flutter analyze
 ```
 
-**Pass:** Flutter successfully bundles the TFLite checkpoint, reference JSON, map graph, photos, and all required Intramuros tiles. **Fail/blocker:** missing asset, incomplete tile coverage, or model/data mismatch.
+**Pass:** Flutter bundles the TFLite checkpoint, reference JSON, map graph, and photos; connected setup downloads the Mapbox style/region and verifies completion. **Fail/blocker:** missing bundled asset, failed/incomplete region download, or model/data mismatch.
 
 ## 5. Run the app on the phone (connected development)
 
 First pick the physical phone from `flutter devices`. Then:
 
 ```bash
-flutter run -d <android-device-id>
+flutter run -d <android-device-id> --dart-define=ACCESS_TOKEN="$MAPBOX_ACCESS_TOKEN"
 ```
 
 Replace `<android-device-id>` with the actual device ID. This command runs a developer build; **do not** use a debug build as final evidence of resource efficiency.
@@ -242,7 +229,7 @@ Replace `<android-device-id>` with the actual device ID. This command runs a dev
 1. Open the photo screen; choose or take one **unseen supported** landmark photo.
 2. Confirm the TFLite model runs **on the phone** and returns candidates from local embeddings.
 3. Choose the correct landmark; confirm its marker is placed at a stored verified coordinate.
-4. Select a supported **manual starting point** on the bundled Intramuros map.
+4. Select a supported **manual starting point** on the downloaded Mapbox Intramuros map.
 5. Confirm the route follows actual walking graph geometry, with distance and estimated walking time (fixed 4.5 km/h).
 6. Test an **unknown photo** and a **disconnected route**. Expected outcomes are **Not recognized** and **Route unavailable**.
 
@@ -250,7 +237,7 @@ Replace `<android-device-id>` with the actual device ID. This command runs a dev
 
 ```bash
 flutter analyze
-flutter build apk --release
+flutter build apk --release --dart-define=ACCESS_TOKEN="$MAPBOX_ACCESS_TOKEN"
 ```
 
 Expected default build artifact:
@@ -270,14 +257,15 @@ The installation requires the Android signing/build prerequisites to be configur
 
 This checks **real application independence**, not just whether a screen remains cached.
 
-1. Finish installing the APK, permissions, model, and all local assets while development internet is still available.
-2. On the Android phone, **enable airplane mode**, verify Wi-Fi **and mobile data** are disabled, and leave them disabled for the full demo. GPS is not required.
-3. **Force-close** TUNTON (not merely background it) and **cold-launch** the installed release app.
-4. Pick a held-out landmark photo. Verify recognition executes without any Mac/localhost connection.
-5. Confirm a landmark, choose a manual start, and render the actual bundled map and pedestrian route.
-6. Verify distance/ETA and the offline failure states (`Not recognized`, `Route unavailable`).
-7. Repeat once with a different supported landmark photo. If one resource fails without internet, the offline test **fails** until corrected.
-8. As an additional independence check, unplug USB and keep the Mac disconnected; the app must still run standalone.
+1. Install the APK and configure the scoped public Mapbox token.
+2. While connected, download the Mapbox style and fixed Intramuros region; wait for SDK-confirmed completion and verify the visible attribution/telemetry opt-out control.
+3. On the Android phone, **enable airplane mode**, verify Wi-Fi **and mobile data** are disabled, and leave them disabled for the full journey. GPS is not required.
+4. **Force-close** TUNTON (not merely background it) and **cold-launch** the installed release app.
+5. Pick a held-out landmark photo. Verify recognition executes without any Mac/localhost connection.
+6. Confirm a landmark, choose a manual start, and render the actual Mapbox offline region and pedestrian route.
+7. Verify distance/ETA and the offline failure states (`Not recognized`, `Route unavailable`).
+8. Repeat once with a different supported landmark photo. If one resource fails without internet, the offline test **fails** until corrected.
+9. As an additional independence check, unplug USB and keep the Mac disconnected; the app must still run standalone.
 
 ### Record real evidence
 
@@ -306,7 +294,7 @@ Run this at idle, during/after recognition, and while displaying the route. `dum
 | TFLite interpreter fails to load | Check checkpoint exists, `pubspec.yaml`, native Android support, Android API level and logs. | Replace with cloud inference / arbitrary new model. |
 | Model outputs nonsensical matches | Verify preprocessing and input/output tensor types, exact checkpoint reference vectors, cosine normalization, held-out tests. | Treat ImageNet labels as embeddings or report a fake confidence. |
 | App cannot find bundled images/JSON | Check case-sensitive asset path and `pubspec.yaml` indentation, then rerun `flutter pub get`. | Fetch runtime assets from cloud storage. |
-| Map is blank offline | Verify licensed tile files, every leaf tile directory registration, map coverage, zoom range, `AssetTileProvider`. | Add an online map fallback. |
+| Map is blank offline | Verify Mapbox region/style download completion, persisted SDK store, region coverage, token configuration, and airplane-mode behavior. | Claim readiness or add an online map fallback. Retry the connected download and report a blocker if needed. |
 | Route appears straight/unrealistic | Validate graph connectivity, verified landmark node IDs, edge geometry, lat/lon order and Dijkstra reconstruction. | Draw a straight point-to-point polyline as a substitute. |
 | `Route unavailable` for known landmarks | Validate pedestrian graph and entrances; check directed/undirected edges and disconnected components. | Invent pedestrian connectors. |
 | Slow/low-memory phone | One interpreter instance, one image at a time, small region/tiles, compact embeddings, CPU-only baseline. | Load additional LLMs or add background processes. |
@@ -318,7 +306,7 @@ Run this at idle, during/after recognition, and while displaying the route. `dum
 | Track | Required handoff to integration |
 |---|---|
 | Vision | Bundled `.tflite`, verified tensor/preprocessing spec, complete `reference_embeddings.json`, held-out matching result. |
-| Map/data | Verified `landmarks.json`, licensed `assets/tiles/` coverage, actual `intramuros_graph.json`, working mapped origin/destination pair. |
+| Map/data | Verified `landmarks.json`, completed Mapbox offline region, actual `intramuros_graph.json`, working mapped origin/destination pair. |
 | Flutter UI | Photo/candidate/confirmation/map/route flow using the fixed data contracts, clear unknown/no-route error states. |
 | QA | Installed release APK, disconnected full-flow test, Android device model/RAM, measured recognition/routing/memory evidence. |
 
@@ -343,7 +331,7 @@ Blocker:
 - [ ] Correct MobileNetV3 Small image-embedder model bundled and tensor contract verified.
 - [ ] Six verified Intramuros landmarks and correctly labeled images available.
 - [ ] Reference vectors computed with **exactly the runtime model and preprocessing**.
-- [ ] Licensed offline tiles render at the required area and zoom levels.
+- [ ] Mapbox style/region download completes while connected and renders at the required area/zoom levels after cold-launch in airplane mode.
 - [ ] Pedestrian graph has real geometry and confirmed connected landmark pairs.
 - [ ] Unknown/ambiguous photos and disconnected graph cases fail safely.
 - [ ] `flutter analyze` passes and **release APK installs**.

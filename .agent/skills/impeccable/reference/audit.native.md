@@ -95,7 +95,7 @@ Tag every issue with **P0-P3 severity**:
 - **P2 Minor**: Annoyance, workaround exists. Fix in next pass
 - **P3 Polish**: Nice-to-fix, no real user impact. Fix if time permits
 
-For each issue, document:
+For each issue, document:   
 - **[P?] Issue name**
 - **Location**: Screen, file, line
 - **Category**: Accessibility / Performance / Theming / Conformance / Adaptivity

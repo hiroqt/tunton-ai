@@ -1,83 +1,42 @@
-# Tunton
+# TUNTON App Description
 
-**Tagline:** Snap a Landmark. Find Your Way.
+**Tagline:** Snap a Landmark. Find Your Way. **Product target:** Android-first Flutter MVP for Intramuros, Manila.
 
-## App Description
+## App description
 
-**Tunton** is an AI-powered landmark recognition and navigation application that helps users discover famous landmarks and tourist attractions and find routes to or from them using photographs. Instead of relying solely on typing a place name, users can capture a landmark with their device's camera or choose an existing image from their gallery. Tunton analyzes the image using an **AI model that runs locally on the device** and matches it against a **landmark dataset bundled with the application**.
+TUNTON helps an Android visitor identify one of six supported Intramuros landmarks from a photograph and preview a walking route to it. Before going offline, the user downloads the fixed Mapbox style and Intramuros region through the Mapbox Flutter SDK. One MobileNetV3 Small image embedder runs on the phone. TUNTON compares its output with bundled reference embeddings, asks the user to confirm a candidate, then displays the verified destination on the Mapbox offline map. The user manually selects a graph-backed starting point, and the app computes a walking route over its packaged pedestrian graph.
 
-Once a landmark is identified, Tunton displays the recognized location and connects it with an interactive map powered by **Mapbox**. Users can save locations for future use and generate routes using a recognized landmark as either the **starting point** or the **destination**.
+The route is a static-data preview. Recognizing a landmark identifies the photographed place; it does not establish the photographer's location. TUNTON does not claim current gate access, closures, or live turn-by-turn guidance.
 
-For example, a user can save a place they want to visit, upload an image of a landmark near them, and request directions from that recognized landmark to their saved destination. Alternatively, they can upload a photo of a landmark they want to visit and generate a route from their current GPS location or a manually selected starting point to the identified landmark.
+## P0 user journey
 
-Tunton combines **on-device AI recognition** with **map-based navigation** to make exploring landmarks more visual, intuitive, and convenient. Its core landmark recognition does not require cloud AI inference; map loading and route generation may require an internet connection.
+1. Open the installed Android app while connected and download the Mapbox style/Intramuros region; wait for the SDK to confirm completion.
+2. Enable airplane mode and cold-launch the app.
+3. Take or choose one photo.
+4. Run local image preprocessing and on-device TFLite inference.
+5. Show up to three distinct landmark candidates or **Not recognized**.
+6. Require confirmation before setting the destination.
+7. Show the destination on the Mapbox offline map.
+8. Let the user choose a valid manual start point.
+9. Compute and preview a real connected walking path, its graph distance, and estimated ETA; show **Route unavailable** when no path exists.
 
-## Core Features
+## Product boundaries
 
-### 1. AI-Powered Landmark Recognition
-- Identifies supported famous landmarks and tourist attractions from images.
-- Runs image recognition locally on the user's device.
-- Uses AI model files and landmark reference data included directly in the application project.
-- Recognition is limited to landmarks represented in the bundled dataset.
+- Android release APK; one Intramuros data pack.
+- One bundled Google MediaPipe MobileNetV3 Small image embedder.
+- Landmark catalog, reference vectors, and pedestrian graph are bundled read-only assets. Mapbox map data is downloaded through the SDK and stored in its private offline store; it is not bundled or redistributed.
+- Recognition and route calculation work locally. Map display works offline after the region download; first setup requires internet and a scoped public Mapbox token.
+- No GPS/EXIF location, saved places, user accounts, photo uploads, app-owned analytics, online routing, OCR, or second AI model. The Mapbox SDK may send de-identified usage/location telemetry under its terms; keep its attribution control and opt-out visible.
+- The 8 GB RAM device is a design target; compatibility is not proven without measurement.
 
-### 2. Camera and Gallery Upload
-- Take a photograph of a landmark using the device camera.
-- Select an existing landmark photo from the gallery.
-- Use either image source for landmark recognition.
+## Short description
 
-### 3. Mapbox Map and Navigation
-- View identified landmarks on an interactive map.
-- Generate routes between a chosen starting point and destination.
-- Use Mapbox for the map and navigation-related functionality; internet connectivity may be needed for maps and routing.
+TUNTON recognizes supported Intramuros landmarks from a photo using on-device AI, then previews an offline walking route from a manually selected starting point.
 
-### 4. Saved Locations
-- Save preferred or frequently visited locations.
-- Select a saved location as a route destination.
+## Hackathon pitch
 
-### 5. Two-Way Image-Based Routing
+**A landmark photo can become an offline route.** After a one-time Mapbox region download, TUNTON matches a visitor's photo on the Android device, asks them to confirm the place, and previews a real walking path using the SDK-managed offline map and bundled pedestrian data—without sending the photo to a cloud service.
 
-**Image as a starting point**
-1. Upload or capture a photograph of a supported landmark.
-2. Tunton identifies the landmark and its mapped location.
-3. Choose a previously saved destination.
-4. Generate a route from the recognized landmark to that destination.
+## Documentation authority
 
-**Image as a destination**
-1. Upload or capture a photograph of a landmark you want to visit.
-2. Tunton identifies the landmark and its mapped location.
-3. Choose your current GPS location or manually select a starting point.
-4. Generate a route to the recognized landmark.
-
-> **Location note:** Recognizing a landmark in a photograph does not prove the user is physically at that landmark. When using a photograph as the route origin, the app treats the recognized landmark as the selected starting point—not as verified live GPS location.
-
-## How Tunton Works
-
-1. **Capture or upload:** The user supplies a landmark image through the camera or gallery.
-2. **Recognize locally:** The on-device AI processes the image and compares it with the bundled landmark reference data.
-3. **Identify the place:** Tunton retrieves the matching landmark's stored name and location information.
-4. **Choose a route:** The user selects the landmark as their origin or destination and chooses the other endpoint from GPS, a map selection, or a saved location.
-5. **Navigate:** Mapbox displays the relevant map and route when the required map/routing services are available.
-
-## Local AI and Internet Requirements
-
-| Function | Processing / dependency |
-|---|---|
-| Landmark image recognition | On-device AI model |
-| Landmark reference dataset | Bundled locally with the application |
-| Camera and gallery image selection | Device functionality |
-| Map display | Mapbox; online resources may be required |
-| Route generation | Mapbox; internet connectivity may be required |
-
-**Tunton is a local-AI application, not necessarily a fully offline navigation application.** Its landmark recognition is designed to work without a cloud AI service, while its mapping and routing features depend on the Mapbox integration and available connectivity.
-
-## What Makes Tunton Different?
-
-Tunton turns an ordinary landmark photograph into a useful navigation input. Users can identify a destination visually, route **toward** a landmark shown in a photo, or route **from** a recognized landmark toward a saved place. By keeping landmark recognition on the device and bundling the recognition dataset with the app, Tunton reduces reliance on cloud-based image analysis.
-
-## Short Description
-
-**Tunton** is a local-AI-powered landmark recognition and navigation app that lets users photograph or upload images of famous landmarks, identify them on-device, and use the recognized locations as starting points or destinations for Mapbox-powered routes. Users can also save locations and navigate between identified landmarks, saved destinations, current GPS positions, and manually selected points.
-
-## Hackathon Pitch
-
-**Tunton transforms pictures into places—and places into routes.** With locally running AI and a built-in landmark dataset, users can identify supported tourist attractions through their camera or gallery without relying on cloud-based image recognition. Mapbox navigation then connects those recognized places to saved destinations or selected starting points, making tourism exploration more visual and convenient.
+This description is a concise product summary. [`PRD.md`](PRD.md) remains authoritative for scope and acceptance; see [`SDD.md`](SDD.md) for the Android system design. The current checkout's implementation status is in [`DEVELOPMENT_MAP.md`](DEVELOPMENT_MAP.md).
