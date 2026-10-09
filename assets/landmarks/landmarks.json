@@ -1,0 +1,44 @@
+[
+  {
+    "id": "fort-santiago",
+    "name": "Fort Santiago",
+    "lat": 14.592877,
+    "lon": 120.9718867,
+    "route_node_id": "1034882636"
+  },
+  {
+    "id": "manila-cathedral",
+    "name": "Manila Cathedral",
+    "lat": 14.5917894,
+    "lon": 120.973312,
+    "route_node_id": "3388767099"
+  },
+  {
+    "id": "san-agustin",
+    "name": "San Agustin Church — exterior public street approach",
+    "lat": 14.5891456,
+    "lon": 120.9751342,
+    "route_node_id": "7739042117"
+  },
+  {
+    "id": "casa-manila",
+    "name": "Casa Manila",
+    "lat": 14.5897328,
+    "lon": 120.9752501,
+    "route_node_id": "7739042126"
+  },
+  {
+    "id": "baluarte-san-diego",
+    "name": "Baluarte de San Diego — exterior public street approach",
+    "lat": 14.5854776,
+    "lon": 120.9756548,
+    "route_node_id": "6510489354"
+  },
+  {
+    "id": "puerta-real",
+    "name": "Puerta Real",
+    "lat": 14.586193,
+    "lon": 120.977024,
+    "route_node_id": "9834302082"
+  }
+]
