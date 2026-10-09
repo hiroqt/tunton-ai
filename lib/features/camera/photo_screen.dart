@@ -19,6 +19,7 @@ class PhotoScreen extends StatefulWidget {
     this.recognizePhoto,
     this.startPoints = const [],
     this.calculateRoute,
+    this.findNearestNode,
   });
 
   final Future<Uint8List?> Function(ImageSource source)? pickPhoto;
@@ -26,6 +27,8 @@ class PhotoScreen extends StatefulWidget {
   final List<Landmark> startPoints;
   final Future<RouteResult> Function(Landmark origin, Landmark destination)?
   calculateRoute;
+  final (String, (double, double)) Function(double lat, double lon)?
+  findNearestNode;
 
   @override
   State<PhotoScreen> createState() => _PhotoScreenState();
@@ -145,6 +148,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
         builder: (context) => OfflineMapScreen(
           destination: destination,
           startPoints: widget.startPoints,
+          findNearestNode: widget.findNearestNode,
           onStartConfirmed: (origin) => Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (context) => NavigationScreen(

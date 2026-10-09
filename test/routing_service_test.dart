@@ -204,5 +204,44 @@ void main() {
       expect(result.geometry.length, greaterThanOrEqualTo(2));
       expect(result.etaMinutes, greaterThan(0));
     });
+
+    test('findNearestNode snaps to the closest graph node', () {
+      final service = RoutingService.fromDecodedJson(_tinyGraph());
+      // A is at (14.0, 120.0), B is at (14.1, 120.1)
+      final (nodeA, coordA) = service.findNearestNode(14.01, 120.01);
+      expect(nodeA, 'A');
+      expect(coordA, (14.0, 120.0));
+
+      // E is at (14.9, 120.9)
+      final (nodeE, coordE) = service.findNearestNode(14.88, 120.89);
+      expect(nodeE, 'E');
+      expect(coordE, (14.9, 120.9));
+    });
+
+    test('distanceMeters returns expected great-circle distance', () {
+      final d0 = RoutingService.distanceMeters((14.0, 120.0), (14.0, 120.0));
+      expect(d0, 0.0);
+
+      // (14.0, 120.0) to (14.001, 120.0) is approx ~111 meters
+      final d1 = RoutingService.distanceMeters((14.0, 120.0), (14.001, 120.0));
+      expect(d1, closeTo(111.0, 5.0));
+    });
+
+    test('findNearestNode on real bundled graph snaps landmark position', () {
+      final service = RoutingService.fromJsonString(
+        File('assets/maps/intramuros_graph.json').readAsStringSync(),
+      );
+      final landmarks = Landmark.listFromJsonString(
+        File('assets/landmarks/landmarks.json').readAsStringSync(),
+      );
+      final fortSantiago =
+          landmarks.firstWhere((l) => l.id == 'fort-santiago');
+
+      final (nodeId, _) = service.findNearestNode(
+        fortSantiago.lat,
+        fortSantiago.lon,
+      );
+      expect(nodeId, fortSantiago.routeNodeId);
+    });
   });
 }

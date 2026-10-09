@@ -1,4 +1,10 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../app/app.dart';
 import '../../shared/models/landmark.dart';
@@ -11,10 +17,12 @@ class NavigationScreen extends StatefulWidget {
     required this.destination,
     required this.origin,
     this.calculateRoute,
+    this.positionStream,
   });
   final Landmark destination;
   final Landmark origin;
   final Future<RouteResult> Function()? calculateRoute;
+  final Stream<Position>? positionStream;
 
   @override
   State<NavigationScreen> createState() => _NavigationScreenState();
@@ -22,6 +30,8 @@ class NavigationScreen extends StatefulWidget {
 
 class _NavigationScreenState extends State<NavigationScreen> {
   Future<RouteResult>? _route;
+  StreamSubscription<Position>? _positionSub;
+  LatLng? _liveUserLocation;
 
   @override
   void initState() {
@@ -29,6 +39,51 @@ class _NavigationScreenState extends State<NavigationScreen> {
     if (widget.calculateRoute != null) {
       _route = Future.sync(widget.calculateRoute!);
     }
+    _startLiveTracking();
+  }
+
+  void _startLiveTracking() {
+    if (widget.origin.id == 'user-current-location') {
+      _liveUserLocation = LatLng(widget.origin.lat, widget.origin.lon);
+    }
+    if (widget.positionStream != null) {
+      _positionSub = widget.positionStream!.listen(
+        (pos) {
+          if (mounted) {
+            setState(() {
+              _liveUserLocation = LatLng(pos.latitude, pos.longitude);
+            });
+          }
+        },
+        onError: (_) {},
+      );
+      return;
+    }
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      try {
+        _positionSub = Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 2,
+          ),
+        ).listen(
+          (pos) {
+            if (mounted) {
+              setState(() {
+                _liveUserLocation = LatLng(pos.latitude, pos.longitude);
+              });
+            }
+          },
+          onError: (_) {},
+        );
+      } catch (_) {}
+    }
+  }
+
+  @override
+  void dispose() {
+    _positionSub?.cancel();
+    super.dispose();
   }
 
   void _changeStart() => Navigator.of(context).pop();
@@ -99,12 +154,17 @@ class _NavigationScreenState extends State<NavigationScreen> {
                       destination: widget.destination,
                       origin: widget.origin,
                       route: result,
+                      userLocation: _liveUserLocation,
                     ),
                     const SizedBox(height: 24),
                     _Endpoint(
-                      label: 'Manual start',
+                      label: widget.origin.id == 'user-current-location'
+                          ? 'Starting location'
+                          : 'Manual start',
                       place: widget.origin.name,
-                      icon: Icons.trip_origin_rounded,
+                      icon: widget.origin.id == 'user-current-location'
+                          ? Icons.my_location_rounded
+                          : Icons.trip_origin_rounded,
                     ),
                     const SizedBox(height: 16),
                     _Endpoint(
@@ -124,18 +184,43 @@ class _NavigationScreenState extends State<NavigationScreen> {
                           ),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Wrap(
-                          spacing: 32,
-                          runSpacing: 20,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _RouteMetric(
-                              value: distanceLabel,
-                              label: 'Walking distance',
+                            Wrap(
+                              spacing: 32,
+                              runSpacing: 20,
+                              children: [
+                                _RouteMetric(
+                                  value: distanceLabel,
+                                  label: 'Walking distance',
+                                ),
+                                _RouteMetric(
+                                  value: '${result.estimatedMinutes!.ceil()} min',
+                                  label: 'Estimated time',
+                                ),
+                              ],
                             ),
-                            _RouteMetric(
-                              value: '${result.estimatedMinutes!.ceil()} min',
-                              label: 'Estimated time',
-                            ),
+                            if (_liveUserLocation != null) ...[
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.gps_fixed_rounded,
+                                    size: 14,
+                                    color: Colors.green,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Live GPS position streaming',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.green.shade700,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),

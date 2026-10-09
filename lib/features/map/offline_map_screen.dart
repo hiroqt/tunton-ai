@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../app/app.dart';
 import '../../shared/models/landmark.dart';
@@ -14,6 +19,8 @@ class OfflineMapScreen extends StatefulWidget {
     this.startPoints = const [],
     required this.onStartConfirmed,
     this.loadZooms,
+    this.findNearestNode,
+    this.getCurrentPosition,
   });
   final Landmark destination;
 
@@ -21,6 +28,9 @@ class OfflineMapScreen extends StatefulWidget {
   final List<Landmark> startPoints;
   final ValueChanged<Landmark> onStartConfirmed;
   final Future<List<int>> Function()? loadZooms;
+  final (String, (double, double)) Function(double lat, double lon)?
+  findNearestNode;
+  final Future<Position?> Function()? getCurrentPosition;
 
   @override
   State<OfflineMapScreen> createState() => _OfflineMapScreenState();
@@ -28,6 +38,147 @@ class OfflineMapScreen extends StatefulWidget {
 
 class _OfflineMapScreenState extends State<OfflineMapScreen> {
   Landmark? _start;
+  LatLng? _userLocation;
+  bool _locatingGps = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialLocation();
+  }
+
+  Future<void> _checkInitialLocation() async {
+    try {
+      if (widget.getCurrentPosition != null) {
+        final pos = await widget.getCurrentPosition!();
+        if (pos != null && mounted) {
+          setState(() => _userLocation = LatLng(pos.latitude, pos.longitude));
+        }
+        return;
+      }
+      if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
+        return;
+      }
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        final pos = await Geolocator.getLastKnownPosition();
+        if (pos != null && mounted) {
+          setState(() => _userLocation = LatLng(pos.latitude, pos.longitude));
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _useCurrentLocation() async {
+    if (_locatingGps) return;
+    setState(() => _locatingGps = true);
+    try {
+      Position? position;
+      if (widget.getCurrentPosition != null) {
+        position = await widget.getCurrentPosition!();
+      } else {
+        final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Location services are turned off. Please turn on GPS in phone settings.',
+                ),
+              ),
+            );
+          }
+          return;
+        }
+
+        var permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+          if (permission == LocationPermission.denied) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Location permission was denied. You can select a start landmark manually.',
+                  ),
+                ),
+              );
+            }
+            return;
+          }
+        }
+
+        if (permission == LocationPermission.deniedForever) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Location permission is permanently denied. You can select a start landmark manually.',
+                ),
+              ),
+            );
+          }
+          return;
+        }
+
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 12),
+          ),
+        );
+      }
+
+      if (position != null && mounted) {
+        final lat = position.latitude;
+        final lon = position.longitude;
+        final latLng = LatLng(lat, lon);
+
+        String snappedNodeId = '';
+        if (widget.findNearestNode != null) {
+          final (nodeId, _) = widget.findNearestNode!(lat, lon);
+          snappedNodeId = nodeId;
+        } else if (widget.startPoints.isNotEmpty) {
+          snappedNodeId = widget.startPoints.first.routeNodeId;
+        }
+
+        final userStart = Landmark(
+          id: 'user-current-location',
+          name: 'Your Location (GPS)',
+          latitude: lat,
+          longitude: lon,
+          routeNodeId: snappedNodeId,
+        );
+
+        setState(() {
+          _userLocation = latLng;
+          _start = userStart;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Current GPS position snapped to nearest walking path.',
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not obtain GPS fix. You can select a start landmark manually.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _locatingGps = false);
+    }
+  }
 
   Future<void> _chooseStart(List<Landmark> places) async {
     final selected = await showModalBottomSheet<Landmark>(
@@ -51,6 +202,23 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
                   ),
                 ),
               ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
+                title: const Text('Use current location (GPS)'),
+                subtitle: const Text('Snaps to nearest walkway in Intramuros'),
+                leading: Icon(
+                  Icons.my_location_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _useCurrentLocation();
+                },
+              ),
+              const Divider(indent: 24, endIndent: 24),
               Flexible(
                 child: ListView(
                   shrinkWrap: true,
@@ -105,7 +273,7 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Choose the place where your walk will begin. No GPS needed.',
+            'Choose where your walk begins using GPS or a landmark.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -114,6 +282,7 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
           OfflineLandmarkMap(
             destination: widget.destination,
             origin: _start,
+            userLocation: _userLocation,
             loadZooms: widget.loadZooms,
           ),
           const SizedBox(height: 24),
@@ -126,12 +295,34 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
           const SizedBox(height: 8),
           Text(widget.destination.name, style: theme.textTheme.titleLarge),
           const SizedBox(height: 24),
-          Text('Manual starting point', style: theme.textTheme.titleMedium),
+          Text('Starting point', style: theme.textTheme.titleMedium),
           const SizedBox(height: 12),
+          FilledButton.tonalIcon(
+            onPressed: _locatingGps ? null : _useCurrentLocation,
+            icon: _locatingGps
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.my_location_rounded),
+            label: Text(
+              _locatingGps
+                  ? 'Finding GPS location…'
+                  : _start?.id == 'user-current-location'
+                  ? 'Location set: Your Location'
+                  : 'Use current location (GPS)',
+            ),
+          ),
+          const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: starts.isEmpty ? null : () => _chooseStart(starts),
             icon: const Icon(Icons.place_outlined),
-            label: Text(_start?.name ?? 'Choose starting point'),
+            label: Text(
+              _start != null && _start!.id != 'user-current-location'
+                  ? _start!.name
+                  : 'Choose starting point',
+            ),
           ),
           const SizedBox(height: 12),
           if (starts.isEmpty) ...[
@@ -173,11 +364,13 @@ class OfflineLandmarkMap extends StatefulWidget {
     required this.destination,
     this.origin,
     this.route,
+    this.userLocation,
     this.loadZooms,
   });
   final Landmark destination;
   final Landmark? origin;
   final RouteResult? route;
+  final LatLng? userLocation;
   final Future<List<int>> Function()? loadZooms;
 
   @override
@@ -280,17 +473,24 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
                         ],
                       ),
                     MarkerLayer(
-                      markers: landmarkMarkers(
-                        landmarks: [
-                          widget.destination,
-                          if (widget.origin != null &&
-                              widget.origin!.id != widget.destination.id)
-                            widget.origin!,
-                        ],
-                        destinationId: widget.destination.id,
-                        startId: widget.origin?.id,
-                        colors: theme.colorScheme,
-                      ),
+                      markers: [
+                        ...landmarkMarkers(
+                          landmarks: [
+                            widget.destination,
+                            if (widget.origin != null &&
+                                widget.origin!.id != widget.destination.id)
+                              widget.origin!,
+                          ],
+                          destinationId: widget.destination.id,
+                          startId: widget.origin?.id,
+                          colors: theme.colorScheme,
+                        ),
+                        if (widget.userLocation != null)
+                          userLocationMarker(
+                            point: widget.userLocation!,
+                            colors: theme.colorScheme,
+                          ),
+                      ],
                     ),
                   ],
                 ),

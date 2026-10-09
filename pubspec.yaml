@@ -39,6 +39,7 @@ dependencies:
   tflite_flutter: ^0.12.1
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
+  geolocator: ^13.0.2
 
 dev_dependencies:
   flutter_test:

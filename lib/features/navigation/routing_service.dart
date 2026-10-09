@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:tuntun/shared/models/route_result.dart';
@@ -200,6 +201,53 @@ class RoutingService {
   }
 
   bool hasNode(String id) => _nodes.containsKey(id);
+
+  /// Finds the nearest graph node to the given coordinates ([lat], [lon]).
+  ///
+  /// Uses equirectangular approximation, which is fast and accurate for local
+  /// pedestrian distances. Returns a record with `(String nodeId, GeoPoint coordinates)`.
+  /// Throws [StateError] if the graph has no nodes.
+  (String, GeoPoint) findNearestNode(double lat, double lon) {
+    if (_nodes.isEmpty) {
+      throw StateError('Walk graph contains no nodes.');
+    }
+    String? nearestId;
+    GeoPoint? nearestPoint;
+    var minDistanceSq = double.infinity;
+
+    final latRad = lat * (math.pi / 180.0);
+    final cosLat = math.cos(latRad);
+
+    for (final entry in _nodes.entries) {
+      final nodeLat = entry.value.$1;
+      final nodeLon = entry.value.$2;
+      final dLat = nodeLat - lat;
+      final dLon = (nodeLon - lon) * cosLat;
+      final distSq = dLat * dLat + dLon * dLon;
+      if (distSq < minDistanceSq) {
+        minDistanceSq = distSq;
+        nearestId = entry.key;
+        nearestPoint = entry.value;
+      }
+    }
+    return (nearestId!, nearestPoint!);
+  }
+
+  /// Calculates the great-circle distance between two geographic coordinates in meters.
+  static double distanceMeters(GeoPoint a, GeoPoint b) {
+    const r = 6371000.0; // Earth radius in meters
+    final dLat = (b.$1 - a.$1) * (math.pi / 180.0);
+    final dLon = (b.$2 - a.$2) * (math.pi / 180.0);
+    final lat1 = a.$1 * (math.pi / 180.0);
+    final lat2 = b.$1 * (math.pi / 180.0);
+
+    final sinDLat = math.sin(dLat / 2);
+    final sinDLon = math.sin(dLon / 2);
+    final h = sinDLat * sinDLat +
+        math.cos(lat1) * math.cos(lat2) * sinDLon * sinDLon;
+    final c = 2 * math.asin(math.sqrt(h));
+    return r * c;
+  }
 
   /// Shortest walking route from [startNodeId] to [destinationNodeId].
   ///

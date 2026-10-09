@@ -8,6 +8,7 @@ import 'features/camera/photo_screen.dart';
 import 'features/recognition/embedding_service.dart';
 import 'features/recognition/landmark_matcher.dart';
 import 'shared/models/landmark.dart';
+import 'shared/models/route_result.dart';
 
 const _landmarksAsset = 'assets/landmarks/landmarks.json';
 
@@ -109,8 +110,29 @@ class _BackendGate extends StatelessWidget {
       return PhotoScreen(
         recognizePhoto: (photo) async => services.recognize(photo),
         startPoints: starts,
-        calculateRoute: (origin, destination) async => services.routing
-            .findRoute(origin.routeNodeId, destination.routeNodeId),
+        findNearestNode: services.routing.findNearestNode,
+        calculateRoute: (origin, destination) async {
+          final route = services.routing.findRoute(
+            origin.routeNodeId,
+            destination.routeNodeId,
+          );
+          if (!route.isAvailable) return route;
+          if (origin.id == 'user-current-location') {
+            final originPoint = (origin.lat, origin.lon);
+            final targetPoint = route.geometry.isNotEmpty
+                ? route.geometry.first
+                : originPoint;
+            final extraDist = RoutingService.distanceMeters(
+              originPoint,
+              targetPoint,
+            );
+            return RouteResult.available(
+              geometry: [originPoint, ...route.geometry],
+              distanceMeters: route.distanceMeters + extraDist,
+            );
+          }
+          return route;
+        },
       );
     },
   );

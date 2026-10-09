@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tuntun/app/app.dart';
 import 'package:tuntun/features/camera/photo_screen.dart';
@@ -362,4 +364,86 @@ void main() {
     await tester.ensureVisible(find.text('Choose from gallery'));
     expect(find.text('Choose from gallery'), findsOneWidget);
   });
+
+  testWidgets('current GPS location can be chosen as start point', (
+    tester,
+  ) async {
+    Landmark? confirmed;
+    await tester.pumpWidget(
+      TuntonApp(
+        home: OfflineMapScreen(
+          destination: destination,
+          startPoints: const [origin],
+          findNearestNode: (lat, lon) => ('snapped-gps-node', (14.5905, 120.9745)),
+          getCurrentPosition: () async => Position(
+            latitude: 14.5902,
+            longitude: 120.9741,
+            timestamp: DateTime.now(),
+            accuracy: 5.0,
+            altitude: 10.0,
+            altitudeAccuracy: 1.0,
+            heading: 0.0,
+            headingAccuracy: 1.0,
+            speed: 0.0,
+            speedAccuracy: 0.0,
+          ),
+          onStartConfirmed: (value) => confirmed = value,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Use current location (GPS)'), findsOneWidget);
+    await tester.ensureVisible(find.text('Use current location (GPS)'));
+    await tester.tap(find.text('Use current location (GPS)'));
+    await tester.pumpAndSettle();
+    expect(find.text('Location set: Your Location'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Preview walking route'));
+    await tester.tap(find.text('Preview walking route'));
+    expect(confirmed, isNotNull);
+    expect(confirmed!.id, 'user-current-location');
+    expect(confirmed!.routeNodeId, 'snapped-gps-node');
+  });
+
+  testWidgets(
+    'navigation screen displays live GPS streaming status when stream emits',
+    (tester) async {
+      final controller = StreamController<Position>();
+      addTearDown(controller.close);
+
+      await tester.pumpWidget(
+        TuntonApp(
+          home: NavigationScreen(
+            destination: destination,
+            origin: origin,
+            calculateRoute: () async => const RouteResult.available(
+              geometry: [(14.591, 120.974), (14.59, 120.975)],
+              distanceMeters: 150.0,
+            ),
+            positionStream: controller.stream,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('150 m'), findsOneWidget);
+      expect(find.text('Live GPS position streaming'), findsNothing);
+
+      controller.add(
+        Position(
+          latitude: 14.591,
+          longitude: 120.974,
+          timestamp: DateTime.now(),
+          accuracy: 3.0,
+          altitude: 10.0,
+          altitudeAccuracy: 1.0,
+          heading: 0.0,
+          headingAccuracy: 1.0,
+          speed: 1.2,
+          speedAccuracy: 0.2,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Live GPS position streaming'), findsOneWidget);
+    },
+  );
 }
