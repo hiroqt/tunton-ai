@@ -1,0 +1,7 @@
+{
+  "task_id": "task-backend-logic-layer",
+  "task_description": "Create the four approved offline Dart backend files for TUNTON AI (ARD §3): shared models landmark.dart and route_result.dart, recognition landmark_matcher.dart, and navigation routing_service.dart, each with a matching *_test.dart. Additive only, no new packages/directories/network. Public API is fixed in .agents/tasks/plan.md.",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}
