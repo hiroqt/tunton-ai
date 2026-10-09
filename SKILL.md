@@ -24,7 +24,7 @@ This skill is a **task procedure**, not permission to create new features or arc
 | Photo taken or chosen by user | Up to three distinct supported landmark candidates, or **Not recognized**. |
 | Confirmed landmark candidate | Stored landmark ID, name, verified coordinates and valid route node. |
 | Manual start point + confirmed destination | Offline shortest walking route, distance in meters, ETA in minutes, or **Route unavailable**. |
-| Bundled map/graph/model assets | Offline rendered map and local inference, with no runtime network dependency. |
+| Bundled graph/model assets plus Mapbox SDK offline store | Local inference/routing and offline map rendering after a connected Mapbox region download. |
 
 ## Procedure (run in this order)
 
@@ -39,7 +39,7 @@ This skill is a **task procedure**, not permission to create new features or arc
 - Inspect `assets/models/landmark_embedder.tflite` through `tflite_flutter`; record real input and output tensor shape/types.
 - Ensure `assets/landmarks/landmarks.json` has unique IDs, verified lat/lon, and graph-backed route node IDs.
 - Ensure `assets/landmarks/reference_embeddings.json` has full-length finite vectors with the **actual** output dimension; reference vectors came from the **same model + preprocessing**.
-- Confirm pilot-region offline tile files are registered as Flutter assets and cover the test route.
+- Confirm the SDK-managed Mapbox offline region is downloaded and covers the test route; do not bundle Mapbox data.
 - Confirm `assets/maps/intramuros_graph.json` contains a connected, pedestrian-valid route for demo landmarks.
 - If assets are missing or incompatible, report a blocker; never synthesize false map geometry or locations.
 
@@ -57,7 +57,7 @@ This skill is a **task procedure**, not permission to create new features or arc
 
 ### Step 4 — Implement/verify offline mapping and routing
 
-1. Render locally bundled raster tiles through `flutter_map` and `AssetTileProvider` only.
+1. Use `mapbox_maps_flutter` to download the fixed Intramuros style and region while connected; verify the SDK-managed offline store before airplane-mode use. Never bundle or redistribute Mapbox map data.
 2. Show bundled landmark markers and the confirmed candidate destination.
 3. Let the user choose a known, graph-backed **manual** starting point.
 4. Read graph node and edge data from packaged JSON.
@@ -79,17 +79,17 @@ Only pass the current image/match, selected landmark ID, manual origin ID, and c
 - **Cold-launch with airplane mode enabled**; perform recognition and routing.
 - Test unsupported image, invalid photo, missing model/data handling, and a graph pair with no path.
 - Record actual recognition latency, route computation latency, and peak memory on the device.
-- Show source attribution for bundled map data and identify any licensing/asset blockers.
+- Keep Mapbox SDK attribution visible and show **© OpenStreetMap contributors** for the separate OSM-derived pedestrian graph; identify licensing or token blockers.
 - Report what was tested and what remains unverified. Do not claim 8 GB compatibility without an 8 GB device run or equivalent defensible measurement.
 
 ## Fixed guardrails
 
 - **Only in-scope code:** Nothing beyond PRD P0 or the ARD file tree.
-- **Phone-only runtime:** No FastAPI, local network backend, hosted services, online tiles, cloud AI, or dependency on the Mac once installed.
+- **Phone-only journey after map setup:** No FastAPI, local network backend, online map access after the Mapbox region download, cloud AI, or dependency on the Mac. First map setup requires internet and a scoped public Mapbox token.
 - **One vision model:** MobileNetV3 Small image embedder; no additional OCR/LLM/vision model.
 - **One area and one mode:** Intramuros pedestrian routes only.
 - **One user journey:** Image → recognized landmark → manual start → route preview.
-- **Privacy:** No photo uploads or telemetry.
+- **Privacy:** No photo uploads or app-owned analytics. Mapbox SDK telemetry may be sent under its terms; keep the visible attribution control and telemetry opt-out.
 - **Uncertainty:** Unknown remains unknown; unconnected routes remain unavailable.
 
 ## Required agent response format

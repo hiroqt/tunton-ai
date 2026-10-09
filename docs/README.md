@@ -8,16 +8,19 @@ The product and implementation contracts are located in this `docs/` folder. Sta
 2. [`PRD.md`](PRD.md) — product requirements, acceptance criteria, and exclusions.
 3. [`ARD.md`](ARD.md) — approved files, packages, data contracts, and code ownership.
 4. [`ARCHITECTURE.md`](ARCHITECTURE.md) — runtime boundaries and data flow.
-5. [`SETUP.md`](SETUP.md) — environment, asset preparation, build, and offline verification.
-6. [`../SKILL.md`](../SKILL.md) — implementation sequence and task procedure.
-7. [`../README.md`](../README.md) — user and judge overview; it does not expand scope.
+5. [`SDD.md`](SDD.md) — Android system design, P0 traceability, interfaces, and verification strategy; subordinate to the documents above.
+6. [`SETUP.md`](SETUP.md) — environment, asset preparation, build, and offline verification.
+7. [`../SKILL.md`](../SKILL.md) — implementation sequence and task procedure.
+8. [`../README.md`](../README.md) — user and judge overview; it does not expand scope.
 
 ## Development map
 
 - [`DEVELOPMENT_MAP.md`](DEVELOPMENT_MAP.md) — current checkout, approved Flutter target tree, P0 ownership, and change boundaries.
+- [`SDD.md`](SDD.md) — Android-first system design and current implementation status.
+- [`TUNTON_BACKEND_STRUCTURE.md`](TUNTON_BACKEND_STRUCTURE.md) — build-time data preparation and the no-runtime-backend boundary.
 
 ## Authority
 
-`PRD.md` sets product scope. `ARD.md` sets the approved implementation surface. `ARCHITECTURE.md` explains the runtime. `AGENTS.md` applies the scope gate to agent work. If they disagree, stop and identify the conflict; do not create a new interpretation in this folder.
+`PRD.md` sets product scope. `ARD.md` sets the approved implementation surface. `ARCHITECTURE.md` explains the runtime. `SDD.md` organizes those decisions as a system design. `AGENTS.md` applies the scope gate to agent work. If they disagree, stop and identify the conflict; do not create a new interpretation in this folder.
 
-Keep implementation details in the governing root documents where they belong. Add a document here only when it provides a useful index or a focused guide without creating a second source of truth.
+Keep canonical requirements and schemas in `PRD.md`, `ARD.md`, and `ARCHITECTURE.md`; `SDD.md` summarizes and traces them without replacing them. Add other documents here only when they provide a useful index or focused guide without creating another source of truth.

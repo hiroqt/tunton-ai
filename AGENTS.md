@@ -3,6 +3,7 @@
 ## Start here
 
 - Use [`docs/README.md`](docs/README.md) as the documentation index and [`docs/DEVELOPMENT_MAP.md`](docs/DEVELOPMENT_MAP.md) for the current versus approved Flutter tree.
+- Use [`docs/SDD.md`](docs/SDD.md) for Android system design and P0 traceability. It explains, but does not override, the PRD/ARD/architecture contracts.
 - Product scope remains in [`docs/PRD.md`](docs/PRD.md); file/package contracts remain in [`docs/ARD.md`](docs/ARD.md); runtime flow remains in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The docs index does not override them.
 - The tree documented in [`docs/ARD.md`](docs/ARD.md) is the approved target, not a claim that every file or feature exists in the current checkout.
 
@@ -12,7 +13,7 @@
 
 Build one working, fully device-local flow:
 
-**Take/choose a photo → TFLite MobileNetV3 Small image embedding → match up to 3 distinct supported Intramuros landmarks → confirm destination → show bundled offline map → select manual start → Dart shortest walking route, distance, ETA.**
+**Download the fixed Mapbox offline region while connected → take/choose a photo → TFLite MobileNetV3 Small image embedding → match up to 3 distinct supported Intramuros landmarks → confirm destination → show map offline → select manual start → Dart shortest walking route, distance, ETA.**
 
 The output is a **working Android APK** with an **airplane-mode** live demo on physical hardware, targeting an **8 GB RAM** phone. The target is not proven until tested or otherwise defensibly measured; do not invent benchmark claims.
 
@@ -21,8 +22,9 @@ The output is a **working Android APK** with an **airplane-mode** live demo on p
 1. [`docs/PRD.md`](docs/PRD.md): product requirements and hard exclusions.
 2. [`docs/ARD.md`](docs/ARD.md): exact files, assets, dependencies and schema contracts.
 3. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): visual runtime boundaries / sequencing.
-4. [`docs/SETUP.md`](docs/SETUP.md), `SKILL.md`: install instructions, approved tools and task procedure.
-5. [`README.md`](README.md): summary for users/judges, **not authority to expand scope**.
+4. [`docs/SDD.md`](docs/SDD.md): Android system design overview, subordinate to PRD/ARD/ARCHITECTURE.
+5. [`docs/SETUP.md`](docs/SETUP.md), `SKILL.md`: install instructions, approved tools and task procedure.
+6. [`README.md`](README.md): summary for users/judges, **not authority to expand scope**.
 
 If documentation differs, **do not silently improvise**. Keep P0 strict, fix inconsistencies only in the affected source-of-truth docs after explicit approval.
 
@@ -50,11 +52,11 @@ The agent must identify the specific `P0-xx` ID and existing target files **befo
 | Input | `image_picker`; preprocess with Dart `image` after inspecting actual tensors / metadata |
 | Match | L2-normalized cosine similarity using packaged reference embeddings, grouped by landmark |
 | Location | Verified `landmarks.json` coordinates; AI **never** invents lat/lon |
-| Map | `flutter_map` with bundled tile assets; proper OSM attribution |
+| Map | `mapbox_maps_flutter` with an SDK-managed offline style/region; allow network only for explicit download/update, then disable the map network stack; retain Mapbox and OSM graph attribution |
 | Origin | Manual selection of a valid graph-backed point only; no GPS |
 | Routing | Pure Dart Dijkstra over packaged walk graph with real edge geometry |
 | Output | Path preview, distance, ETA fixed at 4.5 km/h; unknown/unavailable errors |
-| Storage | Read-only bundled assets, not database/network |
+| Storage | Read-only bundled model/catalog/graph assets plus the Mapbox SDK-managed offline region downloaded while connected |
 | Prep | Python/OSMnx allowed only as build-time prep on Mac; not shipped as a service |
 
 ## 5. Model provenance and switching — strict rule
@@ -98,7 +100,6 @@ assets/models/landmark_embedder.tflite
 assets/landmarks/landmarks.json
 assets/landmarks/reference_embeddings.json
 assets/maps/intramuros_graph.json
-assets/tiles/{z}/{x}/{y}.png
 assets/images/[licensed landmark images]
 tools/prepare_dataset.py
 pubspec.yaml
@@ -109,9 +110,9 @@ Standard Flutter-generated Android files may be modified only as needed to make 
 ## 7. Implement in dependency order
 
 1. **Model validity:** The actual MobileNetV3 embedder checkpoint loads via `tflite_flutter` on the Android device. Record its tensors, produce finite embedding and verify reference pair similarity.
-2. **Dataset validity:** Six real verified landmarks, 3–5 labeled reference images per place, matching vectors, graph-backed route node IDs, legal offline map tiles.
+2. **Dataset validity:** Six real verified landmarks, 3–5 labeled reference images per place, matching vectors, graph-backed route node IDs, and an aligned offline-map region configuration.
 3. **Recognition:** Return top 3 different candidates or **Not recognized**; require confirmation.
-4. **Map:** Offline tiles and correct markers, manual start selection, no live network calls.
+4. **Map:** Download the Mapbox style and Intramuros region while connected, confirm completion, then verify offline rendering, correct markers, and manual start selection. No map network calls are needed after download.
 5. **Route:** Graph Dijkstra, actual ordered edge path, correct distance and ETA, no-path error.
 6. **Integration:** One end-to-end photo-to-route flow in the four approved screens.
 7. **Proof:** Release APK, airplane-mode cold launch, held-out recognition tests, disconnected route, memory/latency measurements.
@@ -123,9 +124,9 @@ When time is limited, fix an existing P0 failure before writing a new screen or 
 - **No made-up outputs:** Never fake image embeddings, model predictions, landmark locations, route geometry, distance, benchmark results, or offline proof.
 - **No pretending similarity is calibrated probability:** Show a ranked suggestion, not "99% sure" unless properly validated and calibrated.
 - **Do not mark a build tested unless it ran.** List hardware, command, result and any missing verification.
-- **Offline means offline:** Don't rely on CDN UI scripts, tiles, model downloads, API proxies, hot-reload development servers, localhost FastAPI or a Mac running nearby.
-- **Respect rights:** Image redistributions must be licensed. Offline map tiles must be legally obtained; public OpenStreetMap tiles are not for prohibited bulk offline downloading. Show **© OpenStreetMap contributors**.
-- **No photos leave the phone** and no telemetry or user identity collection.
+- **Offline means downloaded first:** Mapbox map data must be downloaded from Mapbox through its SDK and may not be bundled or redistributed. Verify the SDK-managed region is complete before airplane mode; do not add a network basemap fallback. Keep the SDK's Mapbox attribution visible and show **© OpenStreetMap contributors** for the OSM-derived pedestrian graph.
+- **Respect rights:** Image redistributions must be licensed. Use Mapbox's SDK-managed offline storage under its terms; never package Mapbox map data in the APK.
+- **No photos leave the phone** and no app-owned analytics or user identity collection. Mapbox SDK may send de-identified usage/location telemetry under its terms; expose its opt-out through the visible attribution control.
 - **No misleading routing claims:** Walking path is a preview and cannot account for current gates, hazards or closures.
 
 ## 9. Testing / acceptance obligations

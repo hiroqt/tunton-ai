@@ -1,18 +1,18 @@
 # ARCHITECTURE — TUNTON AI Flutter Offline MVP
 
-**Authority:** Visual explanation of `PRD.md` P0 and `ARD.md` contracts, not a second set of product requirements. **Platform:** One Android phone. **Data coverage:** Bundled Intramuros pilot area. **Offline rule:** After installation, the phone needs neither internet nor a running Mac/backend.
+**Authority:** Visual explanation of `PRD.md` P0 and `ARD.md` contracts, not a second set of product requirements. **Platform:** One Android phone. **Data coverage:** Fixed Intramuros pilot area. **Offline rule:** After the Mapbox region has been downloaded, the phone needs neither internet nor a running Mac/backend for the demo journey.
 
 ## 1. System boundaries
 
-The whole production system is **one Flutter APK**. Its runtime comprises:
+The product runtime is one Flutter APK using the Mapbox Flutter SDK. The app downloads Mapbox style/region data from Mapbox while connected; map data remains in the SDK-managed device store and is not part of the APK. Its offline journey comprises:
 
 - Flutter UI (photo → candidates → offline map → route preview).
 - **One** packaged image embedding checkpoint executing through `tflite_flutter`.
 - A small, local set of verified landmark metadata and precomputed reference embeddings.
-- Map tiles supplied as app assets and rendered by `flutter_map`.
+- Mapbox style and fixed Intramuros region downloaded through `mapbox_maps_flutter` while connected, then rendered from Mapbox's SDK-managed offline store.
 - A finite, local pedestrian graph and **pure Dart Dijkstra** route search.
 
-A Python/OSMnx preparation step may run on a developer's Mac to **create bundled files**, but **never** serves requests to the phone at demo time.
+A Python/OSMnx preparation step may run on a developer's Mac to create the local model index, catalog, and pedestrian graph, but never serves requests to the phone. Mapbox map data is downloaded by the SDK on-device and is not produced by the preparation pipeline.
 
 ```mermaid
 flowchart TD
@@ -26,7 +26,7 @@ flowchart TD
     F -->|Yes| H[User confirms landmark]
     L[(Verified landmark catalog)] --> H
     H --> I[Offline Flutter map and destination pin]
-    T[(Bundled raster tiles)] --> I
+    MB[(Mapbox SDK offline store)] --> I
     I --> J[User manually picks mapped origin]
     J --> K[Dart Dijkstra walking path]
     W[(Bundled pedestrian graph)] --> K
@@ -35,7 +35,7 @@ flowchart TD
     M -->|Yes| O[Polyline plus distance and estimated ETA]
 ```
 
-**Do not add:** external server, online map/geocoder, user login, cloud AI call, live GPS feed, camera-based AR, or a second inference pipeline.
+**Do not add:** app-owned external server, online map fallback after setup, geocoder, user login, cloud AI call, live GPS feed, camera-based AR, or a second inference pipeline. Mapbox network access is limited to preparing/updating its offline region while connected.
 
 ## 2. Model integration architecture
 
@@ -69,8 +69,9 @@ sequenceDiagram
     participant UI as Flutter UI
     participant AI as TFLite embedder (phone)
     participant Index as Local landmark files
-    participant Map as Offline flutter_map
+    participant Map as Mapbox Flutter SDK
     participant Route as Dart Dijkstra
+    Note over User,Map: While connected, download the fixed Mapbox region and confirm completion before the offline session
     User->>UI: Take/select photo
     UI->>AI: Preprocess and run one image
     AI-->>UI: Embedding vector
@@ -80,7 +81,7 @@ sequenceDiagram
     User->>UI: Confirm supported landmark
     UI->>Index: Resolve verified coordinates and graph node
     Index-->>Map: Selected destination
-    Map-->>User: Bundled map + destination pin
+    Map-->>User: Downloaded offline map + destination pin
     User->>Map: Select valid manual start point
     Map->>Route: Origin node + destination node
     Route-->>Map: Connected graph geometry and length, or unavailable
@@ -97,11 +98,11 @@ The `Index` participant means **bundled local JSON data accessed inside the app*
 | Download and record exact official model checkpoint | Run the **packaged** MobileNetV3 TFLite image embedder |
 | Produce reference embeddings with same checkpoint and preprocessing | Compare current embedding against bundled reference vectors |
 | Obtain verified Intramuros POI locations and walkable graph from OSM-derived data | Read local landmark catalog and pedestrian graph |
-| Obtain/build licensed offline raster tiles, register assets | Render packaged raster tiles offline |
+| On connected Android, download fixed Mapbox style and Intramuros region through SDK; verify completion | Render Mapbox SDK-managed region offline |
 | Verify coordinate and graph connectivity | Compute connected shortest pedestrian path in Dart |
 | Create and sign Android APK | Operate independently in airplane mode |
 
-All inputs necessary for the demo must ship within the installed application. Development-time downloads are fine; runtime dependency on those hosts is not.
+The model, catalog, reference vectors, and graph ship within the APK. Mapbox map data is downloaded from Mapbox to the SDK-managed device store while connected, then used offline; it is not bundled or redistributed.
 
 ## 5. Reference dataset and location integrity
 
@@ -127,13 +128,13 @@ Two different data products are needed; one cannot substitute for the other.
 
 | Data | Where packaged | What it does |
 |---|---|---|
-| Raster map tiles | `assets/tiles/{z}/{x}/{y}.png` | Visual display: buildings, paths, labels, etc. |
+| Mapbox offline map | SDK-managed device storage; never an app asset | Visual display: buildings, paths, labels, etc. |
 | POI catalog | `assets/landmarks/landmarks.json` | Verified names, coordinates, graph-backed route nodes |
 | Walk graph | `assets/maps/intramuros_graph.json` | Machine-readable connected pedestrian edges, `length_m`, actual geometry |
 
-**Routing procedure:** user origin ID + confirmed destination ID → validate within pilot area → map to known pedestrian nodes → Dijkstra over actual allowed edge lengths → reconstruct edge geometries in correct order → polyline in `flutter_map` → display distance and ETA = distance / 75 meters per minute (4.5 km/h). If no connected path, return **Route unavailable**. Do not create direct-line substitutes.
+**Routing procedure:** user origin ID + confirmed destination ID → validate within pilot area → map to known pedestrian nodes → Dijkstra over actual allowed edge lengths → reconstruct edge geometries in correct order → polyline over Mapbox map → display distance and ETA = distance / 75 meters per minute (4.5 km/h). If no connected path, return **Route unavailable**. Do not create direct-line substitutes.
 
-**Coordinate contract:** graph geometry uses `[latitude, longitude]` arrays in `ARD.md`; GeoJSON often uses `[longitude, latitude]`, so normalize during preparation. The renderer receives correctly ordered Flutter `LatLng` points.
+**Coordinate contract:** graph geometry uses `[latitude, longitude]` arrays in `ARD.md`; Mapbox `Position` uses longitude then latitude. Convert at the rendering boundary and never reorder stored source geometry silently.
 
 **Navigation limitation:** This is a route **preview**, not current-position turn-by-turn guidance. The app doesn't know if gates, paths or entries are currently accessible; no live alerts or closures.
 
@@ -145,7 +146,7 @@ Two different data products are needed; one cannot substitute for the other.
 | `lib/features/recognition/embedding_service.dart` | Single TFLite checkpoint, preprocessing and inference |
 | `lib/features/recognition/landmark_matcher.dart` | Index reading, cosine ranking, uncertainty/rejection |
 | `lib/features/recognition/recognition_screen.dart` | Candidate display and confirmation |
-| `lib/features/map/offline_map_screen.dart` | Bundled tile map and manual start selection |
+| `lib/features/map/offline_map_screen.dart` | Mapbox region download/status, offline map and manual start selection |
 | `lib/features/map/landmark_markers.dart` | Offline landmark markers |
 | `lib/features/navigation/routing_service.dart` | Graph routing and distance/ETA |
 | `lib/features/navigation/navigation_screen.dart` | Route result overlay and error |
@@ -163,24 +164,25 @@ Exact asset names and data shapes are defined in `ARD.md`. Do not create additio
 | Missing/incompatible model | Model unavailable | Cloud inference |
 | Non-finite/incorrect embedding | Recognition unavailable | Random vector / fake candidate |
 | Unfamiliar / ambiguous photo | **Not recognized** or candidate confirmation | Fabricated coordinates |
-| Missing tiles | Offline map unavailable | Online tile fetching |
+| Missing or incomplete Mapbox offline region | Show map-not-ready/error state and offer download while connected | Online map fallback or claiming offline readiness |
 | Missing/invalid landmark node | Location unavailable | Nearest unverified building center |
 | Disconnected graph | **Route unavailable** | Straight-line drawing |
 | 8 GB device crashes/slows | Document failure and optimize within P0 | Claim hardware compatibility without testing |
 
-## 9. Proof that the cloud is absent
+## 9. Proof of local inference and offline operation
 
 A judge-facing **release Android build** should:
 
-1. Install while network access is permitted for developer setup if needed.
-2. Enter airplane mode; disconnect USB / Mac app-server dependency.
-3. Cold-launch the app.
-4. Match a previously unseen image of a supported landmark using on-phone AI.
-5. Confirm destination; view the bundled map, select a manual origin, calculate a real walking route.
-6. Show error handling with an unknown image or disconnected graph case.
-7. Provide recorded actual model latency, route latency and memory usage on the lowest tested phone; disclose if 8 GB compatibility remains unverified.
+1. Install the APK, launch while connected, and download the fixed Mapbox style/region through its SDK.
+2. Confirm the SDK reports the region downloaded; keep the Mapbox attribution control visible.
+3. Enter airplane mode and disconnect USB / Mac app-server dependency.
+4. Cold-launch the app.
+5. Match a previously unseen image of a supported landmark using on-phone AI.
+6. Confirm destination; view the Mapbox offline map, select a manual origin, calculate a real walking route.
+7. Show error handling with an unknown image or disconnected graph case.
+8. Provide recorded actual model latency, route latency and memory usage on the lowest tested phone; disclose if 8 GB compatibility remains unverified.
 
-No cloud inference, network tiles, analytics, telemetry, maps SDK, Google Maps API, or other runtime requests.
+No cloud inference, online map access after offline-region setup, app-owned analytics, Google Maps API, or remote routing requests. Mapbox SDK is the approved map renderer and contacts Mapbox to download/update its region while connected. Its SDK may send de-identified usage/location telemetry under its terms; the visible attribution control provides the required user opt-out.
 
 ## 10. Links and authority
 
@@ -189,4 +191,4 @@ No cloud inference, network tiles, analytics, telemetry, maps SDK, Google Maps A
 - `AGENTS.md`: instructions that prevent feature creep.
 - `SETUP.md`: environment, model download, asset preparation, Android build.
 - `TECH_STACK.md`: reason each runtime technology is needed.
-- Source references: [Google image embedder](https://developers.google.com/edge/mediapipe/solutions/vision/image_embedder), [community MobileCLIP files](https://huggingface.co/anton96vice/mobileclip2_tflite), [Flutter TFLite plugin](https://pub.dev/packages/tflite_flutter), [flutter_map offline](https://docs.fleaflet.dev/tile-servers/offline-mapping), [OSM attribution and tile rules](https://operations.osmfoundation.org/policies/tiles/).
+- Source references: [Google image embedder](https://developers.google.com/edge/mediapipe/solutions/vision/image_embedder), [community MobileCLIP files](https://huggingface.co/anton96vice/mobileclip2_tflite), [Flutter TFLite plugin](https://pub.dev/packages/tflite_flutter), [Mapbox Flutter installation](https://docs.mapbox.com/flutter/maps/guides/install/), [Mapbox Flutter offline maps](https://docs.mapbox.com/flutter/maps/examples/offline/), [Mapbox offline map constraints](https://docs.mapbox.com/ios/maps/guides/offline/concepts/), and [OpenStreetMap copyright](https://www.openstreetmap.org/copyright) for the separate pedestrian graph data.

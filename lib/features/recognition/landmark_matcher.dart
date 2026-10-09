@@ -56,6 +56,8 @@ class LandmarkMatcher {
 
   int get dimension => _dimension;
 
+  Iterable<String> get landmarkIds => _refsByLandmark.keys;
+
   /// Build from already-parsed JSON (preferred for tests — no IO).
   ///
   /// Validates: `dimension` is a positive int; `references` is a non-empty list;
@@ -107,9 +109,9 @@ class LandmarkMatcher {
         }
         vector[i] = value.toDouble();
       }
-      refsByLandmark.putIfAbsent(rawLandmarkId, () => <List<double>>[]).add(
-        vector,
-      );
+      refsByLandmark
+          .putIfAbsent(rawLandmarkId, () => <List<double>>[])
+          .add(vector);
     }
 
     return LandmarkMatcher._(dimension, refsByLandmark, scoreThreshold);
@@ -160,9 +162,7 @@ class LandmarkMatcher {
     }
     for (final value in query) {
       if (!value.isFinite) {
-        throw const FormatException(
-          'Query embedding has a non-finite value.',
-        );
+        throw const FormatException('Query embedding has a non-finite value.');
       }
     }
 
