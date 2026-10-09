@@ -29,11 +29,13 @@ class PrepareDatasetEndToEndTest(unittest.TestCase):
             "graph": self.inputs / "graph.json",
         }
         write_json(self.sources["landmarks"], [{
-            "id": "test-place", "name": "Fixture Place", "lat": 14.59,
+            "id": "test-place", "name": "Fixture Place", "area_id": "intramuros", "lat": 14.59,
             "lon": 120.97, "route_node_id": "node-a",
         }])
         write_json(self.sources["embeddings"], {
-            "model_id": "bundled-mobilenetv3-small-embedder",
+            "model_id": "openclip-vit-b32-laion2b-s34b-b79k-int8-dynamic",
+            "model_sha256": "a" * 64,
+            "preprocessing_version": "openclip-vit-b32-v1",
             "dimension": 2,
             "references": [{
                 "landmark_id": "test-place",

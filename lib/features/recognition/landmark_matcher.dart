@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// One ranked candidate: a distinct landmark id and its RAW best cosine
@@ -35,7 +37,14 @@ class MatchResult {
 /// dot product because both the query (from EmbeddingService.normalizeEmbedding)
 /// and every stored reference vector are already L2-normalized.
 class LandmarkMatcher {
-  LandmarkMatcher._(this._dimension, this._refsByLandmark, this.scoreThreshold);
+  LandmarkMatcher._(
+    this._dimension,
+    this._refsByLandmark,
+    this.scoreThreshold,
+    this.modelId,
+    this.modelSha256,
+    this.preprocessingVersion,
+  );
 
   static const String referenceAsset =
       'assets/landmarks/reference_embeddings.json';
@@ -53,6 +62,9 @@ class LandmarkMatcher {
   final Map<String, List<List<double>>> _refsByLandmark;
 
   final double scoreThreshold;
+  final String modelId;
+  final String? modelSha256;
+  final String? preprocessingVersion;
 
   int get dimension => _dimension;
 
@@ -74,6 +86,25 @@ class LandmarkMatcher {
       );
     }
     final dimension = rawDimension;
+    final modelId = json['model_id'];
+    if (modelId is! String || modelId.trim().isEmpty) {
+      throw const FormatException('Reference embeddings require a model_id.');
+    }
+    final modelSha256 = json['model_sha256'];
+    if (modelSha256 != null &&
+        (modelSha256 is! String ||
+            !RegExp(r'^[0-9a-f]{64}$').hasMatch(modelSha256))) {
+      throw const FormatException(
+        'Reference embeddings have an invalid model checksum.',
+      );
+    }
+    final preprocessingVersion = json['preprocessing_version'];
+    if (preprocessingVersion != null &&
+        (preprocessingVersion is! String || preprocessingVersion.isEmpty)) {
+      throw const FormatException(
+        'Reference embeddings have an invalid preprocessing version.',
+      );
+    }
 
     final rawReferences = json['references'];
     if (rawReferences is! List || rawReferences.isEmpty) {
@@ -109,12 +140,27 @@ class LandmarkMatcher {
         }
         vector[i] = value.toDouble();
       }
+      final norm = math.sqrt(
+        vector.fold<double>(0, (sum, value) => sum + value * value),
+      );
+      if (!norm.isFinite || (norm - 1).abs() > 0.001) {
+        throw FormatException(
+          'Reference vector for "$rawLandmarkId" must be L2-normalized.',
+        );
+      }
       refsByLandmark
           .putIfAbsent(rawLandmarkId, () => <List<double>>[])
           .add(vector);
     }
 
-    return LandmarkMatcher._(dimension, refsByLandmark, scoreThreshold);
+    return LandmarkMatcher._(
+      dimension,
+      refsByLandmark,
+      scoreThreshold,
+      modelId,
+      modelSha256 as String?,
+      preprocessingVersion as String?,
+    );
   }
 
   /// Parse a JSON string then delegate to [fromDecodedJson].
@@ -178,6 +224,14 @@ class LandmarkMatcher {
           bestScore = dot;
         }
       }
+      if (kDebugMode) {
+        debugPrint(
+          '[TUNTON_RECOG] landmark=${entry.key} '
+          'best_cosine=${bestScore.toStringAsFixed(4)} '
+          'accepted=${bestScore >= scoreThreshold} '
+          'threshold=${scoreThreshold.toStringAsFixed(2)}',
+        );
+      }
       if (bestScore >= scoreThreshold) {
         candidates.add(LandmarkCandidate(entry.key, bestScore));
       }
@@ -187,6 +241,11 @@ class LandmarkMatcher {
     final kept = candidates.length > maxCandidates
         ? candidates.sublist(0, maxCandidates)
         : candidates;
+    if (kDebugMode) {
+      debugPrint(
+        '[TUNTON_RECOG] candidates=${kept.map((candidate) => candidate.landmarkId).join(',')}',
+      );
+    }
     return MatchResult(List<LandmarkCandidate>.unmodifiable(kept));
   }
 }

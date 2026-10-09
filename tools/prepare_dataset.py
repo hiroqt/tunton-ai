@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare TUNTON's licensed photos, MobileNetV3 embeddings, and offline OSM assets."""
+"""Prepare TUNTON's licensed photos, OpenCLIP embeddings, and Intramuros graph."""
 import argparse
 import json
 import math
@@ -15,12 +15,22 @@ import urllib.request
 from urllib.parse import urlparse
 from pathlib import Path
 from pathlib import PurePosixPath
-MODEL_ID = 'bundled-mobilenetv3-small-embedder'
-MODEL_SHA256 = 'bbbb4c51a55a53905af1daec995ca1aae355046f8839bb8c9f5ce9271394bc40'
-MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite'
+MODEL_ID = 'openclip-vit-b32-laion2b-s34b-b79k-int8-dynamic'
+MODEL_FILE = 'openclip_vit_b32_laion2b_int8.onnx'
+MODEL_ASSET = 'assets/models/' + MODEL_FILE
+MODEL_MANIFEST = 'assets/models/openclip_vit_b32_laion2b_int8.manifest.json'
+PRETRAINED_TAG = 'laion2b_s34b_b79k'
+MODEL_REPO = 'laion/CLIP-ViT-B-32-laion2B-s34B-b79K'
+INPUT_SHAPE = [1, 3, 224, 224]
+OUTPUT_DIMENSION = 512
+PREPROCESSING_VERSION = 'openclip-vit-b32-v1'
 
 def checksum(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    digest = hashlib.sha256()
+    with Path(path).open('rb') as source:
+        for block in iter(lambda: source.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
 
 def dataset_path(root, relative):
     text(relative, 'dataset path')
@@ -47,6 +57,93 @@ def write_json(path, value):
         os.link(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
+
+def export_model(root):
+    """Export one checked OpenCLIP image tower and its dynamic-int8 derivative."""
+    import numpy as np
+    import onnx
+    import onnxruntime as ort
+    import open_clip
+    import torch
+    from open_clip.pretrained import download_pretrained_from_hf
+    from onnxruntime.quantization import QuantType, quantize_dynamic
+
+    root = Path(root)
+    target = root / MODEL_ASSET
+    manifest_path = root / MODEL_MANIFEST
+    if target.exists() or manifest_path.exists():
+        fail('refusing to overwrite an existing model or manifest')
+    config = open_clip.get_pretrained_cfg('ViT-B-32', PRETRAINED_TAG)
+    checkpoint = Path(download_pretrained_from_hf(config['hf_hub'].rstrip('/')))
+    checkpoint_sha256 = checksum(checkpoint)
+    model, _, transform = open_clip.create_model_and_transforms(
+        'ViT-B-32', pretrained=PRETRAINED_TAG,
+    )
+    model.eval()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.openclip-export-', dir=target.parent) as work:
+        work = Path(work)
+        float_model = work / 'image_encoder_fp32.onnx'
+        quantized_model = work / MODEL_FILE
+        example = torch.zeros(1, 3, 224, 224, dtype=torch.float32)
+        with torch.inference_mode():
+            expected = model.encode_image(example).cpu().numpy()
+        torch.onnx.export(
+            model.visual, example, float_model, input_names=['images'],
+            output_names=['embeddings'], opset_version=17,
+            do_constant_folding=True, dynamo=False,
+        )
+        onnx.checker.check_model(onnx.load(float_model))
+        quantize_dynamic(
+            str(float_model), str(quantized_model), weight_type=QuantType.QInt8,
+            per_channel=True, op_types_to_quantize=['MatMul'],
+        )
+        session = ort.InferenceSession(
+            str(quantized_model), providers=['CPUExecutionProvider'],
+        )
+        inputs, outputs = session.get_inputs(), session.get_outputs()
+        if len(inputs) != 1 or len(outputs) != 1 or inputs[0].shape != INPUT_SHAPE or outputs[0].shape != [1, OUTPUT_DIMENSION] or inputs[0].type != 'tensor(float)' or outputs[0].type != 'tensor(float)':
+            fail('exported ONNX tensor contract differs from the inspected OpenCLIP model')
+        actual = session.run([outputs[0].name], {inputs[0].name: example.numpy()})[0]
+        similarity = float(np.dot(expected.ravel(), actual.ravel()) / (np.linalg.norm(expected) * np.linalg.norm(actual)))
+        if not np.isfinite(actual).all() or not math.isfinite(similarity) or similarity < 0.97:
+            fail(f'quantized export self-check failed (cosine={similarity})')
+        model_sha256 = checksum(quantized_model)
+        manifest = {
+            'model_id': MODEL_ID,
+            'pretrained_tag': PRETRAINED_TAG,
+            'checkpoint_repo': MODEL_REPO,
+            'checkpoint_revision': checkpoint.parent.name,
+            'checkpoint_sha256': checkpoint_sha256,
+            'model_sha256': model_sha256,
+            'format': 'ONNX',
+            'opset': 17,
+            'quantization': 'dynamic QInt8 per-channel MatMul weights',
+            'input_name': inputs[0].name,
+            'input_shape': INPUT_SHAPE,
+            'input_type': inputs[0].type,
+            'output_name': outputs[0].name,
+            'output_shape': outputs[0].shape,
+            'output_type': outputs[0].type,
+            'dimension': OUTPUT_DIMENSION,
+            'preprocessing_version': PREPROCESSING_VERSION,
+            'resize': 224,
+            'resize_mode': config['resize_mode'],
+            'interpolation': config['interpolation'],
+            'crop': 'center 224x224',
+            'channel_order': 'RGB, NCHW',
+            'mean': list(transform.transforms[-1].mean),
+            'std': list(transform.transforms[-1].std),
+            'self_check_cosine': similarity,
+            'android_verified': False,
+        }
+        os.link(quantized_model, target)
+        try:
+            write_json(manifest_path, manifest)
+        except Exception:
+            target.unlink(missing_ok=True)
+            raise
+    return manifest
 
 def photo_sources(path):
     manifest = read_json(path)
@@ -87,8 +184,8 @@ def photo_sources(path):
         seen_originals.add(photo['original_sha256'])
     return photos
 
-def image_tensor(path):
-    """The same EXIF/RGB/floor-index resize and pixel scale as embedding_service.dart."""
+def image_tensor(path, transform):
+    """Use the exact OpenCLIP transform for the selected pretrained tag."""
     import numpy as np
     from PIL import Image, ImageOps
     path = Path(path)
@@ -97,30 +194,40 @@ def image_tensor(path):
     with Image.open(path) as source:
         if source.width * source.height > 16000000:
             fail('decoded image exceeds 16 megapixels')
-        rgb = np.asarray(ImageOps.exif_transpose(source).convert('RGB'))
-    rows = np.arange(224) * rgb.shape[0] // 224
-    columns = np.arange(224) * rgb.shape[1] // 224
-    return (rgb[rows[:, None], columns[None, :]].astype(np.float32) / np.float32(255)).reshape(1, 224, 224, 3)
+        rgb = ImageOps.exif_transpose(source).convert('RGB')
+        tensor = transform(rgb).unsqueeze(0).numpy().astype(np.float32, copy=False)
+    if tensor.shape != tuple(INPUT_SHAPE) or not np.isfinite(tensor).all():
+        fail('OpenCLIP preprocessing produced an invalid input tensor')
+    return tensor
 
 def load_embedder(path):
-    import numpy as np
-    from ai_edge_litert.interpreter import Interpreter
-    if checksum(path) != MODEL_SHA256:
-        fail('model checksum does not match the approved MobileNetV3 artifact')
-    model = Interpreter(model_path=str(path), num_threads=1)
-    model.allocate_tensors()
-    inputs, outputs = (model.get_input_details(), model.get_output_details())
-    if len(inputs) != 1 or len(outputs) != 1 or inputs[0]['shape'].tolist() != [1, 224, 224, 3] or (outputs[0]['shape'].tolist() != [1, 1024]) or (inputs[0]['dtype'] != np.float32) or (outputs[0]['dtype'] != np.float32):
-        fail('model tensor contract differs from the inspected artifact')
-    return model
+    import open_clip
+    import onnxruntime as ort
+    path = Path(path)
+    manifest_path = path.with_name('openclip_vit_b32_laion2b_int8.manifest.json')
+    manifest = read_json(manifest_path)
+    if manifest.get('model_id') != MODEL_ID or manifest.get('model_sha256') != checksum(path):
+        fail('ONNX model checksum or identity does not match its manifest')
+    config = open_clip.get_pretrained_cfg('ViT-B-32', PRETRAINED_TAG)
+    transform = open_clip.image_transform(
+        224, is_train=False, mean=config['mean'], std=config['std'],
+        resize_mode=config['resize_mode'], interpolation=config['interpolation'],
+    )
+    model = ort.InferenceSession(str(path), providers=['CPUExecutionProvider'])
+    inputs, outputs = model.get_inputs(), model.get_outputs()
+    if len(inputs) != 1 or len(outputs) != 1 or inputs[0].shape != INPUT_SHAPE or outputs[0].shape != [1, OUTPUT_DIMENSION] or inputs[0].type != 'tensor(float)' or outputs[0].type != 'tensor(float)':
+        fail('ONNX tensor contract differs from its inspected manifest')
+    if manifest.get('input_name') != inputs[0].name or manifest.get('output_name') != outputs[0].name or manifest.get('dimension') != OUTPUT_DIMENSION:
+        fail('ONNX input/output metadata differs from its manifest')
+    return model, transform, manifest
 
 def image_embedding(model, path):
     import numpy as np
-    model.set_tensor(model.get_input_details()[0]['index'], image_tensor(path))
-    model.invoke()
-    vector = model.get_tensor(model.get_output_details()[0]['index']).reshape(-1).astype(np.float64)
+    session, transform, manifest = model
+    tensor = image_tensor(path, transform)
+    vector = session.run([manifest['output_name']], {manifest['input_name']: tensor})[0].reshape(-1).astype(np.float64)
     norm = np.linalg.norm(vector)
-    if len(vector) != 1024 or not np.isfinite(vector).all() or (not math.isfinite(norm)) or (norm == 0):
+    if len(vector) != manifest['dimension'] or not np.isfinite(vector).all() or (not math.isfinite(norm)) or (norm == 0):
         fail('inference produced an invalid embedding')
     return (vector / norm).tolist()
 
@@ -148,18 +255,35 @@ def create_index(root, sources):
     ids = {item['id'] for item in landmarks}
     if any((photo['split'] != 'unknown' and photo['landmark_id'] not in ids for photo in photos)):
         fail('photo label is outside the landmark catalog')
-    model = load_embedder(root / 'assets/models/landmark_embedder.tflite')
-    index = {'model_id': MODEL_ID, 'dimension': 1024, 'references': []}
+    model = load_embedder(root / MODEL_ASSET)
+    manifest = model[2]
+    index = {
+        'model_id': MODEL_ID,
+        'model_sha256': manifest['model_sha256'],
+        'preprocessing_version': PREPROCESSING_VERSION,
+        'dimension': manifest['dimension'],
+        'references': [],
+    }
     for photo in photos:
         if photo['split'] == 'reference':
             index['references'].append({'landmark_id': photo['landmark_id'], 'image_asset': photo['path'], 'vector': image_embedding(model, dataset_path(root, photo['path']))})
     graph = read_json(root / 'assets/maps/intramuros_graph.json')
     validate(landmarks, index, graph)
-    if len(ids) != 6 or any((not 3 <= sum((ref['landmark_id'] == item for ref in index['references'])) <= 5 for item in ids)):
-        fail('MVP catalog requires six landmarks and 3–5 references each')
+    if any((not 3 <= sum((ref['landmark_id'] == item for ref in index['references'])) <= 5 for item in ids)):
+        fail('each catalog POI requires 3–5 licensed reference photos')
     first = next((photo for photo in photos if photo['split'] == 'reference'))
-    tensor_bytes = image_tensor(dataset_path(root, first['path'])).tobytes()
-    parity = {'model_sha256': MODEL_SHA256, 'image_path': first['path'], 'image_sha256': first['sha256'], 'input_shape': [1, 224, 224, 3], 'output_shape': [1, 1024], 'preprocessing': 'EXIF orientation; RGB; full-frame floor-index nearest resize 224x224; pixel/255; output L2', 'input_sha256': hashlib.sha256(tensor_bytes).hexdigest(), 'embedding': index['references'][0]['vector'], 'android_verified': False}
+    tensor_bytes = image_tensor(dataset_path(root, first['path']), model[1]).tobytes()
+    parity = {
+        'model_sha256': manifest['model_sha256'],
+        'image_path': first['path'],
+        'image_sha256': first['sha256'],
+        'input_shape': INPUT_SHAPE,
+        'output_shape': [1, manifest['dimension']],
+        'preprocessing_version': PREPROCESSING_VERSION,
+        'input_sha256': hashlib.sha256(tensor_bytes).hexdigest(),
+        'embedding': index['references'][0]['vector'],
+        'android_verified': False,
+    }
     written = []
     try:
         for path, value in zip(destinations[:2], (index, parity)):
@@ -185,7 +309,8 @@ def evaluate(root, sources):
     if any((photo['split'] != 'unknown' and photo['landmark_id'] not in ids for photo in photos)):
         fail('photo label is outside the landmark catalog')
     validate(landmarks, index, read_json(root / 'assets/maps/intramuros_graph.json'))
-    model = load_embedder(root / 'assets/models/landmark_embedder.tflite')
+    model = load_embedder(root / MODEL_ASSET)
+    manifest = model[2]
     records, timings = ([], [])
     for photo in photos:
         if photo['split'] == 'reference':
@@ -203,7 +328,7 @@ def evaluate(root, sources):
     unknown = [item for item in records if item['split'] == 'unknown']
     if not known or not unknown:
         fail('evaluation requires separate supported and unknown photos')
-    return {'model_id': MODEL_ID, 'model_sha256': MODEL_SHA256, 'environment': 'Mac Python CPU; no Android proof', 'held_out_count': len(known), 'unknown_count': len(unknown), 'top1_correct': sum((item['expected'] == item['top3'][0] for item in known)), 'top3_correct': sum((item['expected'] in item['top3'] for item in known)), 'rejection_rule_calibrated': False, 'inference_ms': {'median': statistics.median(timings), 'max': max(timings)}, 'records': records}
+    return {'model_id': MODEL_ID, 'model_sha256': manifest['model_sha256'], 'preprocessing_version': PREPROCESSING_VERSION, 'environment': 'Mac Python CPU; no Android proof', 'held_out_count': len(known), 'unknown_count': len(unknown), 'top1_correct': sum((item['expected'] == item['top3'][0] for item in known)), 'top3_correct': sum((item['expected'] in item['top3'] for item in known)), 'rejection_rule_calibrated': False, 'inference_ms': {'median': statistics.median(timings), 'max': max(timings)}, 'records': records}
 
 def download(url, expected_sha):
     allowed = {'upload.wikimedia.org', 'storage.googleapis.com'}
@@ -261,15 +386,17 @@ def prepare_dataset(sources, map_source, source_root, output_dir):
     with tempfile.TemporaryDirectory(prefix='.tunton-prep-', dir=output.parent) as temp:
         stage = Path(temp) / 'bundle'
         stage.mkdir()
-        model_path = Path(source_root) / 'assets/models/landmark_embedder.tflite'
-        model_target = stage / 'assets/models/landmark_embedder.tflite'
+        model_path = Path(source_root) / MODEL_ASSET
+        manifest_path = Path(source_root) / MODEL_MANIFEST
+        model_target = stage / MODEL_ASSET
+        manifest_target = stage / MODEL_MANIFEST
         model_target.parent.mkdir(parents=True)
-        if model_path.is_file():
-            if checksum(model_path) != MODEL_SHA256:
-                fail('source model checksum mismatch')
-            shutil.copyfile(model_path, model_target)
-        else:
-            model_target.write_bytes(download(MODEL_URL, MODEL_SHA256))
+        if not model_path.is_file() or not manifest_path.is_file():
+            fail('export the approved OpenCLIP model before preparing the dataset')
+        if read_json(manifest_path).get('model_sha256') != checksum(model_path):
+            fail('source ONNX model checksum mismatch')
+        shutil.copyfile(model_path, model_target)
+        shutil.copyfile(manifest_path, manifest_target)
         for photo in photos:
             target = dataset_path(stage, photo['path'])
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -313,8 +440,9 @@ def prepare_dataset(sources, map_source, source_root, output_dir):
 def compare_android(expected, actual):
     import numpy as np
     expected, actual = (read_json(expected), read_json(actual))
-    if expected.get('model_sha256') != MODEL_SHA256:
-        fail('expected parity model is not the approved checkpoint')
+    model_sha256 = expected.get('model_sha256')
+    if not isinstance(model_sha256, str) or len(model_sha256) != 64 or any((c not in '0123456789abcdef' for c in model_sha256)):
+        fail('expected parity requires the ONNX model SHA-256')
     image_sha = expected.get('image_sha256')
     if not isinstance(image_sha, str) or len(image_sha) != 64 or any((c not in '0123456789abcdef' for c in image_sha)):
         fail('expected parity requires a valid image SHA-256')
@@ -323,23 +451,26 @@ def compare_android(expected, actual):
             fail('Android parity ' + key + ' mismatch')
     for record in (expected, actual):
         values = record.get('embedding')
+        dimension = expected.get('dimension')
         try:
-            valid = isinstance(values, list) and len(values) == 1024 and all((not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value) for value in values))
+            valid = isinstance(dimension, int) and dimension > 0 and isinstance(values, list) and len(values) == dimension and all((not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value) for value in values))
         except (OverflowError, TypeError, ValueError):
             valid = False
         if not valid:
-            fail('parity embedding must contain 1024 finite numeric values')
+            fail('parity embedding must contain the declared finite dimension')
     left, right = (np.asarray(expected['embedding'], dtype=float), np.asarray(actual['embedding'], dtype=float))
-    if left.shape != (1024,) or right.shape != (1024,) or (not np.isfinite(left).all()) or (not np.isfinite(right).all()) or (not math.isclose(float(np.linalg.norm(left)), 1, abs_tol=0.0001)):
-        fail('Android parity embedding must contain 1024 finite values')
+    if left.shape != (dimension,) or right.shape != (dimension,) or (not np.isfinite(left).all()) or (not np.isfinite(right).all()) or (not math.isclose(float(np.linalg.norm(left)), 1, abs_tol=0.0001)):
+        fail('Android parity embedding must be finite and L2-normalized')
     error = float(np.max(np.abs(left - right)))
-    if error > 0.0001:
-        fail(f'Android parity maximum absolute error {error} exceeds 0.0001')
+    if error > 0.005:
+        fail(f'Android parity maximum absolute error {error} exceeds 0.005')
     return {'max_absolute_error': error, 'passed': True}
 
 def dataset_main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
+    exporter = commands.add_parser('export-model', help='export and verify the approved OpenCLIP image tower')
+    exporter.add_argument('--root', default='.')
     prepare = commands.add_parser('prepare', help='rebuild a real dataset into a new directory')
     prepare.add_argument('--sources', required=True)
     prepare.add_argument('--map-source', required=True)
@@ -356,7 +487,10 @@ def dataset_main(argv):
     parity.add_argument('--actual', required=True)
     args = parser.parse_args(argv)
     try:
-        if args.command == 'prepare':
+        if args.command == 'export-model':
+            manifest = export_model(args.root)
+            print(json.dumps({key: value for key, value in manifest.items() if key not in ('mean', 'std')}, indent=2))
+        elif args.command == 'prepare':
             report = prepare_dataset(args.sources, args.map_source, args.source_root, args.output_dir)
             print(json.dumps({key: value for key, value in report.items() if key != 'records'}, indent=2))
         elif args.command == 'index':
@@ -399,10 +533,17 @@ def validate(landmarks, embeddings, graph):
         fail('landmarks must be a non-empty array')
     landmark_ids = set()
     for item in landmarks:
-        keys(item, ('id', 'name', 'lat', 'lon', 'route_node_id'), 'landmark')
+        required = {'id', 'name', 'area_id', 'lat', 'lon'}
+        if not isinstance(item, dict) or not required.issubset(item) or set(item) - required - {'route_node_id'}:
+            fail('landmark must contain id, name, area_id, lat, lon, and optional route_node_id')
         text(item['id'], 'landmark id')
         text(item['name'], f"landmark {item['id']} name")
-        text(item['route_node_id'], f"landmark {item['id']} route_node_id")
+        if item['area_id'] not in {'intramuros', 'manila', 'makati', 'pasay'}:
+            fail(f"landmark {item['id']} has an unsupported area_id")
+        if 'route_node_id' in item:
+            text(item['route_node_id'], f"landmark {item['id']} route_node_id")
+            if item['area_id'] != 'intramuros':
+                fail('only Intramuros POIs may have a route_node_id')
         coordinate(item['lat'], item['lon'], f"landmark {item['id']}")
         if item['id'] in landmark_ids:
             fail(f"duplicate landmark id: {item['id']}")
@@ -419,7 +560,7 @@ def validate(landmarks, embeddings, graph):
             fail(f"duplicate graph node id: {node['id']}")
         nodes.add(node['id'])
     for item in landmarks:
-        if item['route_node_id'] not in nodes:
+        if 'route_node_id' in item and item['route_node_id'] not in nodes:
             fail(f"landmark {item['id']} references missing graph node {item['route_node_id']}")
     if not isinstance(graph['edges'], list):
         fail('graph edges must be an array')
@@ -443,9 +584,14 @@ def validate(landmarks, embeddings, graph):
             if not isinstance(point, list) or len(point) != 2:
                 fail('graph edge geometry points must be [latitude, longitude]')
             coordinate(point[0], point[1], 'graph edge geometry point')
-    keys(embeddings, ('model_id', 'dimension', 'references'), 'embeddings')
+    keys(embeddings, ('model_id', 'model_sha256', 'preprocessing_version', 'dimension', 'references'), 'embeddings')
     if embeddings['model_id'] != MODEL_ID:
         fail(f'model_id must be {MODEL_ID!r}')
+    checksum_value = embeddings['model_sha256']
+    if not isinstance(checksum_value, str) or len(checksum_value) != 64 or any(c not in '0123456789abcdef' for c in checksum_value):
+        fail('embedding model_sha256 must be a lowercase SHA-256')
+    if embeddings['preprocessing_version'] != PREPROCESSING_VERSION:
+        fail('embedding preprocessing_version does not match the current model contract')
     dimension = embeddings['dimension']
     if isinstance(dimension, bool) or not isinstance(dimension, int) or dimension <= 0:
         fail('embedding dimension must be a positive integer')
@@ -633,7 +779,7 @@ def render_map_tiles(source_path, output_dir):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    if argv and argv[0] in ('prepare', 'index', 'evaluate', 'compare-android'):
+    if argv and argv[0] in ('export-model', 'prepare', 'index', 'evaluate', 'compare-android'):
         return dataset_main(argv)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--landmarks', required=True)

@@ -1,55 +1,78 @@
+import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as image;
-import 'package:tflite_flutter/tflite_flutter.dart';
 
-/// One CPU interpreter for the approved MobileNetV3 Small image embedder.
+/// Prepares one OpenCLIP ViT-B/32 input and calls native Android ONNX Runtime.
 class EmbeddingService {
-  EmbeddingService._(this._interpreter);
+  EmbeddingService._(this._dimension, this.modelSha256);
 
-  static const modelAsset = 'assets/models/landmark_embedder.tflite';
+  static const manifestAsset =
+      'assets/models/openclip_vit_b32_laion2b_int8.manifest.json';
+  static const modelId = 'openclip-vit-b32-laion2b-s34b-b79k-int8-dynamic';
+  static const preprocessingVersion = 'openclip-vit-b32-v1';
+  static const dimension = 512;
   static const inputSize = 224;
-  static const dimension = 1024;
-  final Interpreter _interpreter;
+  static const _area = inputSize * inputSize;
+  static const _mean = [0.48145466, 0.4578275, 0.40821073];
+  static const _std = [0.26862954, 0.26130258, 0.27577711];
+  static const _channel = MethodChannel('com.tunton/vision');
+
+  final int _dimension;
+  final String modelSha256;
   bool _disposed = false;
 
   static Future<EmbeddingService> load() async {
-    final interpreter = await Interpreter.fromAsset(
-      modelAsset,
-      options: InterpreterOptions()..threads = 1,
+    final decoded = jsonDecode(await rootBundle.loadString(manifestAsset));
+    if (decoded is! Map<String, dynamic> ||
+        decoded['model_id'] != modelId ||
+        decoded['input_shape'] is! List ||
+        (decoded['input_shape'] as List).join(',') != '1,3,224,224' ||
+        decoded['dimension'] != dimension ||
+        decoded['preprocessing_version'] != preprocessingVersion ||
+        decoded['model_sha256'] is! String ||
+        !RegExp(
+          r'^[0-9a-f]{64}$',
+        ).hasMatch(decoded['model_sha256'] as String)) {
+      throw const FormatException('The OpenCLIP model manifest is invalid.');
+    }
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      'initialize',
+      {'sha256': decoded['model_sha256'], 'dimension': dimension},
     );
-    try {
-      final inputs = interpreter.getInputTensors();
-      final outputs = interpreter.getOutputTensors();
-      if (inputs.length != 1 ||
-          outputs.length != 1 ||
-          inputs.single.type != TensorType.float32 ||
-          outputs.single.type != TensorType.float32 ||
-          inputs.single.shape.join(',') != '1,224,224,3' ||
-          outputs.single.shape.join(',') != '1,1024') {
-        throw StateError('The bundled model has incompatible tensors.');
-      }
-      return EmbeddingService._(interpreter);
-    } catch (_) {
-      interpreter.close();
-      rethrow;
+    if (result?['dimension'] != dimension) {
+      throw StateError('The Android model output dimension is incompatible.');
     }
+    return EmbeddingService._(dimension, decoded['model_sha256'] as String);
   }
 
-  /// Synchronous inference serializes calls on the owning Dart isolate.
-  List<double> embed(Uint8List encodedImage) {
-    if (_disposed) {
-      throw StateError('Embedding service is disposed.');
+  Future<List<double>> embed(Uint8List encodedImage) async {
+    if (_disposed) throw StateError('Embedding service is disposed.');
+    final preprocessing = Stopwatch()..start();
+    final tensor = prepareImage(encodedImage);
+    preprocessing.stop();
+    final inference = Stopwatch()..start();
+    final raw = await _channel.invokeListMethod<num>('embed', {
+      'tensor': tensor,
+    });
+    inference.stop();
+    if (raw == null) {
+      throw const FormatException('Android returned no image embedding.');
     }
-    final pixels = prepareImage(encodedImage);
-    final output = [List<double>.filled(dimension, 0)];
-    _interpreter.run(pixels.buffer.asUint8List(), output);
-    return normalizeEmbedding(output.single);
+    final embedding = normalizeEmbedding(raw, _dimension);
+    if (kDebugMode) {
+      debugPrint(
+        '[TUNTON_RECOG] preprocess_ms=${preprocessing.elapsedMilliseconds} '
+        'inference_ms=${inference.elapsedMilliseconds} '
+        'embedding_dim=${embedding.length}',
+      );
+    }
+    return embedding;
   }
 
-  /// Matches Python preparation: EXIF orientation, RGB, floor-index resize,
-  /// and pixel / 255 (the approved checkpoint's mean 0 and std 255).
+  /// OpenCLIP resize-shortest-edge, bicubic, center-crop, RGB and normalization.
   static Float32List prepareImage(Uint8List bytes) {
     if (bytes.isEmpty || bytes.length > 20 * 1024 * 1024) {
       throw const FormatException('Photo is empty or exceeds 20 MiB.');
@@ -68,50 +91,132 @@ class EmbeddingService {
       if (frame == null) {
         throw const FormatException('Photo cannot be decoded.');
       }
-      decoded = frame;
+      decoded = image
+          .bakeOrientation(frame)
+          .convert(format: image.Format.uint8, numChannels: 3);
     } on FormatException {
       rethrow;
     } catch (_) {
       throw const FormatException('Photo cannot be decoded.');
     }
-    final rgb = image
-        .bakeOrientation(decoded)
-        .convert(format: image.Format.uint8, numChannels: 3);
-    final pixels = Float32List(inputSize * inputSize * 3);
-    var offset = 0;
+
+    final width = decoded.width < decoded.height
+        ? inputSize
+        : (decoded.width * inputSize / decoded.height).floor();
+    final height = decoded.height < decoded.width
+        ? inputSize
+        : (decoded.height * inputSize / decoded.width).floor();
+    final resized = _resizeBicubic(decoded, width, height);
+    final cropped = image.copyCrop(
+      resized,
+      x: ((width - inputSize) / 2).round(),
+      y: ((height - inputSize) / 2).round(),
+      width: inputSize,
+      height: inputSize,
+    );
+    final tensor = Float32List(3 * _area);
     for (var y = 0; y < inputSize; y++) {
       for (var x = 0; x < inputSize; x++) {
-        final pixel = rgb.getPixel(
-          x * rgb.width ~/ inputSize,
-          y * rgb.height ~/ inputSize,
-        );
-        pixels[offset++] = pixel.r / 255;
-        pixels[offset++] = pixel.g / 255;
-        pixels[offset++] = pixel.b / 255;
+        final pixel = cropped.getPixel(x, y);
+        final offset = y * inputSize + x;
+        tensor[offset] = (pixel.r / 255 - _mean[0]) / _std[0];
+        tensor[_area + offset] = (pixel.g / 255 - _mean[1]) / _std[1];
+        tensor[2 * _area + offset] = (pixel.b / 255 - _mean[2]) / _std[2];
       }
     }
-    return pixels;
+    return tensor;
   }
 
-  static List<double> normalizeEmbedding(List<double> vector) {
-    if (vector.length != dimension || vector.any((value) => !value.isFinite)) {
+  static image.Image _resizeBicubic(image.Image source, int width, int height) {
+    final xWeights = _bicubicWeights(source.width, width);
+    final yWeights = _bicubicWeights(source.height, height);
+    final horizontal = Uint8List(width * source.height * 3);
+    for (var y = 0; y < source.height; y++) {
+      for (var x = 0; x < width; x++) {
+        final weights = xWeights[x];
+        var red = 0.0, green = 0.0, blue = 0.0;
+        for (var i = 0; i < weights.length; i++) {
+          final pixel = source.getPixel(weights[i].$1, y);
+          red += pixel.r * weights[i].$2;
+          green += pixel.g * weights[i].$2;
+          blue += pixel.b * weights[i].$2;
+        }
+        final index = (y * width + x) * 3;
+        horizontal[index] = red.round().clamp(0, 255).toInt();
+        horizontal[index + 1] = green.round().clamp(0, 255).toInt();
+        horizontal[index + 2] = blue.round().clamp(0, 255).toInt();
+      }
+    }
+    final resized = image.Image(width: width, height: height, numChannels: 3);
+    for (var y = 0; y < height; y++) {
+      final weights = yWeights[y];
+      for (var x = 0; x < width; x++) {
+        var red = 0.0, green = 0.0, blue = 0.0;
+        for (var i = 0; i < weights.length; i++) {
+          final index = (weights[i].$1 * width + x) * 3;
+          red += horizontal[index] * weights[i].$2;
+          green += horizontal[index + 1] * weights[i].$2;
+          blue += horizontal[index + 2] * weights[i].$2;
+        }
+        resized.setPixelRgb(x, y, red.round(), green.round(), blue.round());
+      }
+    }
+    return resized;
+  }
+
+  static List<List<(int, double)>> _bicubicWeights(int input, int output) {
+    final scale = input / output;
+    final filterScale = math.max(1.0, scale);
+    final support = 2 * filterScale;
+    return List.generate(output, (position) {
+      final center = (position + 0.5) * scale;
+      final first = math.max(0, (center - support + 0.5).floor()).toInt();
+      final end = math.min(input, (center + support + 0.5).floor()).toInt();
+      final samples = <(int, double)>[];
+      var sum = 0.0;
+      for (var index = first; index < end; index++) {
+        final distance = ((index + 0.5 - center) / filterScale).abs();
+        final weight = distance < 1
+            ? ((1.5 * distance - 2.5) * distance * distance) + 1
+            : distance < 2
+            ? (((-0.5 * distance + 2.5) * distance - 4) * distance) + 2
+            : 0.0;
+        samples.add((index, weight));
+        sum += weight;
+      }
+      return samples.map((sample) => (sample.$1, sample.$2 / sum)).toList();
+    });
+  }
+
+  static List<double> normalizeEmbedding(List<num> vector, int expectedSize) {
+    if (vector.length != expectedSize || vector.any((v) => !v.isFinite)) {
       throw const FormatException('Model returned an invalid embedding.');
     }
+    final values = vector.map((v) => v.toDouble()).toList(growable: false);
+    final scale = values.fold<double>(
+      0,
+      (max, value) => math.max(max, value.abs()),
+    );
+    if (!scale.isFinite || scale == 0) {
+      throw const FormatException(
+        'Model returned a zero or invalid embedding.',
+      );
+    }
     final norm = math.sqrt(
-      vector.fold<double>(0, (sum, value) => sum + value * value),
+      values.fold<double>(0, (sum, value) {
+        final scaled = value / scale;
+        return sum + scaled * scaled;
+      }),
     );
     if (!norm.isFinite || norm == 0) {
       throw const FormatException(
         'Model returned a zero or invalid embedding.',
       );
     }
-    return vector.map((value) => value / norm).toList(growable: false);
+    return values
+        .map((value) => (value / scale) / norm)
+        .toList(growable: false);
   }
 
-  void dispose() {
-    if (!_disposed) {
-      _interpreter.close();
-      _disposed = true;
-    }
-  }
+  void dispose() => _disposed = true;
 }

@@ -135,12 +135,29 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
         final lon = position.longitude;
         final latLng = LatLng(lat, lon);
 
-        String snappedNodeId = '';
+        String? snappedNodeId;
         if (widget.findNearestNode != null) {
           final (nodeId, _) = widget.findNearestNode!(lat, lon);
           snappedNodeId = nodeId;
-        } else if (widget.startPoints.isNotEmpty) {
-          snappedNodeId = widget.startPoints.first.routeNodeId;
+        } else {
+          for (final point in widget.startPoints) {
+            final routeNodeId = point.routeNodeId;
+            if (routeNodeId != null && routeNodeId.isNotEmpty) {
+              snappedNodeId = routeNodeId;
+              break;
+            }
+          }
+        }
+
+        if (snappedNodeId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'No graph-backed walking path is available. Choose a mapped start manually.',
+              ),
+            ),
+          );
+          return;
         }
 
         final userStart = Landmark(
@@ -159,7 +176,7 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Current GPS position snapped to nearest walking path.',
+              'GPS start snapped to the nearest graph node.',
             ),
             duration: Duration(seconds: 2),
           ),
@@ -208,7 +225,9 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
                   vertical: 8,
                 ),
                 title: const Text('Use current location (GPS)'),
-                subtitle: const Text('Snaps to nearest walkway in Intramuros'),
+                subtitle: const Text(
+                  'Snaps to a graph node; connector may not be walkable.',
+                ),
                 leading: Icon(
                   Icons.my_location_rounded,
                   color: Theme.of(context).colorScheme.primary,
@@ -378,8 +397,9 @@ class OfflineLandmarkMap extends StatefulWidget {
 }
 
 class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
-  late final Future<List<int>> _zooms =
-      widget.loadZooms != null ? widget.loadZooms!() : _loadZooms();
+  late final Future<List<int>> _zooms = widget.loadZooms != null
+      ? widget.loadZooms!()
+      : _loadZooms();
   bool _tileError = false;
 
   Future<List<int>> _loadZooms() async {
@@ -413,7 +433,8 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
       return const JourneyMessage(
         icon: Icons.place_outlined,
         title: 'Location unavailable',
-        message: 'This location could not be loaded. Go back and choose another destination.',
+        message:
+            'This location could not be loaded. Go back and choose another destination.',
       );
     }
     return FutureBuilder<List<int>>(
@@ -433,7 +454,8 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
           return const JourneyMessage(
             icon: Icons.map_outlined,
             title: 'Offline map unavailable',
-            message: 'The map for this area could not be loaded. Go back and try another destination.',
+            message:
+                'The map for this area could not be loaded. Go back and try another destination.',
           );
         }
         final zooms = snapshot.data!;

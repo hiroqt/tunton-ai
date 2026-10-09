@@ -57,4 +57,5 @@ flutter {
 
 dependencies {
     androidTestUtil("androidx.test:orchestrator:1.5.1")
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.23.2")
 }

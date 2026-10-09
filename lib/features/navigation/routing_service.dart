@@ -88,7 +88,7 @@ class _MinHeap {
 /// Pure-Dart pedestrian routing over the bundled Intramuros walk graph.
 ///
 /// Runs Dijkstra over DIRECTED edges weighted by `length_m` (P0-09, P0-10).
-/// The graph is read-only bundled data; no network, no database, no GPS.
+/// The graph is read-only bundled data; GPS snapping is handled by the caller.
 class RoutingService {
   RoutingService._(this._nodes, this._adjacency);
 

@@ -191,12 +191,12 @@ void main() {
 
       expect(fortSantiago.routeNodeId, '1034882636');
       expect(puertaReal.routeNodeId, '9834302082');
-      expect(service.hasNode(fortSantiago.routeNodeId), isTrue);
-      expect(service.hasNode(puertaReal.routeNodeId), isTrue);
+      expect(service.hasNode(fortSantiago.routeNodeId!), isTrue);
+      expect(service.hasNode(puertaReal.routeNodeId!), isTrue);
 
       final result = service.findRoute(
-        fortSantiago.routeNodeId,
-        puertaReal.routeNodeId,
+        fortSantiago.routeNodeId!,
+        puertaReal.routeNodeId!,
       );
 
       expect(result.isAvailable, isTrue);

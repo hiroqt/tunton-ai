@@ -54,10 +54,19 @@ class _PhotoScreenState extends State<PhotoScreen> {
     try {
       final response = await _picker.retrieveLostData();
       if (response.files?.isNotEmpty ?? false) {
-        await _accept(await response.files!.first.readAsBytes());
+        await _accept(
+          await response.files!.first.readAsBytes(),
+          source: 'recovered',
+        );
       } else if (response.exception != null && mounted) {
+        if (kDebugMode) {
+          debugPrint(
+            '[TUNTON_RECOG] photo_recovery_failed=${response.exception!.code}',
+          );
+        }
         setState(
-          () => _error = 'Your previous photo could not be recovered. Please choose it again.',
+          () => _error =
+              'Your previous photo could not be recovered. Please choose it again.',
         );
       }
     } on MissingPluginException {
@@ -72,17 +81,27 @@ class _PhotoScreenState extends State<PhotoScreen> {
     }
   }
 
-  Future<void> _accept(Uint8List bytes) async {
+  Future<void> _accept(Uint8List bytes, {required String source}) async {
     final codec = await ui.instantiateImageCodec(
       bytes,
       targetWidth: 1024,
       allowUpscaling: false,
     );
+    late final int width;
+    late final int height;
     try {
       final frame = await codec.getNextFrame();
+      width = frame.image.width;
+      height = frame.image.height;
       frame.image.dispose();
     } finally {
       codec.dispose();
+    }
+    if (kDebugMode) {
+      debugPrint(
+        '[TUNTON_RECOG] photo_ready source=$source bytes=${bytes.lengthInBytes} '
+        'dimensions=${width}x$height',
+      );
     }
     if (mounted) {
       setState(() {
@@ -94,6 +113,9 @@ class _PhotoScreenState extends State<PhotoScreen> {
 
   Future<void> _pick(ImageSource source) async {
     if (_busy) return;
+    if (kDebugMode) {
+      debugPrint('[TUNTON_RECOG] photo_pick source=${source.name}');
+    }
     setState(() {
       _busy = true;
       _error = null;
@@ -106,8 +128,17 @@ class _PhotoScreenState extends State<PhotoScreen> {
         final file = await _picker.pickImage(source: source);
         bytes = await file?.readAsBytes();
       }
-      if (bytes != null) await _accept(bytes);
+      if (bytes != null) {
+        await _accept(bytes, source: source.name);
+      } else if (kDebugMode) {
+        debugPrint('[TUNTON_RECOG] photo_pick_cancelled source=${source.name}');
+      }
     } on PlatformException catch (error) {
+      if (kDebugMode) {
+        debugPrint(
+          '[TUNTON_RECOG] photo_pick_failed source=${source.name} code=${error.code}',
+        );
+      }
       if (mounted) {
         setState(
           () => _error = error.code.contains('denied')
@@ -116,6 +147,11 @@ class _PhotoScreenState extends State<PhotoScreen> {
         );
       }
     } catch (_) {
+      if (kDebugMode) {
+        debugPrint(
+          '[TUNTON_RECOG] photo_pick_failed source=${source.name} error=unknown',
+        );
+      }
       if (mounted) {
         setState(
           () =>
@@ -129,6 +165,9 @@ class _PhotoScreenState extends State<PhotoScreen> {
 
   void _recognize() {
     final photo = _photo!;
+    if (kDebugMode) {
+      debugPrint('[TUNTON_RECOG] recognition_requested');
+    }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => RecognitionScreen(
@@ -143,6 +182,28 @@ class _PhotoScreenState extends State<PhotoScreen> {
   }
 
   void _confirmDestination(Landmark destination) {
+    if (!destination.isRoutable) {
+      final area =
+          destination.areaId[0].toUpperCase() + destination.areaId.substring(1);
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(destination.name),
+          content: Text(
+            destination.areaId == 'intramuros'
+                ? 'This place is recognized, but a verified walking route is unavailable.'
+                : '$area place recognition is available. Walking routes are currently supported only in Intramuros.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => OfflineMapScreen(
@@ -178,10 +239,12 @@ class _PhotoScreenState extends State<PhotoScreen> {
             children: [
               Icon(Icons.place_outlined, color: colors.primary, size: 16),
               const SizedBox(width: 6),
-              Text(
-                'Intramuros',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: colors.primary,
+              Flexible(
+                child: Text(
+                  'Manila · Makati · Pasay',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: colors.primary,
+                  ),
                 ),
               ),
             ],
@@ -199,8 +262,8 @@ class _PhotoScreenState extends State<PhotoScreen> {
           const SizedBox(height: 12),
           Text(
             _photo == null
-                ? 'Snap a landmark. Find your way through the walled city.'
-                : 'Check that the landmark is clear before finding a match.',
+                ? 'Snap a known place. Confirm what the camera sees.'
+                : 'Check that the place is clear before finding a match.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: colors.onSurfaceVariant,
             ),

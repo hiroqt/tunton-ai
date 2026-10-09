@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tuntun/features/recognition/landmark_matcher.dart';
 
 /// Builds a decoded-JSON map for a small synthetic dimension so the ranking
-/// logic can be exercised without the 1024-dimension real asset.
+/// logic can be exercised without the 512-dimension real asset.
 Map<String, dynamic> _decoded(
   int dimension,
   List<(String landmarkId, List<double> vector)> references,
@@ -123,55 +123,67 @@ void main() {
       throwsFormatException,
     );
     expect(
-      () => LandmarkMatcher.fromDecodedJson(_decoded(2, [
-        ('', [1.0, 0.0]),
-      ])),
+      () => LandmarkMatcher.fromDecodedJson(
+        _decoded(2, [
+          ('', [1.0, 0.0]),
+        ]),
+      ),
       throwsFormatException,
     );
     expect(
-      () => LandmarkMatcher.fromDecodedJson(_decoded(2, [
-        ('alpha', [1.0]),
-      ])),
+      () => LandmarkMatcher.fromDecodedJson(
+        _decoded(2, [
+          ('alpha', [1.0]),
+        ]),
+      ),
       throwsFormatException,
     );
     expect(
-      () => LandmarkMatcher.fromDecodedJson(_decoded(2, [
-        ('alpha', [double.nan, 0.0]),
-      ])),
+      () => LandmarkMatcher.fromDecodedJson(
+        _decoded(2, [
+          ('alpha', [double.nan, 0.0]),
+        ]),
+      ),
       throwsFormatException,
     );
   });
 
   test('fromJsonString parses a valid synthetic payload', () {
     final matcher = LandmarkMatcher.fromJsonString(
-      jsonEncode(_decoded(2, [
-        ('alpha', [1.0, 0.0]),
-      ])),
+      jsonEncode(
+        _decoded(2, [
+          ('alpha', [1.0, 0.0]),
+        ]),
+      ),
       scoreThreshold: 0.0,
     );
     expect(matcher.dimension, 2);
     expect(matcher.match([1.0, 0.0]).top!.landmarkId, 'alpha');
   });
 
-  test('real asset: a stored reference vector self-matches its own landmark', () {
-    final jsonString =
-        File('assets/landmarks/reference_embeddings.json').readAsStringSync();
-    final decoded = jsonDecode(jsonString) as Map<String, dynamic>;
-    final matcher = LandmarkMatcher.fromDecodedJson(decoded);
+  test(
+    'real asset: a stored reference vector self-matches its own landmark',
+    () {
+      final jsonString = File(
+        'assets/landmarks/reference_embeddings.json',
+      ).readAsStringSync();
+      final decoded = jsonDecode(jsonString) as Map<String, dynamic>;
+      final matcher = LandmarkMatcher.fromDecodedJson(decoded);
 
-    expect(matcher.dimension, 1024);
+      expect(matcher.dimension, 512);
 
-    final references = decoded['references'] as List<dynamic>;
-    final firstReference = references.first as Map<String, dynamic>;
-    final expectedLandmarkId = firstReference['landmark_id'] as String;
-    final query = (firstReference['vector'] as List<dynamic>)
-        .map((value) => (value as num).toDouble())
-        .toList(growable: false);
+      final references = decoded['references'] as List<dynamic>;
+      final firstReference = references.first as Map<String, dynamic>;
+      final expectedLandmarkId = firstReference['landmark_id'] as String;
+      final query = (firstReference['vector'] as List<dynamic>)
+          .map((value) => (value as num).toDouble())
+          .toList(growable: false);
 
-    final result = matcher.match(query);
-    expect(result.isRecognized, isTrue);
-    expect(result.top!.landmarkId, expectedLandmarkId);
-    // A unit vector dotted with itself is 1.0 (vectors are L2-normalized).
-    expect(result.top!.score, closeTo(1.0, 1e-6));
-  });
+      final result = matcher.match(query);
+      expect(result.isRecognized, isTrue);
+      expect(result.top!.landmarkId, expectedLandmarkId);
+      // A unit vector dotted with itself is 1.0 (vectors are L2-normalized).
+      expect(result.top!.score, closeTo(1.0, 1e-6));
+    },
+  );
 }

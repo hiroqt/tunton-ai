@@ -7,13 +7,13 @@
 - Product scope remains in [`docs/PRD.md`](docs/PRD.md); file/package contracts remain in [`docs/ARD.md`](docs/ARD.md); runtime flow remains in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The docs index does not override them.
 - The tree documented in [`docs/ARD.md`](docs/ARD.md) is the approved target, not a claim that every file or feature exists in the current checkout.
 
-> **MANDATORY for any coding agent or co-developer.** The project is a **one-day Flutter Android MVP**. Implement **only** what is enumerated as `P0` in [`docs/PRD.md`](docs/PRD.md), using existing files and packages defined by [`docs/ARD.md`](docs/ARD.md). Consult [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the current data flow. Do not reinterpret this as permission to make a complete Google Maps clone.
+> **MANDATORY for any coding agent or co-developer.** The user explicitly approved a 2026-10-10 scope change to OpenCLIP ViT-B/32 LAION-2B on native Android ONNX Runtime and recognition for named Manila, Makati, and Pasay POIs. Routing remains Intramuros-only. This supersedes the original MobileNet/TFLite-only and Intramuros-only recognition decisions below. OCR and runtime services remain excluded. Follow the updated PRD, ARD, and ARCHITECTURE.
 
 ## 1. Mission
 
 Build one working, fully device-local flow:
 
-**Download the fixed Mapbox offline region while connected → take/choose a photo → TFLite MobileNetV3 Small image embedding → match up to 3 distinct supported Intramuros landmarks → confirm destination → show map offline → select manual start → Dart shortest walking route, distance, ETA.**
+**Take/choose a photo → native Android OpenCLIP image embedding → match up to 3 distinct named Manila/Makati/Pasay POIs → confirm. Intramuros matches may continue to the existing map and Dart walking route.**
 
 The output is a **working Android APK** with an **airplane-mode** live demo on physical hardware, targeting an **8 GB RAM** phone. The target is not proven until tested or otherwise defensibly measured; do not invent benchmark claims.
 
@@ -47,37 +47,21 @@ The agent must identify the specific `P0-xx` ID and existing target files **befo
 | Boundary | Required behavior |
 |---|---|
 | Platform | Flutter + Dart Android-first, physical demo phone |
-| Primary local AI | **MobileNetV3 Small Image Embedder `.tflite`** only |
-| Runtime | `tflite_flutter` on-device, one interpreter and one image at a time |
-| Input | `image_picker`; preprocess with Dart `image` after inspecting actual tensors / metadata |
+| Primary local AI | **OpenCLIP ViT-B/32 LAION-2B image tower `.onnx`** only |
+| Runtime | Native Android ONNX Runtime via Flutter MethodChannel; one session and one image at a time |
+| Input | `image_picker`; preprocess with Dart `image` per the exported tensor contract |
 | Match | L2-normalized cosine similarity using packaged reference embeddings, grouped by landmark |
 | Location | Verified `landmarks.json` coordinates; AI **never** invents lat/lon |
 | Map | `mapbox_maps_flutter` with an SDK-managed offline style/region; allow network only for explicit download/update, then disable the map network stack; retain Mapbox and OSM graph attribution |
-| Origin | Manual selection of a valid graph-backed point only; no GPS |
+| Origin | Manual graph-backed start or user-requested GPS start snapped to a valid Intramuros graph node; manual selection remains available |
 | Routing | Pure Dart Dijkstra over packaged walk graph with real edge geometry |
-| Output | Path preview, distance, ETA fixed at 4.5 km/h; unknown/unavailable errors |
+| Output | Path preview, graph distance plus any disclosed approximate GPS connector, ETA at 4.5 km/h; unknown/unavailable errors |
 | Storage | Read-only bundled model/catalog/graph assets plus the Mapbox SDK-managed offline region downloaded while connected |
 | Prep | Python/OSMnx allowed only as build-time prep on Mac; not shipped as a service |
 
 ## 5. Model provenance and switching — strict rule
 
-**Official MobileNetV3 Small image-embedder checkpoint:**
-
-`https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite`
-
-**Experimental alternative, not to install as P0:** Community MobileCLIP-S1 TFLite:
-
-`https://huggingface.co/anton96vice/mobileclip2_tflite/blob/main/mobileclip_s1_datacompdr_last.tflite`
-
-Do **not**:
-
-- Add a MobileCLIP model selector, second model asset, multiple model interpreters or a new model-plugin architecture.
-- Pretend the community MobileCLIP-S1 is the official Apple MobileCLIP2-S0 PyTorch checkpoint.
-- Swap to MobileCLIP merely because the file is downloadable; verify TFLite image embedding output on Android first.
-- Reuse MobileNet reference embeddings with a different model, preprocess or output dimension.
-- Add Qwen2.5, Qwen-VL, Gemma, GLM, Ollama, cloud VLMs, OCR or new inference services.
-
-If MobileNet performance is inadequate on **held-out** photos, **report evidence and request explicit team approval** before replacing it. On approval, update `docs/PRD.md` / `docs/ARD.md` / `docs/ARCHITECTURE.md` / relevant setup instructions, choose **one** replacement checkpoint, re-index every reference photo, re-test actual Android inference. Model replacement is a deliberate scope-change decision, not an automatic fallback.
+**Approved model:** OpenCLIP ViT-B/32 with pretrained tag `laion2b_s34b_b79k`. Export only its image tower to ONNX; the text tower and tokenizer are not packaged. Couple the ONNX file, preprocessing contract, output dimension, reference index and checksums. If the model/export/runtime fails the Android proof gate, stop and report the evidence; do not silently use another model or send photos to a service.
 
 ## 6. Approved code ownership; no invented abstractions
 
@@ -96,7 +80,7 @@ lib/features/navigation/routing_service.dart
 lib/features/navigation/navigation_screen.dart
 lib/shared/models/landmark.dart
 lib/shared/models/route_result.dart
-assets/models/landmark_embedder.tflite
+assets/models/openclip_vit_b32_laion2b_int8.onnx
 assets/landmarks/landmarks.json
 assets/landmarks/reference_embeddings.json
 assets/maps/intramuros_graph.json
@@ -109,10 +93,10 @@ Standard Flutter-generated Android files may be modified only as needed to make 
 
 ## 7. Implement in dependency order
 
-1. **Model validity:** The actual MobileNetV3 embedder checkpoint loads via `tflite_flutter` on the Android device. Record its tensors, produce finite embedding and verify reference pair similarity.
-2. **Dataset validity:** Six real verified landmarks, 3–5 labeled reference images per place, matching vectors, graph-backed route node IDs, and an aligned offline-map region configuration.
+1. **Model validity:** The exported OpenCLIP image tower loads through ONNX Runtime on Android. Record tensor names/shapes, produce a finite embedding and verify parity/reference similarity.
+2. **Dataset validity:** Each catalog POI has a verified location and 3–5 licensed references with matching vectors. Only Intramuros entries require graph-backed route nodes; other areas are recognition-only.
 3. **Recognition:** Return top 3 different candidates or **Not recognized**; require confirmation.
-4. **Map:** Download the Mapbox style and Intramuros region while connected, confirm completion, then verify offline rendering, correct markers, and manual start selection. No map network calls are needed after download.
+4. **Map:** Download the Mapbox style and Intramuros region while connected, confirm completion, then verify offline rendering, correct markers, and manual/GPS-snapped start selection. No map network calls are needed after download.
 5. **Route:** Graph Dijkstra, actual ordered edge path, correct distance and ETA, no-path error.
 6. **Integration:** One end-to-end photo-to-route flow in the four approved screens.
 7. **Proof:** Release APK, airplane-mode cold launch, held-out recognition tests, disconnected route, memory/latency measurements.

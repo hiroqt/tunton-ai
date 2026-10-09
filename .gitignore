@@ -47,3 +47,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Generated OpenCLIP runtime artifacts; use the preparation pipeline to build them.
+/assets/models/openclip_vit_b32_laion2b_int8.onnx
+/assets/models/openclip_vit_b32_laion2b_int8.manifest.json

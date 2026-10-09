@@ -35,11 +35,13 @@ class PreparedMapTest(unittest.TestCase):
             self.assertGreater(edge['length_m'],0)
             self.assertTrue(math.isfinite(edge['length_m']))
 
-    def test_six_landmarks_have_connected_real_endpoints_and_explicit_access_evidence(self):
-        self.assertEqual(len(self.catalog),6)
+    def test_only_six_intramuros_landmarks_have_connected_real_endpoints(self):
+        routable=[l for l in self.catalog if 'route_node_id' in l]
+        self.assertEqual(len(self.catalog),15)
+        self.assertEqual(len(routable),6)
         adj=collections.defaultdict(list)
         for edge in self.graph['edges']:adj[edge['from']].append(edge['to'])
-        targets={l['route_node_id'] for l in self.catalog}
+        targets={l['route_node_id'] for l in routable}
         for start in targets:
             seen={start};pending=[start]
             while pending:
@@ -47,7 +49,7 @@ class PreparedMapTest(unittest.TestCase):
                     if node not in seen:seen.add(node);pending.append(node)
             self.assertTrue(targets <= seen)
         evidence={e['landmark_id']:e for e in self.source['catalog_evidence']}
-        for landmark in self.catalog:
+        for landmark in routable:
             self.assertIn(landmark['route_node_id'],self.nodes)
             self.assertTrue(evidence[landmark['id']]['mapping_verified'])
             self.assertFalse(evidence[landmark['id']]['field_accessibility_verified'])
@@ -64,6 +66,8 @@ class PreparedMapTest(unittest.TestCase):
             for x in range(math.floor(x0),math.floor(x1)+1):
                 for y in range(math.floor(y0),math.floor(y1)+1):expected.add(f'{z}/{x}/{y}.png')
             for landmark in self.catalog:
+                if 'route_node_id' not in landmark:
+                    continue
                 x,y=project(landmark['lat'],landmark['lon'],z)
                 self.assertIn(f'{z}/{math.floor(x)}/{math.floor(y)}.png',expected)
         actual={p.relative_to(ROOT/'assets/tiles').as_posix() for p in (ROOT/'assets/tiles').rglob('*.png')}

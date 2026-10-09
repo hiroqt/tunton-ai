@@ -5,12 +5,12 @@ import 'package:tuntun/shared/models/landmark.dart';
 
 void main() {
   Map<String, dynamic> validJson() => <String, dynamic>{
-        'id': 'fort-santiago',
-        'name': 'Fort Santiago',
-        'lat': 14.592877,
-        'lon': 120.9718867,
-        'route_node_id': '1034882636',
-      };
+    'id': 'fort-santiago',
+    'name': 'Fort Santiago',
+    'lat': 14.592877,
+    'lon': 120.9718867,
+    'route_node_id': '1034882636',
+  };
 
   test('fromJson reads a valid entry', () {
     final landmark = Landmark.fromJson(validJson());
@@ -22,9 +22,11 @@ void main() {
   });
 
   test('fromJson accepts integer lat/lon', () {
-    final landmark = Landmark.fromJson(validJson()
-      ..['lat'] = 0
-      ..['lon'] = 120);
+    final landmark = Landmark.fromJson(
+      validJson()
+        ..['lat'] = 0
+        ..['lon'] = 120,
+    );
     expect(landmark.lat, 0.0);
     expect(landmark.lon, 120.0);
   });
@@ -36,12 +38,25 @@ void main() {
         throwsFormatException,
         reason: '$key blank should throw',
       );
-      expect(
-        () => Landmark.fromJson(validJson()..[key] = null),
-        throwsFormatException,
-        reason: '$key missing should throw',
-      );
+      if (key != 'route_node_id') {
+        expect(
+          () => Landmark.fromJson(validJson()..[key] = null),
+          throwsFormatException,
+          reason: '$key missing should throw',
+        );
+      }
     }
+  });
+
+  test('allows a recognition-only POI without a route node', () {
+    final poi = Landmark.fromJson(
+      validJson()
+        ..['area_id'] = 'makati'
+        ..remove('route_node_id'),
+    );
+    expect(poi.routeNodeId, isNull);
+    expect(poi.isRoutable, isFalse);
+    expect(poi.hasValidLocation, isTrue);
   });
 
   test('fromJson rejects out-of-range latitude and longitude', () {
@@ -97,10 +112,11 @@ void main() {
   });
 
   test('parses the real bundled catalog', () {
-    final jsonString =
-        File('assets/landmarks/landmarks.json').readAsStringSync();
+    final jsonString = File(
+      'assets/landmarks/landmarks.json',
+    ).readAsStringSync();
     final landmarks = Landmark.listFromJsonString(jsonString);
-    expect(landmarks.length, 6);
+    expect(landmarks.length, 15);
     expect(landmarks.first.id, 'fort-santiago');
     expect(landmarks.first.routeNodeId, '1034882636');
   });

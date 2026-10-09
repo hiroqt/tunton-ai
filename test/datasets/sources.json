@@ -738,9 +738,9 @@
       "sha256": "55f43463fecd5c5605241a8f8f5775d143b3114977e2b532374b1b7b3a52051c"
     },
     {
-      "path": "test/datasets/unknown/1.png",
-      "landmark_id": null,
-      "split": "unknown",
+      "path": "assets/images/binondo-church/3.png",
+      "landmark_id": "binondo-church",
+      "split": "reference",
       "page_url": "https://commons.wikimedia.org/wiki/File:Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_03.jpg",
       "download_url": "https://upload.wikimedia.org/wikipedia/commons/d/db/Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_03.jpg",
       "author": "P1898",
@@ -843,9 +843,9 @@
       "sha256": "df0d99089da26bad014a12730d0e175b1300f9b745b74e578d5482b838794032"
     },
     {
-      "path": "test/datasets/unknown/6.png",
-      "landmark_id": null,
-      "split": "unknown",
+      "path": "assets/images/binondo-church/4.png",
+      "landmark_id": "binondo-church",
+      "split": "reference",
       "page_url": "https://commons.wikimedia.org/wiki/File:Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_05.jpg",
       "download_url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_05.jpg",
       "author": "P1898",
@@ -988,6 +988,886 @@
         "basis": "Commons file description/category identifies Queen Isabela II monument, Intramuros; visually reviewed against the named Philippine location Queen Isabela II monument, Intramuros, Manila, Philippines."
       },
       "sha256": "cdbbc60bfcc69791343f7c99be231b71727f25e2e05ef3bbaa98287e8a3bea4b"
+    },
+    {
+      "path": "assets/images/rizal-park/1.png",
+      "landmark_id": "rizal-park",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Manila,_Rizal_Park,_Philippines.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Manila%2C_Rizal_Park%2C_Philippines.jpg",
+      "author": "Vyacheslav Argenberg",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "original_sha256": "866ff0a6def79f9ab71a5427e07932422c0d577ee2aba59dbaabd0580cf843ab",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Manila, Rizal Park, Philippines.jpg",
+      "location": "Rizal Park, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Manila,_Rizal_Park,_Philippines.jpg",
+        "basis": "Commons file description and visually reviewed image identify Rizal Park, Manila, Philippines."
+      },
+      "sha256": "bc98875762eb49b352e0978c501c8142aad956d82955d7b175d4d2abdf682778"
+    },
+    {
+      "path": "assets/images/rizal-park/2.png",
+      "landmark_id": "rizal-park",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Manila,_Rizal_Park_2,_Philippines.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/2/24/Manila%2C_Rizal_Park_2%2C_Philippines.jpg",
+      "author": "Vyacheslav Argenberg",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "original_sha256": "29f21b11d9015bc7a607b2d3ed6d0e754bc60eb308310f9a804ba218b73b690d",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Manila, Rizal Park 2, Philippines.jpg",
+      "location": "Rizal Park, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Manila,_Rizal_Park_2,_Philippines.jpg",
+        "basis": "Commons file description and visually reviewed image identify Rizal Park, Manila, Philippines."
+      },
+      "sha256": "ada71d610ee5326da8cc87a7926b1307e40029d1de00e1230679050fef2689c9"
+    },
+    {
+      "path": "assets/images/rizal-park/3.png",
+      "landmark_id": "rizal-park",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:RizalParkManila20190521.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/3/38/RizalParkManila20190521.jpg",
+      "author": "Wolfgang Hägele",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "09fbaa932fd3fc6e75758464def82ee549e0f37617cc9cd57af907f7ead8dbde",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:RizalParkManila20190521.jpg",
+      "location": "Rizal Park, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:RizalParkManila20190521.jpg",
+        "basis": "Commons file description and visually reviewed image identify Rizal Park, Manila, Philippines."
+      },
+      "sha256": "a2cb34e7235c22f6b06378cf70bcb4f461615758d1982e01b0380ce31073c839"
+    },
+    {
+      "path": "test/datasets/held_out/public/rizal-park/1.png",
+      "landmark_id": "rizal-park",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Rizal_Park_fountain_sunset_(Manila;_12-31-2022).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Rizal_Park_fountain_sunset_%28Manila%3B_12-31-2022%29.jpg",
+      "author": "Patrickroque01",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "57f71da20f9f3a865f2dbc81ca6f6f0fa6cf65be7336e53af32a4f464ea3566d",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Rizal Park fountain sunset (Manila; 12-31-2022).jpg",
+      "location": "Rizal Park, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Rizal_Park_fountain_sunset_(Manila;_12-31-2022).jpg",
+        "basis": "Commons file description and visually reviewed image identify Rizal Park, Manila, Philippines."
+      },
+      "sha256": "ae2106f942f43f75faca98060e97eb5f494df23a7b8f9c4b9d07515ed26b1ba0"
+    },
+    {
+      "path": "test/datasets/held_out/public/rizal-park/2.png",
+      "landmark_id": "rizal-park",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Rizal_Park_top_view_(Manila;_12-23-2023).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Rizal_Park_top_view_%28Manila%3B_12-23-2023%29.jpg",
+      "author": "Patrickroque01",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "c4be308e92a2e37d81c79bd868ed93703182abacde24be2775699547470e9ffe",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Rizal Park top view (Manila; 12-23-2023).jpg",
+      "location": "Rizal Park, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Rizal_Park_top_view_(Manila;_12-23-2023).jpg",
+        "basis": "Commons file description and visually reviewed image identify Rizal Park, Manila, Philippines."
+      },
+      "sha256": "0bf454a0d41c60a1cbe5c435f600f611d76cfa961fe2f8b64053672dd870aec2"
+    },
+    {
+      "path": "assets/images/sm-city-manila/1.png",
+      "landmark_id": "sm-city-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:WTMP_GameOPS.net_P1120045.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/9/91/WTMP_GameOPS.net_P1120045.JPG",
+      "author": "John Phillips Bengero / John Andrew Delos Santos (Wikipedia Takes Manila participant)",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "e3b59f4f82131bdc3f63baf85e28ad643222f5eb9b083930d6f630b463eb375c",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:WTMP GameOPS.net P1120045.JPG",
+      "location": "SM City Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:WTMP_GameOPS.net_P1120045.JPG",
+        "basis": "Commons file description and visually reviewed image identify SM City Manila, Manila, Philippines."
+      },
+      "sha256": "4422d87f7abf2f761dbacd5ec57924fd05febb7b38426df184eec4ef033b3bec"
+    },
+    {
+      "path": "assets/images/sm-city-manila/2.png",
+      "landmark_id": "sm-city-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:WTMP_MARK_ANGELO_ROXAS_DSC_0763.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/8f/WTMP_MARK_ANGELO_ROXAS_DSC_0763.JPG",
+      "author": "MARK ANGELO ROXAS (Wikipedia Takes Manila participant)",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0",
+      "original_sha256": "90e55020074c9b2f6d239ad1b05c6d7ad091a8f14eaa1cde4c9bac1bd5c49527",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:WTMP MARK ANGELO ROXAS DSC 0763.JPG",
+      "location": "SM City Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:WTMP_MARK_ANGELO_ROXAS_DSC_0763.JPG",
+        "basis": "Commons file description and visually reviewed image identify SM City Manila, Manila, Philippines."
+      },
+      "sha256": "a01671d0e5716ffcc6328947bd986c1f0d2784e8abba905d79f153c357769323"
+    },
+    {
+      "path": "assets/images/sm-city-manila/3.png",
+      "landmark_id": "sm-city-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:WTMP_Noel_Gonong_DSC_0059.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/3/38/WTMP_Noel_Gonong_DSC_0059.JPG",
+      "author": "noel Gonong (Wikipedia Takes Manila participant)",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "615c80eee021d2c5ecbf75483dcab8339e8d82d79708ca3edd5932a73042d290",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:WTMP Noel Gonong DSC 0059.JPG",
+      "location": "SM City Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:WTMP_Noel_Gonong_DSC_0059.JPG",
+        "basis": "Commons file description and visually reviewed image identify SM City Manila, Manila, Philippines."
+      },
+      "sha256": "fab1cbb1a3bdb674ab6a93aa95ea85f9e90695f08f8832ff46dfd2bbb8f8ed98"
+    },
+    {
+      "path": "test/datasets/held_out/public/sm-city-manila/1.png",
+      "landmark_id": "sm-city-manila",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:WTMP_Oh,_Shoot!_IMG_4610.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/85/WTMP_Oh%2C_Shoot%21_IMG_4610.JPG",
+      "author": "KC Sacramento (Wikipedia Takes Manila participant)",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "5aa3bd866e02d27cd3edece516870c0f86e0c49b253b5a0ceec9c7a41cbb69cd",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:WTMP Oh, Shoot! IMG 4610.JPG",
+      "location": "SM City Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:WTMP_Oh,_Shoot!_IMG_4610.JPG",
+        "basis": "Commons file description and visually reviewed image identify SM City Manila, Manila, Philippines."
+      },
+      "sha256": "c12ac2e026f019c71579e3094237a47feb5a78f5ebdce90a0f2632ee46e68386"
+    },
+    {
+      "path": "test/datasets/held_out/public/sm-city-manila/2.png",
+      "landmark_id": "sm-city-manila",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:WTMP_po-kus_0148.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/1/14/WTMP_po-kus_0148.JPG",
+      "author": "po-kus (Wikipedia Takes Manila participant)",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "original_sha256": "adbd4be7bccbd002acb1279d7e40c8a1fe7bac426fe64390acd82643cdc1c9e5",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:WTMP po-kus 0148.JPG",
+      "location": "SM City Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:WTMP_po-kus_0148.JPG",
+        "basis": "Commons file description and visually reviewed image identify SM City Manila, Manila, Philippines."
+      },
+      "sha256": "b70da704731d1ee97b825ac057ea84fc3155ef54c741e6366d12146631aad1b0"
+    },
+    {
+      "path": "assets/images/robinsons-place-manila/1.png",
+      "landmark_id": "robinsons-place-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Robinsons_Place_Manila,_May_2025_(1).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Robinsons_Place_Manila%2C_May_2025_%281%29.jpg",
+      "author": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "9c94589dfe7dd1e960c7c170f2bf3b04590a4f6703c5f4adc5c783197aa73531",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Robinsons Place Manila, May 2025 (1).jpg",
+      "location": "Robinsons Place Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Robinsons_Place_Manila,_May_2025_(1).jpg",
+        "basis": "Commons file description and visually reviewed image identify Robinsons Place Manila, Manila, Philippines."
+      },
+      "sha256": "f217810eefb86b5a8bf83d58131d174482a4d728e4d458ecc30956f5f499dd51"
+    },
+    {
+      "path": "assets/images/robinsons-place-manila/2.png",
+      "landmark_id": "robinsons-place-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Robinsons_Place_Manila,_May_2025_(2).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/00/Robinsons_Place_Manila%2C_May_2025_%282%29.jpg",
+      "author": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "f88ed9d8e5972be6f0ecbb3bfb3bb4a45f897f4330c1dd069128b0b1379e25b7",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Robinsons Place Manila, May 2025 (2).jpg",
+      "location": "Robinsons Place Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Robinsons_Place_Manila,_May_2025_(2).jpg",
+        "basis": "Commons file description and visually reviewed image identify Robinsons Place Manila, Manila, Philippines."
+      },
+      "sha256": "ba20913cac917b6f83405f005cf2cdcf7c5ebfef4768001891323aae9a1af7f7"
+    },
+    {
+      "path": "assets/images/robinsons-place-manila/3.png",
+      "landmark_id": "robinsons-place-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Robinsons_Place_Manila_Interior,_May_2025_(1).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/05/Robinsons_Place_Manila_Interior%2C_May_2025_%281%29.jpg",
+      "author": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "d037a4fd6eb40bade185debb0ec5051e2bb63a1b973feeea63f0eb712901a509",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Robinsons Place Manila Interior, May 2025 (1).jpg",
+      "location": "Robinsons Place Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Robinsons_Place_Manila_Interior,_May_2025_(1).jpg",
+        "basis": "Commons file description and visually reviewed image identify Robinsons Place Manila, Manila, Philippines."
+      },
+      "sha256": "7b4753edb1b60890ce19dbb8e4ff98023cecdb25025340df6efbfe57bdd45a63"
+    },
+    {
+      "path": "test/datasets/held_out/public/robinsons-place-manila/1.png",
+      "landmark_id": "robinsons-place-manila",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Robinsons_Place_Manila_atrium.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Robinsons_Place_Manila_atrium.jpg",
+      "author": "Hariboneagle927",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "6d62daeb3260e750f791e82d54a2427e97988b66b391f0f111ea69d5a702f743",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Robinsons Place Manila atrium.jpg",
+      "location": "Robinsons Place Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Robinsons_Place_Manila_atrium.jpg",
+        "basis": "Commons file description and visually reviewed image identify Robinsons Place Manila, Manila, Philippines."
+      },
+      "sha256": "c509951ab8874e93fb8b99df16031c49d5b2eb0bbcd26a5ffca86972b85b8de5"
+    },
+    {
+      "path": "test/datasets/held_out/public/robinsons-place-manila/2.png",
+      "landmark_id": "robinsons-place-manila",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:The_Jollibee_sore_at_Robinsons_Place_Mall_in_Manila.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/88/The_Jollibee_sore_at_Robinsons_Place_Mall_in_Manila.jpg",
+      "author": "Aliceinthealice",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "original_sha256": "d9ea1878f220a69a0b8be1e222626e61e8629620fab0d334bcec3adf341f4f68",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:The Jollibee sore at Robinsons Place Mall in Manila.jpg",
+      "location": "Robinsons Place Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:The_Jollibee_sore_at_Robinsons_Place_Mall_in_Manila.jpg",
+        "basis": "Commons file description and visually reviewed image identify Robinsons Place Manila, Manila, Philippines."
+      },
+      "sha256": "c148cfffce7429fce818a9454eb6e14f1ddc8e8318ee20ed08a52acb4e30f8a0"
+    },
+    {
+      "path": "assets/images/lucky-chinatown-mall/1.png",
+      "landmark_id": "lucky-chinatown-mall",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown_at_night,_Manila,_Jun_2024.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/e/e2/Lucky_Chinatown_at_night%2C_Manila%2C_Jun_2024.jpg",
+      "author": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "f5dda1be628efc11e05908288ff5ad16a3fa68250e1f850fcb02ce7b5c60ad2a",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Lucky Chinatown at night, Manila, Jun 2024.jpg",
+      "location": "Lucky Chinatown Mall, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown_at_night,_Manila,_Jun_2024.jpg",
+        "basis": "Commons file description and visually reviewed image identify Lucky Chinatown Mall, Manila, Philippines."
+      },
+      "sha256": "ce053e02299af8ee8cdcaf973024e9d0cee4985f777097961bf62cc5698ba575"
+    },
+    {
+      "path": "assets/images/lucky-chinatown-mall/2.png",
+      "landmark_id": "lucky-chinatown-mall",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown_Interior,_Manila,_Jun_2024.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Lucky_Chinatown_Interior%2C_Manila%2C_Jun_2024.jpg",
+      "author": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "aa104b512e5b7f3e48bbdcb8e0a5bcd31ac5b8631283565c5715e70e4d5c0a2a",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Lucky Chinatown Interior, Manila, Jun 2024.jpg",
+      "location": "Lucky Chinatown Mall, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown_Interior,_Manila,_Jun_2024.jpg",
+        "basis": "Commons file description and visually reviewed image identify Lucky Chinatown Mall, Manila, Philippines."
+      },
+      "sha256": "a568fccf91f1717e2c9da3e008d2dc8d4eaca95f0d0a3528cae8c5d1ba81d2df"
+    },
+    {
+      "path": "assets/images/lucky-chinatown-mall/3.png",
+      "landmark_id": "lucky-chinatown-mall",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown,_Binondo,_Manila,_May_2025.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Lucky_Chinatown%2C_Binondo%2C_Manila%2C_May_2025.jpg",
+      "author": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "87461118579abcfdba53ca35ef8434fd6d248fedf86b208d5fe7ec61bd071a4b",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Lucky Chinatown, Binondo, Manila, May 2025.jpg",
+      "location": "Lucky Chinatown Mall, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown,_Binondo,_Manila,_May_2025.jpg",
+        "basis": "Commons file description and visually reviewed image identify Lucky Chinatown Mall, Manila, Philippines."
+      },
+      "sha256": "927fdfe05c033e6886c924d7cefc641d3f3778e5333db999b17b285f213f9e4d"
+    },
+    {
+      "path": "test/datasets/held_out/public/lucky-chinatown-mall/1.png",
+      "landmark_id": "lucky-chinatown-mall",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown_Binondo_Manila_18.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Lucky_Chinatown_Binondo_Manila_18.jpg",
+      "author": "SwarmCheng",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "2698ee105827978e6b927b64d1746650016be93f62a045397ef480642c479c19",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Lucky Chinatown Binondo Manila 18.jpg",
+      "location": "Lucky Chinatown Mall, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown_Binondo_Manila_18.jpg",
+        "basis": "Commons file description and visually reviewed image identify Lucky Chinatown Mall, Manila, Philippines."
+      },
+      "sha256": "18967bb0970d134fa7103999fcc38377181f2c3d08f44b1ddbbca2efc734160d"
+    },
+    {
+      "path": "test/datasets/held_out/public/lucky-chinatown-mall/2.png",
+      "landmark_id": "lucky-chinatown-mall",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown_Mall.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Lucky_Chinatown_Mall.jpg",
+      "author": "Populland16",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "ceefead66900a369ee57ee1667fb3720799cfcbbee941443adf326a5e97827aa",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Lucky Chinatown Mall.jpg",
+      "location": "Lucky Chinatown Mall, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Lucky_Chinatown_Mall.jpg",
+        "basis": "Commons file description and visually reviewed image identify Lucky Chinatown Mall, Manila, Philippines."
+      },
+      "sha256": "09b8828f8fa871d1d17d4898bd0538057f87db55db3cd3800372ee7f590cb6f4"
+    },
+    {
+      "path": "assets/images/up-manila/1.png",
+      "landmark_id": "up-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:FvfUPManila8810_01.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/c/c9/FvfUPManila8810_01.JPG",
+      "author": "Judgefloro",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "75970663083fdaa3d1026c2f62d9729c548924d4a97b357505669175bf4e8d26",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:FvfUPManila8810 01.JPG",
+      "location": "University of the Philippines Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:FvfUPManila8810_01.JPG",
+        "basis": "Commons file description and visually reviewed image identify University of the Philippines Manila, Manila, Philippines."
+      },
+      "sha256": "70c97e61b34de7841bbe02b95c99259647eea4c491d6794264efc713383a1445"
+    },
+    {
+      "path": "assets/images/up-manila/2.png",
+      "landmark_id": "up-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:FvfUPManila8810_02.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/2/29/FvfUPManila8810_02.JPG",
+      "author": "Judgefloro",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "d816b7305a82c1919f10a965a1819de99b35cd899eb776d94785ac5efd63003a",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:FvfUPManila8810 02.JPG",
+      "location": "University of the Philippines Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:FvfUPManila8810_02.JPG",
+        "basis": "Commons file description and visually reviewed image identify University of the Philippines Manila, Manila, Philippines."
+      },
+      "sha256": "d036b5e2fb29056fbea8e79bc74cbbedb451d74d08e627317aa4291155f4a02d"
+    },
+    {
+      "path": "assets/images/up-manila/3.png",
+      "landmark_id": "up-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:FvfUPManila8810_03.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/b/bc/FvfUPManila8810_03.JPG",
+      "author": "Judgefloro",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "9db3118157d44a3c9d821d4d61d91720590390e4e729ddc1c4ac77de10cf2639",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:FvfUPManila8810 03.JPG",
+      "location": "University of the Philippines Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:FvfUPManila8810_03.JPG",
+        "basis": "Commons file description and visually reviewed image identify University of the Philippines Manila, Manila, Philippines."
+      },
+      "sha256": "7060d3efdaaf34214d7ce58fd7a982f34566cd12bdeb54518609606c80ea9fee"
+    },
+    {
+      "path": "test/datasets/held_out/public/up-manila/1.png",
+      "landmark_id": "up-manila",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Henry_Sy,_Sr._Medical_Sciences_Building.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Henry_Sy%2C_Sr._Medical_Sciences_Building.jpg",
+      "author": "A.C.T. Alejandre",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "7ab82e905450a42630b0b0a5b8f7e3cb1e135c6e1331483a25664c1e3d35f5fc",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Henry Sy, Sr. Medical Sciences Building.jpg",
+      "location": "University of the Philippines Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Henry_Sy,_Sr._Medical_Sciences_Building.jpg",
+        "basis": "Commons file description and visually reviewed image identify University of the Philippines Manila, Manila, Philippines."
+      },
+      "sha256": "c8b158bfcc6869404e4bd5e5a250c38724f27a077a565b831a1f492ecdfbb6ca"
+    },
+    {
+      "path": "test/datasets/held_out/public/up-manila/2.png",
+      "landmark_id": "up-manila",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:University_of_the_Philippines_(Manila_Campus)_-_Main_Building_(Pedro_Gil,_Ermita,_Manila;_2014-10-20).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/2/2a/University_of_the_Philippines_%28Manila_Campus%29_-_Main_Building_%28Pedro_Gil%2C_Ermita%2C_Manila%3B_2014-10-20%29.jpg",
+      "author": "Patrick Roque",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "95ef589917c5723bfbb27d24f25895747314765e488125a12e67bae2b0c8d1d5",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:University of the Philippines (Manila Campus) - Main Building (Pedro Gil, Ermita, Manila; 2014-10-20).jpg",
+      "location": "University of the Philippines Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:University_of_the_Philippines_(Manila_Campus)_-_Main_Building_(Pedro_Gil,_Ermita,_Manila;_2014-10-20).jpg",
+        "basis": "Commons file description and visually reviewed image identify University of the Philippines Manila, Manila, Philippines."
+      },
+      "sha256": "275a6e88ccbee95d815c685e218b1f172ff0dec90628108e4811acfebdf99d02"
+    },
+    {
+      "path": "assets/images/dlsu-manila/1.png",
+      "landmark_id": "dlsu-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:DLSU_0003.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/DLSU_0003.jpg",
+      "author": "Kej Andrés (Ryomaandres)",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "5fb21c4ce8929b5be4197537e22862116bc792e4edc1cdee479a8c006f16e01a",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:DLSU 0003.jpg",
+      "location": "De La Salle University Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:DLSU_0003.jpg",
+        "basis": "Commons file description and visually reviewed image identify De La Salle University Manila, Manila, Philippines."
+      },
+      "sha256": "0995194d7bcbc3f74ebed69af8fb1c643e5291395ea2ddc50c9701fb52c56692"
+    },
+    {
+      "path": "assets/images/dlsu-manila/2.png",
+      "landmark_id": "dlsu-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:DLSU_0004.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/00/DLSU_0004.jpg",
+      "author": "Kej Andrés (Ryomaandres)",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "b51794b99bf11dfd738b08b00cffc416c5270aadf49f9d620366d6e91d2e732c",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:DLSU 0004.jpg",
+      "location": "De La Salle University Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:DLSU_0004.jpg",
+        "basis": "Commons file description and visually reviewed image identify De La Salle University Manila, Manila, Philippines."
+      },
+      "sha256": "444b8c405d5c5c6a6376a86619b1f73db70bcd8ef4d6f35b3c56322d1e61a171"
+    },
+    {
+      "path": "assets/images/dlsu-manila/3.png",
+      "landmark_id": "dlsu-manila",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:DLSU_0007.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/9/99/DLSU_0007.jpg",
+      "author": "Kej Andrés (Ryomaandres)",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "84102ee201df915a1e55ae05f3ac54392e3b53b3096872b3e0bfc206d8efd322",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:DLSU 0007.jpg",
+      "location": "De La Salle University Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:DLSU_0007.jpg",
+        "basis": "Commons file description and visually reviewed image identify De La Salle University Manila, Manila, Philippines."
+      },
+      "sha256": "7711399cfba6ac117230be59c498f2e0b9b567b04563927771451762071e9587"
+    },
+    {
+      "path": "test/datasets/held_out/public/dlsu-manila/1.png",
+      "landmark_id": "dlsu-manila",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:De_La_Salle_University,_archway.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/De_La_Salle_University%2C_archway.JPG",
+      "author": "User:Patrickroque01",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "534d1576e03ad567aa7b9ad3d4356901a8a8b2f9427e6c35d8c44cf83388e259",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:De La Salle University, archway.JPG",
+      "location": "De La Salle University Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:De_La_Salle_University,_archway.JPG",
+        "basis": "Commons file description and visually reviewed image identify De La Salle University Manila, Manila, Philippines."
+      },
+      "sha256": "9d03516677a2ba97c969b0ae35f7ceb085ab19244403e4ee98f53f742ada55b2"
+    },
+    {
+      "path": "test/datasets/held_out/public/dlsu-manila/2.png",
+      "landmark_id": "dlsu-manila",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:St._Miguel_Hall,_De_La_Salle_University.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/05/St._Miguel_Hall%2C_De_La_Salle_University.jpg",
+      "author": "Seventide",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "4c622af99bd313cdc64ecff54c84c7574e186c034075f640585d37ca9c4b9571",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:St. Miguel Hall, De La Salle University.jpg",
+      "location": "De La Salle University Manila, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:St._Miguel_Hall,_De_La_Salle_University.jpg",
+        "basis": "Commons file description and visually reviewed image identify De La Salle University Manila, Manila, Philippines."
+      },
+      "sha256": "13f79f1476dac074d68e0b0ff3e9d178905e0f09d525ee8049e1a0f8f7f4cc1c"
+    },
+    {
+      "path": "assets/images/far-eastern-university/1.png",
+      "landmark_id": "far-eastern-university",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Far_Eastern_University_front_view.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Far_Eastern_University_front_view.jpg",
+      "author": "Fredickrodri",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "99d1274b75c032c691794ef53d52e37dae448f8eab9bb77d037bb094e40e9c18",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Far Eastern University front view.jpg",
+      "location": "Far Eastern University (FEU), Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Far_Eastern_University_front_view.jpg",
+        "basis": "Commons file description and visually reviewed image identify Far Eastern University (FEU), Manila, Philippines."
+      },
+      "sha256": "c3919203110c3d7d0358f306d91823c148cd0eeb8ca62536c0bfbc9d1e32c757"
+    },
+    {
+      "path": "assets/images/far-eastern-university/2.png",
+      "landmark_id": "far-eastern-university",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Far_Eastern_University_Manila_Campus_keeping_it_%22Clean_and_Green%22.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Far_Eastern_University_Manila_Campus_keeping_it_%22Clean_and_Green%22.jpg",
+      "author": "Dddeyb. Note: there was originally an in-image watermark that said \"Dave Bunag\"",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "e0392a3d7cfc4e304c2d8476a25c8037367024c6517408090fca32741a5277b6",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Far Eastern University Manila Campus keeping it \"Clean and Green\".jpg",
+      "location": "Far Eastern University (FEU), Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Far_Eastern_University_Manila_Campus_keeping_it_%22Clean_and_Green%22.jpg",
+        "basis": "Commons file description and visually reviewed image identify Far Eastern University (FEU), Manila, Philippines."
+      },
+      "sha256": "7e19e9e62da2710c8940a4a2b04197487a5d2b7decbc9330b80c61956961b04e"
+    },
+    {
+      "path": "assets/images/far-eastern-university/3.png",
+      "landmark_id": "far-eastern-university",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Far_Eastern_University_Statue_of_Dr._Nicanor_Reyes.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Far_Eastern_University_Statue_of_Dr._Nicanor_Reyes.jpg",
+      "author": "Dddeyb",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "original_sha256": "49a2b7818531e967478ceed748950260da372d5db7b4ef97269a67c3810d6210",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Far Eastern University Statue of Dr. Nicanor Reyes.jpg",
+      "location": "Far Eastern University (FEU), Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Far_Eastern_University_Statue_of_Dr._Nicanor_Reyes.jpg",
+        "basis": "Commons file description and visually reviewed image identify Far Eastern University (FEU), Manila, Philippines."
+      },
+      "sha256": "75c09e58e974dd78bd8251298fcc2575ab243a9300e26ea28fa8cbb6c997e5d0"
+    },
+    {
+      "path": "test/datasets/held_out/public/far-eastern-university/1.png",
+      "landmark_id": "far-eastern-university",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:FEU_building_(Quiapo)_13.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/9/9f/FEU_building_%28Quiapo%29_13.jpg",
+      "author": "Zarate123",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "c60639fe0121bff0cc26a80073a9c9c87ead6cb099eaa4d564eb0f2ef35862c6",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:FEU building (Quiapo) 13.jpg",
+      "location": "Far Eastern University (FEU), Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:FEU_building_(Quiapo)_13.jpg",
+        "basis": "Commons file description and visually reviewed image identify Far Eastern University (FEU), Manila, Philippines."
+      },
+      "sha256": "ffba0786c54b479e11a7deaedeee102ab5702f5e7b06866d8a0c21a78ae7fe04"
+    },
+    {
+      "path": "test/datasets/held_out/public/far-eastern-university/2.png",
+      "landmark_id": "far-eastern-university",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:FEU_Auditorium.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/00/FEU_Auditorium.JPG",
+      "author": "Ramiltibayan",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "63fb8f2102f3a0ba620debb68acdf5369579954c0a710dc9d5d99685af0dfcec",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:FEU Auditorium.JPG",
+      "location": "Far Eastern University (FEU), Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:FEU_Auditorium.JPG",
+        "basis": "Commons file description and visually reviewed image identify Far Eastern University (FEU), Manila, Philippines."
+      },
+      "sha256": "c63ba1367e39b344d8b9bfe7f0befeed5702e7d05618d8747ebe74341ad8b324"
+    },
+    {
+      "path": "assets/images/quiapo-church/1.png",
+      "landmark_id": "quiapo-church",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church_2040.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Quiapo_Church_2040.jpg",
+      "author": "Kej Andrés (Ryomaandres)",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "5543ec91758ef4a589dc4d8eac8dc24cf818e0a1abb77cd0e6a0324eb1ccabad",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Quiapo Church 2040.jpg",
+      "location": "Quiapo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church_2040.jpg",
+        "basis": "Commons file description and visually reviewed image identify Quiapo Church, Manila, Philippines."
+      },
+      "sha256": "bd69edd5d8e508a19872de2dc1cbac685399db360683c5ba5752a9832afd4556"
+    },
+    {
+      "path": "assets/images/quiapo-church/2.png",
+      "landmark_id": "quiapo-church",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church_2041.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/3/37/Quiapo_Church_2041.jpg",
+      "author": "Kej Andrés (Ryomaandres)",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "c2c99a557e7d436381ee7b78e545d97e548ea3322b3af02229202de837152648",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Quiapo Church 2041.jpg",
+      "location": "Quiapo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church_2041.jpg",
+        "basis": "Commons file description and visually reviewed image identify Quiapo Church, Manila, Philippines."
+      },
+      "sha256": "f0b0843e158d07179a972259f092f8b18f454627e7ff69a40f4d0b96b557f4f9"
+    },
+    {
+      "path": "assets/images/quiapo-church/3.png",
+      "landmark_id": "quiapo-church",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church_2042.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Quiapo_Church_2042.jpg",
+      "author": "Kej Andrés (Ryomaandres)",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "084a12aba072bc9b9aa9e9784b42e2673976979267b67496b567a95720a716d9",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Quiapo Church 2042.jpg",
+      "location": "Quiapo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church_2042.jpg",
+        "basis": "Commons file description and visually reviewed image identify Quiapo Church, Manila, Philippines."
+      },
+      "sha256": "f36691400bceca24bafcf1d21c4be48cc9403dcbcc9367711e645748d066a4d4"
+    },
+    {
+      "path": "test/datasets/held_out/public/quiapo-church/1.png",
+      "landmark_id": "quiapo-church",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church,_Manila,_Feb_2025_(1).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Quiapo_Church%2C_Manila%2C_Feb_2025_%281%29.jpg",
+      "author": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "896f90cd8510968c11f1d9c1828da3df827e87a4b082e382b1d3ad61b42519b5",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Quiapo Church, Manila, Feb 2025 (1).jpg",
+      "location": "Quiapo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church,_Manila,_Feb_2025_(1).jpg",
+        "basis": "Commons file description and visually reviewed image identify Quiapo Church, Manila, Philippines."
+      },
+      "sha256": "3c4fdd3ac6c33eacd1b2c33bfce6bfdcf6d598e21fa130702e6934ab27e20e3b"
+    },
+    {
+      "path": "test/datasets/held_out/public/quiapo-church/2.png",
+      "landmark_id": "quiapo-church",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church_and_Plaza_Miranda_(Quezon_Boulevard,_Quiapo,_Manila)(2017-12-31).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/80/Quiapo_Church_and_Plaza_Miranda_%28Quezon_Boulevard%2C_Quiapo%2C_Manila%29%282017-12-31%29.jpg",
+      "author": "Patrick Roque",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "289c1939253d4d3feadb9eedae27ba8cb8c7d7ee013c0fc7e4666e2d488b36c9",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Quiapo Church and Plaza Miranda (Quezon Boulevard, Quiapo, Manila)(2017-12-31).jpg",
+      "location": "Quiapo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Quiapo_Church_and_Plaza_Miranda_(Quezon_Boulevard,_Quiapo,_Manila)(2017-12-31).jpg",
+        "basis": "Commons file description and visually reviewed image identify Quiapo Church, Manila, Philippines."
+      },
+      "sha256": "6bdb68ffdf721376a4afb6616dfb76c0e77ff675e234ffd5509cb4bedde4e834"
+    },
+    {
+      "path": "assets/images/binondo-church/1.png",
+      "landmark_id": "binondo-church",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_01.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_01.jpg",
+      "author": "P1898",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "original_sha256": "98a258bc6569c8dc914c5134ce8d5e86649df389ed9182239aad9de958f33375",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Binondo Church de San Lorenzo Ruiz 2026-09-21 exterior 01.jpg",
+      "location": "Binondo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_01.jpg",
+        "basis": "Commons file description and visually reviewed image identify Binondo Church, Manila, Philippines."
+      },
+      "sha256": "8f76d19d89347e915aea803ff7259f8bf987a6976aa69dd7b212a378ed2684db"
+    },
+    {
+      "path": "assets/images/binondo-church/2.png",
+      "landmark_id": "binondo-church",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_02.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_02.jpg",
+      "author": "P1898",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "original_sha256": "b78c99d680f252d0c3c452145df3f9bcc19b7f0a0ed6ced0ee22511e4be1c527",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Binondo Church de San Lorenzo Ruiz 2026-09-21 exterior 02.jpg",
+      "location": "Binondo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Binondo_Church_de_San_Lorenzo_Ruiz_2026-09-21_exterior_02.jpg",
+        "basis": "Commons file description and visually reviewed image identify Binondo Church, Manila, Philippines."
+      },
+      "sha256": "0fb219574c6f332ac32549040a62c53ef6b98b87d305dc5bfdff6c06e090cc3c"
+    },
+    {
+      "path": "test/datasets/held_out/public/binondo-church/1.png",
+      "landmark_id": "binondo-church",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Binondo_Church,_Manila,_Jun_2024.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/07/Binondo_Church%2C_Manila%2C_Jun_2024.jpg",
+      "author": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "25af84d6534ca08d258f94066fd55788f83205431dc6aa6fb7b303d12cbb2f82",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Binondo Church, Manila, Jun 2024.jpg",
+      "location": "Binondo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Binondo_Church,_Manila,_Jun_2024.jpg",
+        "basis": "Commons file description and visually reviewed image identify Binondo Church, Manila, Philippines."
+      },
+      "sha256": "39e9310de19c839ad711e5cbe96501104e5d6bab7f1cc3d7093975b00cad3c62"
+    },
+    {
+      "path": "test/datasets/held_out/public/binondo-church/2.png",
+      "landmark_id": "binondo-church",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Binondo_Church_(Binondo,_Manila;_11-24-2019).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Binondo_Church_%28Binondo%2C_Manila%3B_11-24-2019%29.jpg",
+      "author": "patrickroque01",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "2beffca09dfe5a63e5c6c4c72cfa41804826f99127bcf5a32dc08b36936aa862",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Binondo Church (Binondo, Manila; 11-24-2019).jpg",
+      "location": "Binondo Church, Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Binondo_Church_(Binondo,_Manila;_11-24-2019).jpg",
+        "basis": "Commons file description and visually reviewed image identify Binondo Church, Manila, Philippines."
+      },
+      "sha256": "5e2043320f93ae1e31d351ee094df7bfa4f1a77ffdd23e4996ceba592f86873c"
     }
   ],
   "notes": [

@@ -35,11 +35,11 @@
 
 **TUNTON AI** is a small, offline-first mobile proof of concept for identifying **supported, recognizable landmarks in photographs** and previewing a walkable route to the selected landmark. A lightweight vision model operates **on the Android device**; a finite catalog connects landmark matches to verified coordinates; a prepackaged pedestrian graph provides walking paths without calling an online directions service. The Mapbox style and Intramuros region are downloaded once while connected and then rendered offline from SDK-managed storage.
 
-A visitor might have a photo of an Intramuros landmark but not know the name or where it appears on a map. In the supported pilot area, TUNTON helps that visitor identify a likely landmark, confirm it, choose a manual starting location, and preview a route — after the Mapbox region has been downloaded and Wi-Fi and mobile data are turned off.
+A visitor might have a photo of an Intramuros landmark but not know the name or where it appears on a map. In the supported pilot area, TUNTON helps that visitor identify a likely landmark, confirm it, choose a manual start or explicitly request a GPS start snapped to the walking graph, and preview a route — after the Mapbox region has been downloaded and Wi-Fi and mobile data are turned off.
 
 ### Core promise
 
-**Download Mapbox region while connected → photo → local AI matches → user confirms destination → offline map → manually selected start → walking-route preview.**
+**Download Mapbox region while connected → photo → local AI matches → user confirms destination → offline map → manual or GPS-snapped start → walking-route preview.**
 
 **Precision boundary:** Image matching identifies the *landmark depicted in the photograph*, **not the location where the photographer stood**. TUNTON does not infer a live current position from the photo.
 
@@ -57,7 +57,7 @@ A bundled **MobileNetV3 Small image embedder** produces a numerical vector from 
 | Uncertainty | Return **Not recognized** when a photo cannot be matched reliably | P0 |
 | Confirmation | Require the user to confirm a landmark before routing | P0 |
 | Offline map | Download a fixed Mapbox offline region while connected; render it with landmark markers offline | P0 |
-| Starting point | Choose a **manual, mapped, graph-backed** starting location | P0 |
+| Starting point | Choose a manual graph-backed start or explicitly request a GPS start snapped to the graph | P0 |
 | Route preview | Calculate a shortest connected pedestrian route on-device | P0 |
 | Route result | Display path geometry, distance, and estimated walking duration | P0 |
 | Error handling | Explain unsupported inputs, missing assets, and disconnected routes | P0 |
@@ -70,7 +70,7 @@ A bundled **MobileNetV3 Small image embedder** produces a numerical vector from 
 The following are **out of scope for the hackathon** and must not be quietly added by contributors or coding agents:
 
 - General-purpose photo geolocation throughout Manila, the Philippines, or the world.
-- Live GPS tracking, automatic rerouting, turn-by-turn voice guidance, live traffic, or road closure updates.
+- Background GPS tracking, automatic rerouting, turn-by-turn voice guidance, live traffic, or road closure updates. Foreground GPS is optional and does not reroute.
 - EXIF GPS interpretation, OCR, sign reading, geocoding, and additional map regions beyond the fixed P0 Intramuros region.
 - Driving/cycling directions, wheelchair-accessibility guarantees, or safety-certified navigation.
 - Chatbots, large language models, a second AI model, or model training/fine-tuning.
@@ -89,7 +89,7 @@ Do not add extra screens, architecture layers, or dependencies “for future sca
 6. The screen displays up to three **different** potential landmark matches or **Not recognized**.
 7. The user confirms one potential landmark as the **destination**.
 8. The Mapbox offline map places a marker at that landmark's **verified stored coordinates**.
-9. The user manually selects a valid starting landmark or graph-backed map entry point.
+9. The user selects a valid starting landmark or requests a GPS start snapped to a graph node.
 10. The on-device routing engine calculates the shortest connected **walking** path.
 11. The app displays the route polyline, distance, and **estimated** walking duration.
 
@@ -114,7 +114,7 @@ flowchart TD
     L[(Verified landmark catalog)] --> I
     I --> J[Offline map / destination marker]
     T[(Mapbox SDK offline store)] --> J
-    J --> K[User selects manual start]
+    J --> K[User selects manual or GPS-snapped start]
     K --> N[Dart Dijkstra routing]
     W[(Bundled pedestrian graph)] --> N
     N --> O{Connected walking route?}
@@ -134,7 +134,7 @@ All core processing occurs in the Flutter app:
 | Layer | Approved choice | Role |
 |---|---|---|
 | App/UI | Flutter + Dart | Android application and the one-screen-flow state transitions |
-| State | `flutter_riverpod` | Current photo, match, destination, manual origin, and route |
+| State | `flutter_riverpod` | Current photo, match, destination, origin, and route |
 | Image selection | `image_picker` | Capture/select one photo |
 | Preprocessing | Dart `image` | Decode, orient, resize, and prepare tensors as required by the checkpoint |
 | Model/runtime | **MobileNetV3 Small Image Embedder** `.tflite` + `tflite_flutter` | Device-local image embeddings |
@@ -248,7 +248,7 @@ A valid build must ship the **model, reference index, verified catalog, and walk
 
 ## How offline navigation works
 
-The user-confirmed landmark is the **destination**. The user picks a **manual mapped starting point** (not GPS or a guessed camera position).
+The user-confirmed landmark is the **destination**. The user picks a manual mapped start or explicitly requests GPS snapping to the nearest graph node. The photo never supplies the user's position.
 
 1. Resolve both selections to known `route_node_id` entries.
 2. Reject invalid or out-of-region points.
@@ -258,7 +258,7 @@ The user-confirmed landmark is the **destination**. The user picks a **manual ma
 6. Display an approximate walking ETA using a fixed **4.5 km/h** pace, equivalent to **75 meters/minute**.
 7. If disconnected, return **Route unavailable**. Do **not** draw a straight-line replacement.
 
-The resulting route is a **preview based on a preloaded pedestrian graph**, not continuous GPS navigation. Surface that distinction in the interface and demo.
+The resulting route is a **preview based on a preloaded pedestrian graph**, not turn-by-turn navigation or automatic rerouting. A GPS-to-node connector is approximate and may not be walkable.
 
 ## Repository structure
 
@@ -345,7 +345,7 @@ The expected Flutter output path is `build/app/outputs/flutter-apk/app-release.a
 - [ ] An unsupported/ambiguous photo can produce **Not recognized**.
 - [ ] User explicitly confirms a candidate destination.
 - [ ] The Mapbox offline region, labels, and markers render after download and airplane-mode cold launch.
-- [ ] Manual start selection resolves to a valid pedestrian graph node.
+- [ ] Manual or GPS-snapped start resolves to a valid pedestrian graph node.
 - [ ] A connected route follows real pedestrian edges and shows distance/ETA.
 - [ ] An unconnected route returns **Route unavailable**.
 - [ ] No Mac, server, or internet dependency is needed during the journey after the fixed Mapbox region download.
@@ -391,7 +391,7 @@ The full setup and troubleshooting details are in [`docs/SETUP.md`](docs/SETUP.m
 |---|---|
 | **Hour 0–1** | Device ready, Flutter app opens, model/map assets sourced, six landmark records selected |
 | **Hour 1–3** | Independent on-device embedding lookup, graph shortest path, and offline map rendering |
-| **Hour 3–5** | Integrated photo → ranked candidates → confirmation → map → manual origin → route |
+| **Hour 3–5** | Integrated photo → ranked candidates → confirmation → map → manual or GPS-snapped origin → route |
 | **Hour 5–6** | Unknown-photo, invalid-asset, out-of-bounds, and route-unavailable states |
 | **Hour 6–7** | Release APK installed; cold airplane-mode run; recognition, routing, and memory measurements |
 | **Hour 7–8** | Fix blockers, verify asset attribution, and rehearse the final demo |
@@ -404,7 +404,7 @@ The full setup and troubleshooting details are in [`docs/SETUP.md`](docs/SETUP.m
 |---|---|
 | Vision | Verified MobileNetV3 embedder, real tensor contract, reference embeddings, held-out example result |
 | Map and data | Verified six-landmark catalog, completed Mapbox offline-region coverage, connected pedestrian graph with real geometry |
-| Flutter UI/integration | Photo, candidate confirmation, offline map, manual start, and route preview screens |
+| Flutter UI/integration | Photo, candidate confirmation, offline map, manual/GPS-snapped start, and route preview screens |
 | QA/demo | Release APK, airplane-mode cold-run evidence, unsupported-input checks, real measurements |
 
 **Before making a code change:**
@@ -443,7 +443,7 @@ TUNTON is a **bounded hackathon proof of concept**:
 
 - It recognizes only its **prepackaged reference landmarks**, and similar scenes may produce ambiguous candidates.
 - It finds the landmark shown, **not the camera's true position**.
-- It does not provide live GPS location, automatic off-route detection, traffic, closure information, or real-time pedestrian access checks.
+- Foreground GPS may show the current location or provide an explicitly requested snapped start. It does not provide automatic off-route detection, rerouting, traffic, closure information, or real-time pedestrian access checks.
 - Mapped paths may be outdated, closed, gated, or inaccessible. The app must not present a calculated route as guaranteed safe.
 - Routes and walking times are approximate **previews**, not safety-critical navigation instructions.
 - Missing photos, unknown landmarks, graph disconnections, or missing/incomplete Mapbox offline data must produce transparent failure states.
@@ -455,7 +455,7 @@ TUNTON is a **bounded hackathon proof of concept**:
 2. **Start offline.** Put the phone in airplane mode, confirm Wi-Fi/mobile data are off, and cold-launch the release APK.
 3. **Choose a new photo.** Select a held-out photograph of one supported Intramuros landmark.
 4. **Show on-device recognition.** Let TUNTON rank candidates and confirm the intended destination.
-5. **Display the local map.** Show the destination marker and choose a valid **manual** starting point.
+5. **Display the local map.** Show the destination marker and choose a valid manual start or explicitly request a GPS-snapped start.
 6. **Calculate the walk.** Present the route along real pedestrian geometry with distance and approximate ETA.
 7. **Show a limitation honestly.** Test an unsupported image (**Not recognized**) or disconnected pair (**Route unavailable**).
 8. **Close with evidence.** Report observed inference/route timings, device RAM, and the initial Mapbox network setup separately from offline runtime.

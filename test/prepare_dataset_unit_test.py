@@ -9,8 +9,10 @@ import prepare_dataset
 
 
 def sample():
-    landmarks = [{"id": "l1", "name": "Place", "lat": 14.59, "lon": 120.97, "route_node_id": "n1"}]
-    embeddings = {"model_id": prepare_dataset.MODEL_ID, "dimension": 2, "references": [
+    landmarks = [{"id": "l1", "name": "Place", "area_id": "intramuros", "lat": 14.59, "lon": 120.97, "route_node_id": "n1"}]
+    embeddings = {"model_id": prepare_dataset.MODEL_ID, "model_sha256": "a" * 64,
+                  "preprocessing_version": prepare_dataset.PREPROCESSING_VERSION,
+                  "dimension": 2, "references": [
         {"landmark_id": "l1", "image_asset": "assets/images/place.jpg", "vector": [3, 4]}]}
     graph = {"nodes": [{"id": "n1", "lat": 14.59, "lon": 120.97}, {"id": "n2", "lat": 14.591, "lon": 120.971}],
              "edges": [{"from": "n1", "to": "n2", "length_m": 10, "geometry": [[14.59, 120.97], [14.591, 120.971]]}]}

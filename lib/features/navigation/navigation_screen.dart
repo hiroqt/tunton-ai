@@ -193,7 +193,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
                               children: [
                                 _RouteMetric(
                                   value: distanceLabel,
-                                  label: 'Walking distance',
+                                  label: widget.origin.id == 'user-current-location'
+                                      ? 'Estimated distance'
+                                      : 'Walking distance',
                                 ),
                                 _RouteMetric(
                                   value: '${result.estimatedMinutes!.ceil()} min',
@@ -232,6 +234,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
+                    if (widget.origin.id == 'user-current-location') ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'GPS snap connector is approximate and may not be walkable.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     OutlinedButton.icon(
                       onPressed: _changeStart,

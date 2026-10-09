@@ -53,8 +53,8 @@ class PipelineBoundaryTest(unittest.TestCase):
                 prep.dataset_path(root, 'escape/photo.png')
 
     def test_numerical_parity_requires_identity_and_finite_numeric_values(self):
-        expected = {'model_sha256': prep.MODEL_SHA256, 'image_sha256': 'c' * 64,
-                    'embedding': [1.0] + [0.0] * 1023}
+        expected = {'model_sha256': 'a' * 64, 'image_sha256': 'c' * 64,
+                    'dimension': 2, 'embedding': [1.0, 0.0]}
         with tempfile.TemporaryDirectory() as temp:
             left, right = Path(temp) / 'expected.json', Path(temp) / 'actual.json'
             left.write_text(json.dumps(expected))

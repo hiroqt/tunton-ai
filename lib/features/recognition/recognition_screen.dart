@@ -206,7 +206,8 @@ class _CandidateTile extends StatelessWidget {
                       Text(landmark.name, style: theme.textTheme.titleMedium),
                       const SizedBox(height: 4),
                       Text(
-                        'Intramuros',
+                        landmark.areaId[0].toUpperCase() +
+                            landmark.areaId.substring(1),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),

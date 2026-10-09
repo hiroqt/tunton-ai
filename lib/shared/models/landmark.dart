@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
-/// One verified Intramuros landmark from the bundled catalog.
+/// One verified point of interest from the bundled catalog.
 ///
 /// Coordinates are read-only and never invented at runtime: they originate from
-/// the packaged `assets/landmarks/landmarks.json`. `routeNodeId` ties the
-/// landmark to a real node in the walk graph.
+/// the packaged `assets/landmarks/landmarks.json`. Only Intramuros entries may
+/// have a route node; other areas are recognition-only.
 @immutable
 class Landmark {
   const Landmark({
@@ -17,15 +17,17 @@ class Landmark {
     double? lon,
     double? latitude,
     double? longitude,
-    required this.routeNodeId,
-  })  : lat = lat ?? latitude ?? 0.0,
-        lon = lon ?? longitude ?? 0.0;
+    this.routeNodeId,
+    this.areaId = 'intramuros',
+  }) : lat = lat ?? latitude ?? 0.0,
+       lon = lon ?? longitude ?? 0.0;
 
   final String id;
   final String name;
   final double lat;
   final double lon;
-  final String routeNodeId;
+  final String? routeNodeId;
+  final String areaId;
 
   double get latitude => lat;
   double get longitude => lon;
@@ -35,16 +37,29 @@ class Landmark {
       lon.isFinite &&
       lat.abs() <= 90 &&
       lon.abs() <= 180 &&
-      routeNodeId.isNotEmpty;
+      areaId.isNotEmpty;
+  bool get isRoutable => areaId == 'intramuros' && routeNodeId != null;
 
-  /// Validates one catalog entry. JSON keys: id, name, lat, lon, route_node_id.
-  /// Throws [FormatException] when id/name/route_node_id are missing or blank
+  /// Validates one catalog entry. `route_node_id` is optional outside the route
+  /// coverage. Throws [FormatException] when required fields are invalid
   /// (after trim), lat is not in [-90, 90], lon is not in [-180, 180], or
   /// lat/lon are non-finite or not numbers.
   factory Landmark.fromJson(Map<String, dynamic> json) {
     final id = _requireNonBlank(json['id'], 'id');
     final name = _requireNonBlank(json['name'], 'name');
-    final routeNodeId = _requireNonBlank(json['route_node_id'], 'route_node_id');
+    final areaId = _requireNonBlank(json['area_id'] ?? 'intramuros', 'area_id');
+    if (!const {'intramuros', 'manila', 'makati', 'pasay'}.contains(areaId)) {
+      throw FormatException('Unsupported landmark area_id: $areaId.');
+    }
+    final rawRouteNodeId = json['route_node_id'];
+    final routeNodeId = rawRouteNodeId == null
+        ? null
+        : _requireNonBlank(rawRouteNodeId, 'route_node_id');
+    if (routeNodeId != null && areaId != 'intramuros') {
+      throw const FormatException(
+        'Only Intramuros landmarks may have a route node.',
+      );
+    }
     final lat = _requireCoordinate(json['lat'], 'lat', 90);
     final lon = _requireCoordinate(json['lon'], 'lon', 180);
     return Landmark(
@@ -53,6 +68,7 @@ class Landmark {
       lat: lat,
       lon: lon,
       routeNodeId: routeNodeId,
+      areaId: areaId,
     );
   }
 
@@ -69,7 +85,9 @@ class Landmark {
     final seenIds = <String>{};
     for (final element in decoded) {
       if (element is! Map<String, dynamic>) {
-        throw const FormatException('Each catalog entry must be a JSON object.');
+        throw const FormatException(
+          'Each catalog entry must be a JSON object.',
+        );
       }
       final landmark = Landmark.fromJson(element);
       if (!seenIds.add(landmark.id)) {

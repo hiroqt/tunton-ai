@@ -1,15 +1,16 @@
 {
-  "model_id": "bundled-mobilenetv3-small-embedder",
-  "model_sha256": "bbbb4c51a55a53905af1daec995ca1aae355046f8839bb8c9f5ce9271394bc40",
+  "model_id": "openclip-vit-b32-laion2b-s34b-b79k-int8-dynamic",
+  "model_sha256": "94273ff4c9c4366403bc041f1f53621251fc0bf466842bced27d3c30ce13ef0d",
+  "preprocessing_version": "openclip-vit-b32-v1",
   "environment": "Mac Python CPU; no Android proof",
-  "held_out_count": 12,
-  "unknown_count": 12,
-  "top1_correct": 9,
-  "top3_correct": 12,
+  "held_out_count": 30,
+  "unknown_count": 10,
+  "top1_correct": 20,
+  "top3_correct": 24,
   "rejection_rule_calibrated": false,
   "inference_ms": {
-    "median": 19.90731299883919,
-    "max": 30.236875001719454
+    "median": 35.731416999624344,
+    "max": 44.945166002435144
   },
   "records": [
     {
@@ -17,14 +18,14 @@
       "split": "held_out",
       "expected": "fort-santiago",
       "top3": [
-        "san-agustin",
-        "manila-cathedral",
-        "fort-santiago"
+        "fort-santiago",
+        "baluarte-san-diego",
+        "puerta-real"
       ],
       "scores": {
-        "san-agustin": 0.5783805133736961,
-        "manila-cathedral": 0.5781933458818334,
-        "fort-santiago": 0.5207734739307294
+        "fort-santiago": 0.7933440330553976,
+        "baluarte-san-diego": 0.6944587751887101,
+        "puerta-real": 0.6655776153607338
       }
     },
     {
@@ -32,14 +33,14 @@
       "split": "held_out",
       "expected": "fort-santiago",
       "top3": [
-        "manila-cathedral",
-        "san-agustin",
-        "fort-santiago"
+        "fort-santiago",
+        "puerta-real",
+        "baluarte-san-diego"
       ],
       "scores": {
-        "manila-cathedral": 0.40813053084960804,
-        "san-agustin": 0.36494881722149386,
-        "fort-santiago": 0.3589469551325552
+        "fort-santiago": 0.7561432581203315,
+        "puerta-real": 0.7386397267959096,
+        "baluarte-san-diego": 0.7161221093529065
       }
     },
     {
@@ -48,13 +49,13 @@
       "expected": "manila-cathedral",
       "top3": [
         "manila-cathedral",
-        "fort-santiago",
-        "san-agustin"
+        "san-agustin",
+        "binondo-church"
       ],
       "scores": {
-        "manila-cathedral": 0.7575306662477659,
-        "fort-santiago": 0.5381114542776299,
-        "san-agustin": 0.4629317960681488
+        "manila-cathedral": 0.8114301146970337,
+        "san-agustin": 0.7693653527612576,
+        "binondo-church": 0.7007372401681609
       }
     },
     {
@@ -63,13 +64,13 @@
       "expected": "manila-cathedral",
       "top3": [
         "manila-cathedral",
-        "fort-santiago",
+        "binondo-church",
         "san-agustin"
       ],
       "scores": {
-        "manila-cathedral": 0.575649460058189,
-        "fort-santiago": 0.37308891675196615,
-        "san-agustin": 0.35583560339167025
+        "manila-cathedral": 0.7308627915001148,
+        "binondo-church": 0.6792730914275225,
+        "san-agustin": 0.6439683075021029
       }
     },
     {
@@ -78,13 +79,13 @@
       "expected": "san-agustin",
       "top3": [
         "san-agustin",
-        "manila-cathedral",
+        "binondo-church",
         "fort-santiago"
       ],
       "scores": {
-        "san-agustin": 0.6821250205911582,
-        "manila-cathedral": 0.5858130700922755,
-        "fort-santiago": 0.3949322444184693
+        "san-agustin": 0.8974022486966664,
+        "binondo-church": 0.7394765445914844,
+        "fort-santiago": 0.7253263138143593
       }
     },
     {
@@ -94,12 +95,12 @@
       "top3": [
         "san-agustin",
         "manila-cathedral",
-        "fort-santiago"
+        "quiapo-church"
       ],
       "scores": {
-        "san-agustin": 0.2568659518727999,
-        "manila-cathedral": 0.2497332577611001,
-        "fort-santiago": 0.24130057160238275
+        "san-agustin": 0.6672562595173416,
+        "manila-cathedral": 0.6313398580839731,
+        "quiapo-church": 0.5871169681436993
       }
     },
     {
@@ -108,13 +109,13 @@
       "expected": "casa-manila",
       "top3": [
         "casa-manila",
-        "san-agustin",
-        "fort-santiago"
+        "up-manila",
+        "dlsu-manila"
       ],
       "scores": {
-        "casa-manila": 0.7160953338404625,
-        "san-agustin": 0.343459463778535,
-        "fort-santiago": 0.2944668985707274
+        "casa-manila": 0.8767748427688925,
+        "up-manila": 0.6254595578479141,
+        "dlsu-manila": 0.6208765725355911
       }
     },
     {
@@ -124,12 +125,12 @@
       "top3": [
         "casa-manila",
         "fort-santiago",
-        "san-agustin"
+        "manila-cathedral"
       ],
       "scores": {
-        "casa-manila": 0.629208576164977,
-        "fort-santiago": 0.3448280768470675,
-        "san-agustin": 0.2766017244816887
+        "casa-manila": 0.7519716863461527,
+        "fort-santiago": 0.661695330444863,
+        "manila-cathedral": 0.6066512805667343
       }
     },
     {
@@ -138,13 +139,13 @@
       "expected": "baluarte-san-diego",
       "top3": [
         "baluarte-san-diego",
-        "puerta-real",
-        "fort-santiago"
+        "far-eastern-university",
+        "rizal-park"
       ],
       "scores": {
-        "baluarte-san-diego": 0.5220863476413008,
-        "puerta-real": 0.30011083292006085,
-        "fort-santiago": 0.21435397038266263
+        "baluarte-san-diego": 0.817100500469127,
+        "far-eastern-university": 0.666617820786952,
+        "rizal-park": 0.5576974488687201
       }
     },
     {
@@ -157,9 +158,9 @@
         "fort-santiago"
       ],
       "scores": {
-        "baluarte-san-diego": 0.4433446463661965,
-        "puerta-real": 0.27041192305145634,
-        "fort-santiago": 0.21784060755847112
+        "baluarte-san-diego": 0.7626006212462983,
+        "puerta-real": 0.5601338693827668,
+        "fort-santiago": 0.5572588119406896
       }
     },
     {
@@ -167,14 +168,14 @@
       "split": "held_out",
       "expected": "puerta-real",
       "top3": [
-        "puerta-real",
-        "manila-cathedral",
-        "fort-santiago"
+        "casa-manila",
+        "fort-santiago",
+        "up-manila"
       ],
       "scores": {
-        "puerta-real": 0.27744972371350385,
-        "manila-cathedral": 0.24933685569798575,
-        "fort-santiago": 0.24166042793188747
+        "casa-manila": 0.6688283394869212,
+        "fort-santiago": 0.6650960727610311,
+        "up-manila": 0.6545363573752079
       }
     },
     {
@@ -182,29 +183,14 @@
       "split": "held_out",
       "expected": "puerta-real",
       "top3": [
-        "san-agustin",
-        "puerta-real",
-        "casa-manila"
+        "up-manila",
+        "fort-santiago",
+        "puerta-real"
       ],
       "scores": {
-        "san-agustin": 0.35336650331591846,
-        "puerta-real": 0.28488217125197274,
-        "casa-manila": 0.2830652973390639
-      }
-    },
-    {
-      "path": "test/datasets/unknown/1.png",
-      "split": "unknown",
-      "expected": null,
-      "top3": [
-        "san-agustin",
-        "manila-cathedral",
-        "fort-santiago"
-      ],
-      "scores": {
-        "san-agustin": 0.5990919013164557,
-        "manila-cathedral": 0.4547999982583545,
-        "fort-santiago": 0.35495845343731525
+        "up-manila": 0.7618155419668917,
+        "fort-santiago": 0.7277418668932912,
+        "puerta-real": 0.6595518582274933
       }
     },
     {
@@ -212,14 +198,14 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "puerta-real",
-        "fort-santiago",
-        "casa-manila"
+        "dlsu-manila",
+        "lucky-chinatown-mall",
+        "quiapo-church"
       ],
       "scores": {
-        "puerta-real": 0.27197213208827653,
-        "fort-santiago": 0.25751857629244995,
-        "casa-manila": 0.23384719026643475
+        "dlsu-manila": 0.5184017868226847,
+        "lucky-chinatown-mall": 0.4961507347656214,
+        "quiapo-church": 0.4500600624533281
       }
     },
     {
@@ -228,13 +214,13 @@
       "expected": null,
       "top3": [
         "puerta-real",
-        "baluarte-san-diego",
-        "fort-santiago"
+        "fort-santiago",
+        "casa-manila"
       ],
       "scores": {
-        "puerta-real": 0.2737925926456045,
-        "baluarte-san-diego": 0.2265930515345102,
-        "fort-santiago": 0.15124856847884272
+        "puerta-real": 0.5698707486684063,
+        "fort-santiago": 0.5392038670537078,
+        "casa-manila": 0.5195631392575764
       }
     },
     {
@@ -242,14 +228,14 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "baluarte-san-diego",
-        "fort-santiago",
-        "manila-cathedral"
+        "rizal-park",
+        "puerta-real",
+        "baluarte-san-diego"
       ],
       "scores": {
-        "baluarte-san-diego": 0.25349137589931003,
-        "fort-santiago": 0.13801613355078066,
-        "manila-cathedral": 0.13201251298385605
+        "rizal-park": 0.5647002926208105,
+        "puerta-real": 0.49679414059937094,
+        "baluarte-san-diego": 0.4853727849767424
       }
     },
     {
@@ -257,29 +243,14 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "fort-santiago",
-        "puerta-real",
-        "baluarte-san-diego"
+        "rizal-park",
+        "up-manila",
+        "puerta-real"
       ],
       "scores": {
-        "fort-santiago": 0.16407349800408072,
-        "puerta-real": 0.14205504405455738,
-        "baluarte-san-diego": 0.12743587820663285
-      }
-    },
-    {
-      "path": "test/datasets/unknown/6.png",
-      "split": "unknown",
-      "expected": null,
-      "top3": [
-        "manila-cathedral",
-        "san-agustin",
-        "fort-santiago"
-      ],
-      "scores": {
-        "manila-cathedral": 0.4779220155475788,
-        "san-agustin": 0.4700866468821209,
-        "fort-santiago": 0.3385083039592721
+        "rizal-park": 0.5838873246923983,
+        "up-manila": 0.5342540444904443,
+        "puerta-real": 0.5277164950937485
       }
     },
     {
@@ -287,14 +258,14 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "baluarte-san-diego",
+        "rizal-park",
         "puerta-real",
-        "fort-santiago"
+        "casa-manila"
       ],
       "scores": {
-        "baluarte-san-diego": 0.285790297598588,
-        "puerta-real": 0.2266949318612227,
-        "fort-santiago": 0.1385913361727099
+        "rizal-park": 0.5114422055099376,
+        "puerta-real": 0.4869064115726408,
+        "casa-manila": 0.4824479429504963
       }
     },
     {
@@ -302,14 +273,14 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "baluarte-san-diego",
         "puerta-real",
-        "fort-santiago"
+        "fort-santiago",
+        "rizal-park"
       ],
       "scores": {
-        "baluarte-san-diego": 0.32857563508460447,
-        "puerta-real": 0.23573474517100004,
-        "fort-santiago": 0.14251616232811118
+        "puerta-real": 0.593606711506462,
+        "fort-santiago": 0.48524168380716903,
+        "rizal-park": 0.46695998598951677
       }
     },
     {
@@ -317,14 +288,14 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "fort-santiago",
-        "baluarte-san-diego",
+        "quiapo-church",
+        "san-agustin",
         "casa-manila"
       ],
       "scores": {
-        "fort-santiago": 0.18546445478496024,
-        "baluarte-san-diego": 0.16841044729625354,
-        "casa-manila": 0.13163828487888168
+        "quiapo-church": 0.6998537031625218,
+        "san-agustin": 0.5877665667865555,
+        "casa-manila": 0.536738569436546
       }
     },
     {
@@ -332,14 +303,14 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "san-agustin",
-        "manila-cathedral",
-        "puerta-real"
+        "up-manila",
+        "casa-manila",
+        "dlsu-manila"
       ],
       "scores": {
-        "san-agustin": 0.38774180912474965,
-        "manila-cathedral": 0.31275614193210644,
-        "puerta-real": 0.2994841356500675
+        "up-manila": 0.6859077941922909,
+        "casa-manila": 0.6118989473383245,
+        "dlsu-manila": 0.5552429702965265
       }
     },
     {
@@ -347,14 +318,14 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "casa-manila",
-        "san-agustin",
-        "manila-cathedral"
+        "up-manila",
+        "dlsu-manila",
+        "casa-manila"
       ],
       "scores": {
-        "casa-manila": 0.32265108088989286,
-        "san-agustin": 0.28902826568493084,
-        "manila-cathedral": 0.27466198036551204
+        "up-manila": 0.7632554364944212,
+        "dlsu-manila": 0.6126171989551155,
+        "casa-manila": 0.5951320674848304
       }
     },
     {
@@ -362,14 +333,284 @@
       "split": "unknown",
       "expected": null,
       "top3": [
-        "baluarte-san-diego",
-        "puerta-real",
+        "up-manila",
+        "fort-santiago",
+        "puerta-real"
+      ],
+      "scores": {
+        "up-manila": 0.6288719354464695,
+        "fort-santiago": 0.6183794143850457,
+        "puerta-real": 0.6148992279027459
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/rizal-park/1.png",
+      "split": "held_out",
+      "expected": "rizal-park",
+      "top3": [
+        "rizal-park",
+        "far-eastern-university",
         "fort-santiago"
       ],
       "scores": {
-        "baluarte-san-diego": 0.3396874670817248,
-        "puerta-real": 0.33633652433686567,
-        "fort-santiago": 0.2660378777593121
+        "rizal-park": 0.6723288791684144,
+        "far-eastern-university": 0.6024473640475995,
+        "fort-santiago": 0.5657472974929474
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/rizal-park/2.png",
+      "split": "held_out",
+      "expected": "rizal-park",
+      "top3": [
+        "rizal-park",
+        "far-eastern-university",
+        "baluarte-san-diego"
+      ],
+      "scores": {
+        "rizal-park": 0.5754930090297377,
+        "far-eastern-university": 0.5685576871831459,
+        "baluarte-san-diego": 0.5074111664373853
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/sm-city-manila/1.png",
+      "split": "held_out",
+      "expected": "sm-city-manila",
+      "top3": [
+        "sm-city-manila",
+        "lucky-chinatown-mall",
+        "far-eastern-university"
+      ],
+      "scores": {
+        "sm-city-manila": 0.5960951387803467,
+        "lucky-chinatown-mall": 0.46759170511614395,
+        "far-eastern-university": 0.44032888623349176
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/sm-city-manila/2.png",
+      "split": "held_out",
+      "expected": "sm-city-manila",
+      "top3": [
+        "sm-city-manila",
+        "lucky-chinatown-mall",
+        "robinsons-place-manila"
+      ],
+      "scores": {
+        "sm-city-manila": 0.7335935456041327,
+        "lucky-chinatown-mall": 0.6290705405761461,
+        "robinsons-place-manila": 0.5997848507983047
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/robinsons-place-manila/1.png",
+      "split": "held_out",
+      "expected": "robinsons-place-manila",
+      "top3": [
+        "robinsons-place-manila",
+        "lucky-chinatown-mall",
+        "sm-city-manila"
+      ],
+      "scores": {
+        "robinsons-place-manila": 0.7429135743324641,
+        "lucky-chinatown-mall": 0.6792807216821506,
+        "sm-city-manila": 0.4812775509248976
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/robinsons-place-manila/2.png",
+      "split": "held_out",
+      "expected": "robinsons-place-manila",
+      "top3": [
+        "robinsons-place-manila",
+        "lucky-chinatown-mall",
+        "sm-city-manila"
+      ],
+      "scores": {
+        "robinsons-place-manila": 0.5739777305895806,
+        "lucky-chinatown-mall": 0.4586928017332806,
+        "sm-city-manila": 0.431198464894172
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/lucky-chinatown-mall/1.png",
+      "split": "held_out",
+      "expected": "lucky-chinatown-mall",
+      "top3": [
+        "lucky-chinatown-mall",
+        "robinsons-place-manila",
+        "up-manila"
+      ],
+      "scores": {
+        "lucky-chinatown-mall": 0.621594502245624,
+        "robinsons-place-manila": 0.5656204373551474,
+        "up-manila": 0.5474344099198043
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/lucky-chinatown-mall/2.png",
+      "split": "held_out",
+      "expected": "lucky-chinatown-mall",
+      "top3": [
+        "sm-city-manila",
+        "lucky-chinatown-mall",
+        "up-manila"
+      ],
+      "scores": {
+        "sm-city-manila": 0.6378043469868905,
+        "lucky-chinatown-mall": 0.6289867296205857,
+        "up-manila": 0.5568409995735523
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/up-manila/1.png",
+      "split": "held_out",
+      "expected": "up-manila",
+      "top3": [
+        "dlsu-manila",
+        "up-manila",
+        "sm-city-manila"
+      ],
+      "scores": {
+        "dlsu-manila": 0.7454991545576786,
+        "up-manila": 0.7266056144794499,
+        "sm-city-manila": 0.7114617857522478
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/up-manila/2.png",
+      "split": "held_out",
+      "expected": "up-manila",
+      "top3": [
+        "up-manila",
+        "dlsu-manila",
+        "casa-manila"
+      ],
+      "scores": {
+        "up-manila": 0.7820553876272931,
+        "dlsu-manila": 0.6509194052974923,
+        "casa-manila": 0.6355152024349286
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/dlsu-manila/1.png",
+      "split": "held_out",
+      "expected": "dlsu-manila",
+      "top3": [
+        "up-manila",
+        "binondo-church",
+        "far-eastern-university"
+      ],
+      "scores": {
+        "up-manila": 0.6822637554684442,
+        "binondo-church": 0.6726294463297864,
+        "far-eastern-university": 0.6482203554328775
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/dlsu-manila/2.png",
+      "split": "held_out",
+      "expected": "dlsu-manila",
+      "top3": [
+        "up-manila",
+        "sm-city-manila",
+        "far-eastern-university"
+      ],
+      "scores": {
+        "up-manila": 0.7710482614917238,
+        "sm-city-manila": 0.6307743066592617,
+        "far-eastern-university": 0.6132058047767879
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/far-eastern-university/1.png",
+      "split": "held_out",
+      "expected": "far-eastern-university",
+      "top3": [
+        "up-manila",
+        "casa-manila",
+        "sm-city-manila"
+      ],
+      "scores": {
+        "up-manila": 0.7477250208751084,
+        "casa-manila": 0.6435106218194722,
+        "sm-city-manila": 0.6424635372568932
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/far-eastern-university/2.png",
+      "split": "held_out",
+      "expected": "far-eastern-university",
+      "top3": [
+        "up-manila",
+        "lucky-chinatown-mall",
+        "robinsons-place-manila"
+      ],
+      "scores": {
+        "up-manila": 0.5244225201101944,
+        "lucky-chinatown-mall": 0.4982548270364763,
+        "robinsons-place-manila": 0.49765724050016585
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/quiapo-church/1.png",
+      "split": "held_out",
+      "expected": "quiapo-church",
+      "top3": [
+        "san-agustin",
+        "binondo-church",
+        "quiapo-church"
+      ],
+      "scores": {
+        "san-agustin": 0.7954968930120785,
+        "binondo-church": 0.7009752547544701,
+        "quiapo-church": 0.6809976976632155
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/quiapo-church/2.png",
+      "split": "held_out",
+      "expected": "quiapo-church",
+      "top3": [
+        "binondo-church",
+        "manila-cathedral",
+        "san-agustin"
+      ],
+      "scores": {
+        "binondo-church": 0.6531606264437877,
+        "manila-cathedral": 0.5956469032619999,
+        "san-agustin": 0.5850971761651854
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/binondo-church/1.png",
+      "split": "held_out",
+      "expected": "binondo-church",
+      "top3": [
+        "binondo-church",
+        "up-manila",
+        "manila-cathedral"
+      ],
+      "scores": {
+        "binondo-church": 0.8495355365880632,
+        "up-manila": 0.6401571666610468,
+        "manila-cathedral": 0.639481804774676
+      }
+    },
+    {
+      "path": "test/datasets/held_out/public/binondo-church/2.png",
+      "split": "held_out",
+      "expected": "binondo-church",
+      "top3": [
+        "binondo-church",
+        "sm-city-manila",
+        "up-manila"
+      ],
+      "scores": {
+        "binondo-church": 0.7165215513238405,
+        "sm-city-manila": 0.6870137322254203,
+        "up-manila": 0.6595446123415136
       }
     }
   ]

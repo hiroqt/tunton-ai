@@ -173,8 +173,9 @@ void main() {
             );
             final directory = Directory(screenshotDirectory)
               ..createSync(recursive: true);
-            await File('${directory.path}/${entry.key}.png')
-                .writeAsBytes(bytes!.buffer.asUint8List());
+            await File(
+              '${directory.path}/${entry.key}.png',
+            ).writeAsBytes(bytes!.buffer.asUint8List());
             image.dispose();
           });
         }
@@ -338,7 +339,7 @@ void main() {
       await tester.pumpWidget(const TuntonApp(home: PhotoScreen()));
       expect(find.text('Take a photo'), findsOneWidget);
       expect(find.text('Choose from gallery'), findsOneWidget);
-      expect(find.text('Intramuros'), findsOneWidget);
+      expect(find.text('Manila · Makati · Pasay'), findsOneWidget);
       final theme = Theme.of(tester.element(find.text('Take a photo')));
       expect(theme.textTheme.bodyMedium?.fontFamily, 'Inter');
       expect(theme.scaffoldBackgroundColor, const Color(0xFFF8F9F6));
@@ -374,7 +375,8 @@ void main() {
         home: OfflineMapScreen(
           destination: destination,
           startPoints: const [origin],
-          findNearestNode: (lat, lon) => ('snapped-gps-node', (14.5905, 120.9745)),
+          findNearestNode: (lat, lon) =>
+              ('snapped-gps-node', (14.5905, 120.9745)),
           getCurrentPosition: () async => Position(
             latitude: 14.5902,
             longitude: 120.9741,

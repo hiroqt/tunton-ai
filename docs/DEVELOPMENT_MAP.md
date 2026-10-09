@@ -2,14 +2,14 @@
 
 This page distinguishes the current checkout from the approved Android P0 target. It is a navigation/status aid, not product authority. [`PRD.md`](PRD.md) defines scope; [`ARD.md`](ARD.md) defines approved files and contracts; [`SDD.md`](SDD.md) explains the Android design.
 
-## Current checkout (inspected 2026-10-09)
+## Current checkout (scope and inventory updated 2026-10-10)
 
 ```text
 lib/
 ├── main.dart                               # generated Flutter counter starter
 ├── features/
 │   ├── recognition/
-│   │   ├── embedding_service.dart          # local TFLite preprocessing/inference logic
+│   │   ├── embedding_service.dart          # OpenCLIP preprocessing + Android ONNX channel
 │   │   └── landmark_matcher.dart           # local reference ranking
 │   └── navigation/
 │       └── routing_service.dart            # graph path calculation
@@ -21,16 +21,18 @@ tools/
 └── prepare_dataset.py                      # developer-machine asset preparation
 
 assets/
-├── models/landmark_embedder.tflite
+├── models/openclip_vit_b32_laion2b_int8.onnx
 ├── images/                                  # licensed reference set
 ├── landmarks/{landmarks,reference_embeddings}.json
 ├── maps/intramuros_graph.json
 └── tiles/{z}/{x}/{y}.png                      # legacy OSM-rendered tiles; not Mapbox SDK data
 ```
 
-Observed asset inventory: 6 catalog records, 23 reference images and vectors (1024 dimensions), 3,268 graph nodes, 7,245 directed edges, and 156 legacy OSM-rendered tile files. Mapbox map data cannot be bundled; these raster files are not the target runtime basemap and should not be presented as proof of Mapbox readiness. The model file SHA-256 is `bbbb4c51a55a53905af1daec995ca1aae355046f8839bb8c9f5ce9271394bc40`. These are file/inventory facts, not proof that the app flow works or that data is legally/physically validated.
+Observed inventory: 15 catalog records (6 routable Intramuros POIs and 9 recognition-only Manila POIs), 51 licensed reference images and 512-dimensional OpenCLIP vectors, 30 held-out images, 10 unknown images, 3,268 graph nodes, and 7,245 directed edges. The Manila batch covers Rizal Park, SM City Manila, Robinsons Place Manila, Lucky Chinatown Mall, UP Manila, De La Salle University Manila, FEU, Quiapo Church, and Binondo Church. The remaining requested Manila entries and Makati/Pasay catalog expansion are incomplete. Legacy OSM raster files are not the runtime basemap; Mapbox map data cannot be bundled. Inventory facts do not prove full area coverage, source rights, or app behavior.
 
-The current `lib/main.dart` is still the generated counter sample. Approved app shell, camera/recognition/map/navigation screens, and full flow wiring are not present. Current `pubspec.yaml` declares `image` and `tflite_flutter`; the other packages in the ARD-approved target are not yet declared.
+The Manila catalog coordinates were matched to these named OpenStreetMap features: [Rizal Park (way 24159887)](https://www.openstreetmap.org/way/24159887), [SM City Manila (way 59342722)](https://www.openstreetmap.org/way/59342722), [Robinsons Manila (way 48894714)](https://www.openstreetmap.org/way/48894714), [Lucky Chinatown Mall (relation 14330018)](https://www.openstreetmap.org/relation/14330018), [UP Manila (relation 2918734)](https://www.openstreetmap.org/relation/2918734), [De La Salle University Manila (relation 11126048)](https://www.openstreetmap.org/relation/11126048), [Far Eastern University (way 28788717)](https://www.openstreetmap.org/way/28788717), [Quiapo Church (way 27086772)](https://www.openstreetmap.org/way/27086772), and [Binondo Church (way 108850879)](https://www.openstreetmap.org/way/108850879). These entries omit `route_node_id` and remain outside route coverage.
+
+Android image inference uses ONNX Runtime through a Flutter MethodChannel in `MainActivity`; see `ARD.md` for exact model/data contracts and Android proof status.
 
 ## Approved Android target structure
 
@@ -48,7 +50,7 @@ lib/
 └── shared/models/{landmark,route_result}.dart
 
 assets/
-├── models/landmark_embedder.tflite
+├── models/openclip_vit_b32_laion2b_int8.onnx
 ├── images/[licensed reference photos]
 ├── landmarks/{landmarks,reference_embeddings}.json
 ├── maps/intramuros_graph.json
@@ -56,7 +58,7 @@ assets/
 tools/prepare_dataset.py                      # build time only, never an app server
 ```
 
-The approved app packages are `image_picker`, `image`, `tflite_flutter`, `mapbox_maps_flutter`, and `flutter_riverpod`, in addition to Flutter. The target Mapbox region is downloaded by its SDK and stored outside the Flutter asset tree. The current checkout has not yet migrated its dependency or map screen; use versions/contracts recorded in `pubspec.yaml` and `ARD.md` as the implementation is completed. The approved preparation-only environment is separately documented in `ARD.md` and [`TUNTON_BACKEND_STRUCTURE.md`](TUNTON_BACKEND_STRUCTURE.md).
+Flutter and Android runtime dependencies are recorded in `pubspec.yaml` and Gradle. OpenCLIP/PyTorch/ONNX/OSMnx are preparation-only dependencies documented in `ARD.md` and [`TUNTON_BACKEND_STRUCTURE.md`](TUNTON_BACKEND_STRUCTURE.md). Mapbox stores its SDK-managed offline region outside Flutter assets.
 
 ## P0 ownership map
 
@@ -75,6 +77,6 @@ Implement in dependency order: model/runtime validity → data validity → reco
 
 ## Verification state
 
-No physical Android release install, airplane-mode cold launch, Android TFLite inference, or 8 GB memory/latency measurement is established by this inventory. Refer to the verification sections in `SDD.md` and `SETUP.md`; report each check as passed, failed, or not run with its actual evidence.
+Physical Android release install, airplane-mode cold launch, Android ONNX inference, and 8 GB memory/latency measurement still require device evidence. Refer to `SDD.md` and `SETUP.md`; report each as passed, failed, or not run with actual evidence.
 
 When assigning work, include the exact P0 ID, approved file(s), behavior, relevant contract, local check, and device/offline status. Do not add a runtime backend, new model, additional map region, GPS, online map fallback, database, or architecture layer to solve a P0 task.

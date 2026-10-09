@@ -10,6 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 LANDMARKS = {
     'fort-santiago', 'manila-cathedral', 'san-agustin',
     'casa-manila', 'baluarte-san-diego', 'puerta-real',
+    'rizal-park', 'sm-city-manila', 'robinsons-place-manila',
+    'lucky-chinatown-mall', 'up-manila', 'dlsu-manila',
+    'far-eastern-university', 'quiapo-church', 'binondo-church',
 }
 
 
@@ -19,14 +22,18 @@ class DatasetSourcesTest(unittest.TestCase):
         cls.photos = json.loads((ROOT / 'test/datasets/sources.json').read_text())['photos']
 
     def test_complete_separate_splits(self):
-        self.assertEqual(len(self.photos), 47)
-        self.assertEqual(sum(p['split'] == 'reference' for p in self.photos), 23)
+        self.assertEqual(len(self.photos), 91)
+        self.assertEqual(sum(p['split'] == 'reference' for p in self.photos), 51)
         self.assertEqual({p['landmark_id'] for p in self.photos if p['split'] != 'unknown'}, LANDMARKS)
         for landmark in LANDMARKS:
-            for split, count in [('reference', 3 if landmark == 'puerta-real' else 4), ('held_out', 2)]:
+            reference_count = 4 if landmark == 'binondo-church' else 3 if landmark in LANDMARKS - {
+                'fort-santiago', 'manila-cathedral', 'san-agustin',
+                'casa-manila', 'baluarte-san-diego', 'puerta-real',
+            } else 3 if landmark == 'puerta-real' else 4
+            for split, count in [('reference', reference_count), ('held_out', 2)]:
                 self.assertEqual(sum(p['landmark_id'] == landmark and p['split'] == split for p in self.photos), count)
         unknowns = [p for p in self.photos if p['split'] == 'unknown']
-        self.assertEqual(len(unknowns), 12)
+        self.assertEqual(len(unknowns), 10)
         self.assertTrue(all(p['landmark_id'] is None for p in unknowns))
         for field in ('path', 'page_url', 'original_sha256', 'sha256'):
             self.assertEqual(len({p[field] for p in self.photos}), len(self.photos), field)
@@ -88,7 +95,7 @@ class DatasetSourcesTest(unittest.TestCase):
                 self.assertTrue(photo['source_title'].startswith('File:'))
                 self.assertEqual(urlparse(photo['page_url']).hostname, 'commons.wikimedia.org')
                 self.assertEqual(urlparse(photo['download_url']).hostname, 'upload.wikimedia.org')
-                self.assertIn(photo['license'], {'CC0', 'CC BY 2.0', 'CC BY 2.5', 'CC BY 4.0', 'CC BY-SA 2.0', 'CC BY-SA 3.0', 'CC BY-SA 4.0', 'PD-self'})
+                self.assertIn(photo['license'], {'CC0', 'CC BY 2.0', 'CC BY 2.5', 'CC BY 3.0', 'CC BY 4.0', 'CC BY-SA 2.0', 'CC BY-SA 3.0', 'CC BY-SA 4.0', 'PD-self'})
                 if photo['license'] == 'PD-self':
                     self.assertEqual(photo['license_url'], 'https://commons.wikimedia.org/wiki/Template:PD-self')
                     self.assertIn('explicit uploader public-domain release', photo['source_notice'])

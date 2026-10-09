@@ -4,41 +4,110 @@
     "name": "Fort Santiago",
     "lat": 14.592877,
     "lon": 120.9718867,
-    "route_node_id": "1034882636"
+    "route_node_id": "1034882636",
+    "area_id": "intramuros"
   },
   {
     "id": "manila-cathedral",
     "name": "Manila Cathedral",
     "lat": 14.5917894,
     "lon": 120.973312,
-    "route_node_id": "3388767099"
+    "route_node_id": "3388767099",
+    "area_id": "intramuros"
   },
   {
     "id": "san-agustin",
     "name": "San Agustin Church — exterior public street approach",
     "lat": 14.5891456,
     "lon": 120.9751342,
-    "route_node_id": "7739042117"
+    "route_node_id": "7739042117",
+    "area_id": "intramuros"
   },
   {
     "id": "casa-manila",
     "name": "Casa Manila",
     "lat": 14.5897328,
     "lon": 120.9752501,
-    "route_node_id": "7739042126"
+    "route_node_id": "7739042126",
+    "area_id": "intramuros"
   },
   {
     "id": "baluarte-san-diego",
     "name": "Baluarte de San Diego — exterior public street approach",
     "lat": 14.5854776,
     "lon": 120.9756548,
-    "route_node_id": "6510489354"
+    "route_node_id": "6510489354",
+    "area_id": "intramuros"
   },
   {
     "id": "puerta-real",
     "name": "Puerta Real",
     "lat": 14.586193,
     "lon": 120.977024,
-    "route_node_id": "9834302082"
+    "route_node_id": "9834302082",
+    "area_id": "intramuros"
+  },
+  {
+    "id": "rizal-park",
+    "name": "Rizal Park",
+    "lat": 14.5829847,
+    "lon": 120.9792724,
+    "area_id": "manila"
+  },
+  {
+    "id": "sm-city-manila",
+    "name": "SM City Manila",
+    "lat": 14.5897825,
+    "lon": 120.9831425,
+    "area_id": "manila"
+  },
+  {
+    "id": "robinsons-place-manila",
+    "name": "Robinsons Place Manila",
+    "lat": 14.5764417,
+    "lon": 120.9837939,
+    "area_id": "manila"
+  },
+  {
+    "id": "lucky-chinatown-mall",
+    "name": "Lucky Chinatown Mall",
+    "lat": 14.6031035,
+    "lon": 120.9734685,
+    "area_id": "manila"
+  },
+  {
+    "id": "up-manila",
+    "name": "University of the Philippines Manila",
+    "lat": 14.5791337,
+    "lon": 120.9835126,
+    "area_id": "manila"
+  },
+  {
+    "id": "dlsu-manila",
+    "name": "De La Salle University Manila",
+    "lat": 14.564944,
+    "lon": 120.9930992,
+    "area_id": "manila"
+  },
+  {
+    "id": "far-eastern-university",
+    "name": "Far Eastern University (FEU)",
+    "lat": 14.6037961,
+    "lon": 120.9864179,
+    "area_id": "manila"
+  },
+  {
+    "id": "quiapo-church",
+    "name": "Quiapo Church",
+    "lat": 14.5988612,
+    "lon": 120.9837971,
+    "area_id": "manila"
+  },
+  {
+    "id": "binondo-church",
+    "name": "Binondo Church",
+    "lat": 14.6002054,
+    "lon": 120.9746985,
+    "area_id": "manila"
   }
 ]

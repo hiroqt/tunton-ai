@@ -1,6 +1,6 @@
 # ARD — TUNTON AI Application Requirements & Design
 
-**Status:** Implementation contract for `PRD.md` P0 only · **Android-first Flutter** · **No runtime server** · **One bundled TFLite vision embedder**.
+**Status:** Approved scope update, 2026-10-10 · **Android-first Flutter** · **No runtime server** · **One bundled OpenCLIP ONNX image encoder**.
 
 ## 1. Architecture decision record
 
@@ -10,8 +10,8 @@
 | State | `flutter_riverpod` | Only current photo, candidates, selected destination/origin and route |
 | Photo capture | `image_picker` | Camera or gallery input |
 | Image preprocessing | Dart `image` package | Decode, convert, resize and normalize according to *actual* model tensor requirements |
-| ML runtime | **`tflite_flutter`**, CPU-first | Run single local `.tflite` model directly on phone; physical Android device, API 26+ for documented package setup |
-| Primary model | **Google MobileNetV3 Small Image Embedder** | Create reusable visual feature vectors, **not GPS** |
+| ML runtime | **ONNX Runtime Android**, CPU-first | Run one local ONNX image encoder through a Flutter MethodChannel; no local HTTP server |
+| Primary model | **OpenCLIP ViT-B/32, LAION-2B** (`laion2b_s34b_b79k`) | Create reusable visual feature vectors, **not GPS** |
 | Matching | L2-normalized cosine similarity **in Dart** | Rank tens of precomputed vectors without FAISS or database |
 | Map UI | `mapbox_maps_flutter` SDK-managed offline style and tile region | Download the fixed Intramuros region while connected; render it from the SDK offline store with route overlay |
 | Map source | Mapbox basemap; separately, OSM-derived pedestrian graph | Mapbox supplies map presentation; OSM data supplies local pedestrian geometry and requires OSM attribution |
@@ -21,29 +21,22 @@
 
 **Map provider decision (user-approved 2026-10-09):** replace the planned bundled OSM-rendered basemap with one Mapbox SDK-managed Intramuros offline-region download. Retain OSM only as the pedestrian-graph source and its required attribution. The connected download is a P0 setup step; after SDK-confirmed completion, the demo journey must work offline.
 
-Approved preparation-only packages (user decision, 2026-10-09): `ai-edge-litert`, `numpy`, `Pillow`, and `osmnx`, in an isolated Python environment. These prepare licensed photos, run the same MobileNetV3 checkpoint, and export OSM-derived walking data. They are not Android runtime dependencies. Backend evaluation photos and source/license records live under `test/datasets/` and are excluded from the APK; team-held-out photos belong in `test/datasets/held_out/team/`. Mapbox map data is downloaded through the Android SDK and is not generated or redistributed by this pipeline.
+Preparation uses Python, OpenCLIP/PyTorch, ONNX, NumPy, Pillow, and OSMnx on the developer machine. These are not Android runtime dependencies. Android packages only the image tower ONNX model; catalog photos and held-out evaluation images remain outside the APK. Map data behavior is unchanged.
 
-Project dataset restriction (user decision, 2026-10-09): every collected reference, held-out, and unknown-test photo must depict a documented Philippine location. Preparation source records require `country: PH`, a named location, and geographic source evidence. Map data remains the Intramuros pilot extract. This restriction describes the project dataset, not the original pretraining corpus of the approved general-purpose MobileNetV3 checkpoint.
+Project dataset restriction (user decision, 2026-10-09): every collected reference, held-out, and unknown-test photo must depict a documented Philippine location. Preparation source records require `country: PH`, a named location, and geographic source evidence. Map data remains the Intramuros pilot extract; recognition coverage includes only named POIs from Manila, Makati, and Pasay.
 
-Do not add dependencies because they are familiar or trendy. `image_picker`, `image`, `tflite_flutter`, `mapbox_maps_flutter`, and `flutter_riverpod` are the only application-level packages approved for the P0 workload (plus Flutter itself / transitive dependencies). Pin a `mapbox_maps_flutter` release compatible with the repository's actual Flutter/Dart toolchain before implementation; do not infer compatibility from current online docs alone.
+Android ML dependency: Maven Central `com.microsoft.onnxruntime:onnxruntime-android:1.23.2`. Keep CPU as the compatibility baseline; Android inference remains unverified until the packaged model runs on the emulator and a physical phone. Expose only embedding inference through `embedding_service.dart` and the `MainActivity` MethodChannel. No FastAPI, embedded Python, HTTP listener, OCR, or model selector.
 
 ## 2. Model artifacts and decision gate
 
-### Primary approved model
+### Approved image encoder
 
-- **Name:** MobileNetV3 Small **Image Embedder** (Google MediaPipe).
-- **Official download:** https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite
-- **Local APK asset:** `assets/models/landmark_embedder.tflite`.
-- **Model role:** Image → numerical embedding used for similarity to supported reference photos. It does **not** infer coordinates or provide walking directions.
-- **Runtime:** `tflite_flutter` with explicitly validated RGB input, tensor layout/shape/type, preprocessing, output dimensions and normalization. MediaPipe's high-level Tasks API handles preprocessing automatically, but raw TFLite does not. Copying a guess from a different MobileNet variant is unacceptable.
-
-### Alternative source — documentation only, not part of P0 implementation
-
-- **Name:** Community MobileCLIP-S1 TFLite checkpoint.
-- **Hugging Face:** https://huggingface.co/anton96vice/mobileclip2_tflite
-- **Candidate artifact:** `mobileclip_s1_datacompdr_last.tflite` (approximately 340 MB as listed by the repository).
-- **Important provenance:** A **community conversion** of MobileCLIP S1. Apple's **MobileCLIP2-S0** at https://huggingface.co/apple/MobileCLIP2-S0 is a different official **PyTorch** checkpoint and is **not** plug-and-play `.tflite`.
-- **Decision:** Do not download, bundle, initialize or expose a model selector for MobileCLIP as part of P0. Explicit approval to **replace** the model is required if accuracy is inadequate. A replacement must satisfy a working Android TFLite embedding-output test and regenerate the whole reference index. Do not combine vectors from two checkpoints.
+- Model: OpenCLIP `ViT-B-32`, pretrained `laion2b_s34b_b79k`.
+- Export only `model.visual` to a fixed-batch ONNX image encoder; text tower/tokenizer remain build-time only.
+- App asset: `assets/models/openclip_vit_b32_laion2b_int8.onnx`, generated by `tools/prepare_dataset.py export-model` and excluded from Git; its manifest is `assets/models/openclip_vit_b32_laion2b_int8.manifest.json`.
+- Export inspection observed input `images` float32 `[1,3,224,224]` and output `embeddings` float32 `[1,512]`. The manifest records these names/shapes/types, model/checkpoint checksums, transform, quantization and exporter metadata.
+- Use the exact transform returned by OpenCLIP for the tagged checkpoint and implement parity at the shared Dart/Python boundary. L2-normalize the output for matching.
+- The model has no geolocation capability. Verified coordinates are looked up only by a catalog ID.
 
 ## 3. Approved code tree — no speculative modules
 
@@ -72,7 +65,8 @@ tunton/
 │           └── route_result.dart
 ├── assets/
 │   ├── models/
-│   │   └── landmark_embedder.tflite
+│   │   ├── openclip_vit_b32_laion2b_int8.onnx
+│   │   └── openclip_vit_b32_laion2b_int8.manifest.json
 │   ├── landmarks/
 │   │   ├── landmarks.json
 │   │   └── reference_embeddings.json
@@ -101,12 +95,13 @@ Use real verified data; never ship placeholders like `0.0` below:
     "name": "Verified place name",
     "lat": 0.0,
     "lon": 0.0,
+    "area_id": "intramuros",
     "route_node_id": "n001"
   }
 ]
 ```
 
-Each ID is unique, coordinates lie inside the pilot area, and `route_node_id` references a **walkable entrance or connected graph node**, not an arbitrary building centroid.
+Each ID is globally unique and coordinates are verified. Only Intramuros entries have `route_node_id`, which must reference a graph-backed walkable approach. Manila, Makati, and Pasay recognition-only entries omit `route_node_id`; they must never be routed using guessed nodes.
 
 Approved dataset decision (2026-10-09): where OSM has no permitted pedestrian connector to the actual entrance, San Agustin and Baluarte de San Diego use an explicitly named **exterior public street approach**. The landmark marker and route endpoint are distinct recorded points. Routes stop at the mapped approach; no final connector, private-gate crossing, or current-access guarantee is implied. Endpoint source evidence and offsets are recorded in the backend map snapshot.
 
@@ -114,8 +109,10 @@ Approved dataset decision (2026-10-09): where OSM has no permitted pedestrian co
 
 ```json
 {
-  "model_id": "bundled-mobilenetv3-small-embedder",
-  "dimension": 0,
+  "model_id": "openclip-vit-b32-laion2b-s34b-b79k-int8-dynamic",
+  "model_sha256": "<64 lowercase hex characters>",
+  "preprocessing_version": "openclip-vit-b32-v1",
+  "dimension": 512,
   "references": [
     {
       "landmark_id": "landmark-001",
@@ -130,7 +127,7 @@ This is a **schema illustration only**, not usable data. In the real file:
 
 - `dimension` equals **the actual output tensor embedding length**.
 - `vector` contains that exact number of finite values and is nonzero and L2-normalized.
-- `model_id` and model checksum correspond to the bundled checkpoint. Checksum may be recorded in docs; do **not** add an unapproved runtime field unless necessary to prevent mismatch.
+- `model_id`, `model_sha256`, and `preprocessing_version` must match the packaged ONNX manifest before inference is allowed.
 - `landmark_id` exists in `landmarks.json` and the reference photo is properly licensed.
 - Every vector is computed using **identical model weights and identical image preprocessing** as the phone app.
 
@@ -174,11 +171,11 @@ This is a **schema illustration only**, not usable data. In the real file:
 | File | One responsibility | P0 |
 |---|---|---|
 | `photo_screen.dart` | Choose or capture one photo, show preview/error | P0-01 |
-| `embedding_service.dart` | Load one checkpoint, inspect tensors, preprocess, infer one image, normalize vector | P0-02 |
+| `embedding_service.dart` | Preprocess one image and call the native ONNX embedding MethodChannel | P0-02 |
 | `landmark_matcher.dart` | Read reference index, compare cosine scores, aggregate per distinct landmark, reject unreliable input | P0-03, P0-04 |
 | `recognition_screen.dart` | Present up to three candidates, require confirmation | P0-05 |
-| `landmark.dart` | Model verified local ID, name, lat/lon, route-node ID | P0-08 |
-| `offline_map_screen.dart` | Download/verify the fixed Mapbox offline region while connected; render it offline, selected destination and manual start | P0-06, P0-07 |
+| `landmark.dart` | Model verified POI ID, name, coordinates, area, optional route-node ID | P0-08 |
+| `offline_map_screen.dart` | Download/verify the fixed Mapbox offline region while connected; render it offline, selected destination and manual or optional GPS-snapped start | P0-06, P0-07 |
 | `landmark_markers.dart` | Render supported POI markers from catalog | P0-06 |
 | `routing_service.dart` | Read graph; run Dijkstra; reconstruct actual edge path; compute distance and estimated ETA | P0-09, P0-10 |
 | `route_result.dart` | Hold route points, distance, ETA and route-unavailable state | P0-09, P0-10, P0-12 |
@@ -189,8 +186,8 @@ This is a **schema illustration only**, not usable data. In the real file:
 ## 6. Visual embedding algorithm contract
 
 1. Decode one chosen photo; reject decode failure and unsupported large input before allocating unnecessary memory.
-2. Inspect actual TFLite input/output tensor shapes/types and metadata. Verify the preprocessing (RGB channels, resize/crop, pixel scale, normalization); do not guess.
-3. Load exactly one interpreter and reuse it. Default to CPU compatibility; acceleration is not a P0 dependency.
+2. Inspect actual ONNX input/output names, shapes, types and metadata. Verify exact OpenCLIP preprocessing constants and transforms; do not guess.
+3. Load one ONNX Runtime session and reuse it. Default to CPU compatibility; acceleration is not a P0 dependency.
 4. Compute one embedding; verify finite nonzero values and expected length; L2-normalize.
 5. Compare query embedding with each stored normalized reference vector using cosine similarity (dot product for normalized vectors).
 6. Reduce to **best similarity per landmark**, sort, and keep top 3 *distinct IDs*.
@@ -199,33 +196,31 @@ This is a **schema illustration only**, not usable data. In the real file:
 
 ## 7. Pedestrian routing contract
 
-1. Confirmed photo match becomes destination ID and `route_node_id`.
-2. User manually picks a known graph-backed start location.
+1. Confirmed photo match resolves to a catalog POI. Only an Intramuros POI with a verified `route_node_id` can enter routing.
+2. User manually picks a known graph-backed start, or explicitly requests foreground GPS. GPS is snapped to the nearest graph node using the packaged Intramuros graph; permission/location failure preserves manual selection.
 3. Reject unknown/out-of-region start or destination.
 4. Run Dijkstra across permitted directed edges, weighted by `length_m`.
-5. If no route, display **Route unavailable**, not a straight line.
-6. Reconstruct ordered stored `[latitude, longitude]` geometries; convert to Mapbox `Position(longitude, latitude)` values for the route overlay.
-7. Distance is sum of traversed `length_m`, ETA minutes = distance meters / **75 m/min** (4.5 km/h), with an explicit estimate label.
-8. No GPS guidance, navigation rerouting, current closure data or travel-time guarantees.
+5. If no route, display **Route unavailable**. Never replace the graph path with a straight line.
+6. Reconstruct ordered stored `[latitude, longitude]` geometries; convert to Mapbox `Position(longitude, latitude)` values for the route overlay. For a GPS start, prepend the actual GPS coordinate and mark the direct connector to the snapped node as approximate and not verified walkable geometry.
+7. Distance includes the graph path plus the GPS-to-node great-circle connector when used. ETA minutes = displayed distance / **75 m/min** (4.5 km/h), explicitly labeled as an estimate and caveated for the approximate connector.
+8. No background GPS, automatic rerouting, current closure data or travel-time guarantees.
 
 ## 8. Readiness gates
 
-- **Gate A: Model:** Flutter loads the true image embedder, outputs correct nonzero embeddings, and matches a held-out landmark photo on real Android.
-- **Gate B: Data:** Six real landmark locations, matching reference embeddings, licensed images, valid graph-backed nodes, legal offline tile source.
+- **Gate A: Model:** Android loads the exported image encoder, outputs a finite nonzero vector, and produces a parity-checked held-out match.
+- **Gate B: Data:** Named POIs have verified locations, matching reference embeddings and openly licensed images; only Intramuros entries need graph-backed nodes.
 - **Gate C: Routing:** One genuine connected walking path and a disconnected-path error both behave correctly.
 - **Gate D: Offline:** Installed release APK cold-starts and completes full P0 flow in airplane mode **without Mac connection**.
 - **Gate E: Device:** Measure inference latency, route latency and actual memory on an 8 GB device, or state compatibility remains unverified.
 
 ## 9. Explicit exclusions
 
-No OCR, GPS/EXIF, cloud inference, app-owned network client/server, Qwen/Gemma/GLM, multi-model runtime, additional downloadable map regions, state framework changes, database, live turn-by-turn assistance, or generated mock coordinates/routes as product evidence. The fixed Mapbox offline region is the sole P0 map download. If a P0 fix appears to require other architecture expansion, ask for approval first.
+No EXIF positioning, background GPS, FastAPI or any runtime server, cloud inference, Qwen/Gemma/GLM, multi-model runtime, additional downloadable map regions, database, live turn-by-turn assistance, or generated mock coordinates/routes as product evidence. Explicit foreground GPS is allowed only as an optional Intramuros route origin snapped to a verified graph node; recognition covers named Manila, Makati, and Pasay POIs, while routing remains Intramuros-only.
 
 ## 10. References
 
-- Image embedder: https://developers.google.com/edge/mediapipe/solutions/vision/image_embedder
-- Official model download: https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite
-- MobileCLIP alternative (not bundled): https://huggingface.co/anton96vice/mobileclip2_tflite
-- TFLite Flutter: https://pub.dev/packages/tflite_flutter
+- OpenCLIP implementation and model transforms: https://github.com/mlfoundations/open_clip
+- ONNX Runtime Android: https://onnxruntime.ai/docs/get-started/with-mobile.html
 - Mapbox Flutter installation and token setup: https://docs.mapbox.com/flutter/maps/guides/install/
 - Mapbox Flutter offline map example: https://docs.mapbox.com/flutter/maps/examples/offline/
 - Mapbox offline map terms/constraints: https://docs.mapbox.com/ios/maps/guides/offline/concepts/

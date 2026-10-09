@@ -1,0 +1,44 @@
+{
+  "model_id": "openclip-vit-b32-laion2b-s34b-b79k-int8-dynamic",
+  "pretrained_tag": "laion2b_s34b_b79k",
+  "checkpoint_repo": "laion/CLIP-ViT-B-32-laion2B-s34B-b79K",
+  "checkpoint_revision": "1a25a446712ba5ee05982a381eed697ef9b435cf",
+  "checkpoint_sha256": "ac4f8c4b88af6d963118cbf40ad93176d092abbedfcb752601ae1866352656e6",
+  "model_sha256": "94273ff4c9c4366403bc041f1f53621251fc0bf466842bced27d3c30ce13ef0d",
+  "format": "ONNX",
+  "opset": 17,
+  "quantization": "dynamic QInt8 per-channel MatMul weights",
+  "input_name": "images",
+  "input_shape": [
+    1,
+    3,
+    224,
+    224
+  ],
+  "input_type": "tensor(float)",
+  "output_name": "embeddings",
+  "output_shape": [
+    1,
+    512
+  ],
+  "output_type": "tensor(float)",
+  "dimension": 512,
+  "preprocessing_version": "openclip-vit-b32-v1",
+  "resize": 224,
+  "resize_mode": "shortest",
+  "interpolation": "bicubic",
+  "crop": "center 224x224",
+  "channel_order": "RGB, NCHW",
+  "mean": [
+    0.48145466,
+    0.4578275,
+    0.40821073
+  ],
+  "std": [
+    0.26862954,
+    0.26130258,
+    0.27577711
+  ],
+  "self_check_cosine": 0.9976605772972107,
+  "android_verified": false
+}

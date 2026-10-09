@@ -36,7 +36,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   image: ^4.9.1
   image_picker: ^1.2.4
-  tflite_flutter: ^0.12.1
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
   geolocator: ^13.0.2
@@ -65,7 +64,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/fonts/Inter-LICENSE.txt
-    - assets/models/landmark_embedder.tflite
+    - assets/models/openclip_vit_b32_laion2b_int8.onnx
+    - assets/models/openclip_vit_b32_laion2b_int8.manifest.json
     - assets/landmarks/landmarks.json
     - assets/landmarks/reference_embeddings.json
     - assets/maps/intramuros_graph.json
