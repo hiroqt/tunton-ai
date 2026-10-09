@@ -1,67 +1,45 @@
-# ARD — TUNTON AI Architecture & Requirements Design
+# ARD — TUNTON AI Application Requirements & Design
 
-**Authority:** Implements `PRD.md` only; no additions are authorized by this document.  
-**Target:** Flutter Android demo running fully on one 8 GB RAM smartphone.  
-**Design principle:** Small, deterministic, and completely offline at runtime.
+**Status:** Implementation contract for `PRD.md` P0 only · **Android-first Flutter** · **No runtime server** · **One bundled TFLite vision embedder**.
 
-## 1. Architecture in one sentence
+## 1. Architecture decision record
 
-A single Flutter app loads a bundled MobileNetV3 Small TFLite image embedder and offline landmark vectors, renders bundled local map tiles, and routes over a bundled pedestrian graph using pure Dart.
-
-```text
-Camera / Gallery
-       |
-       v
- Flutter image preprocessing
-       |
-       v
- TFLite MobileNetV3 Small embedder     assets/models/landmark_embedder.tflite
-       |
-       v
- Normalize query vector
-       |
-       v
- Cosine comparison ------------------- assets/landmarks/reference_embeddings.json
-       |                               assets/landmarks/landmarks.json
-       v
- Top 3 distinct landmarks / Unknown
-       |
-       v
- User confirms destination
-       |
-       +--> flutter_map offline tiles - assets/tiles/
-       |
-       v
- Manual starting-point selection
-       |
-       v
- Dart Dijkstra ----------------------- assets/maps/intramuros_graph.json
-       |
-       v
- Route polyline + distance + ETA
-```
-
-**No runtime backend, HTTP service, cloud geocoder, remote database, Google Maps SDK, or Ollama.** The Python preparation script is not shipped as a mobile service.
-
-## 2. Architecture decisions (locked)
-
-| Decision | Selected option | Why / constraint |
+| Concern | Selected technology / rule | Why it exists |
 |---|---|---|
-| Mobile UI | Flutter + Dart | One device-local mobile codebase. |
-| Demo target | Android | Must ship a tested APK inside one day; iOS is not an acceptance requirement. |
-| Vision | MobileNetV3 Small Image Embedder TFLite | Low-overhead on-device image vectors; no hosted model. |
-| Inference API | `tflite_flutter` | Bundled interpreter on the phone. |
-| Similarity | Cosine similarity in Dart | Tens of references do not need FAISS or a vector database. |
-| Offline basemap | `flutter_map` + bundled raster tiles with `AssetTileProvider` | No tile requests to a server. |
-| Route data | One vetted pedestrian graph in JSON | Full navigation service is unnecessary. |
-| Routing | Dijkstra shortest path in Dart | Deterministic, testable graph traversal. |
-| Location input | Recognized landmark + manually selected start | Avoids false precision from images and live GPS dependency. |
-| Data storage | Read-only bundled JSON / image / TFLite assets | No database engine required. |
-| State | `flutter_riverpod` | Keep only current photo, match state, selected points, and route. |
+| Mobile runtime | **Flutter + Dart**, Android release APK | Local, portable interactive UI with on-device computation |
+| State | `flutter_riverpod` | Only current photo, candidates, selected destination/origin and route |
+| Photo capture | `image_picker` | Camera or gallery input |
+| Image preprocessing | Dart `image` package | Decode, convert, resize and normalize according to *actual* model tensor requirements |
+| ML runtime | **`tflite_flutter`**, CPU-first | Run single local `.tflite` model directly on phone; physical Android device, API 26+ for documented package setup |
+| Primary model | **Google MobileNetV3 Small Image Embedder** | Create reusable visual feature vectors, **not GPS** |
+| Matching | L2-normalized cosine similarity **in Dart** | Rank tens of precomputed vectors without FAISS or database |
+| Map UI | `flutter_map` + `latlong2` + bundled raster tiles with `AssetTileProvider` | Render offline Intramuros tiles and route overlay |
+| Map source | Legally sourced OpenStreetMap-derived data | Local pedestrian geometry, landmark coordinates, OSM attribution |
+| Route computation | **Pure Dart Dijkstra** over bundled JSON graph | Offline deterministic shortest walkable route |
+| Storage | Read-only Flutter asset JSON, raster tiles, reference images and checkpoint | No database, network services, syncing or online asset retrieval |
+| Preparation tools | Python and optionally OSMnx **on developer Mac only** | Precompute verified walking graph and image reference index before packaging |
 
-## 3. Approved code and asset boundaries
+Do not add dependencies because they are familiar or trendy. `image_picker`, `image`, `tflite_flutter`, `flutter_map`, `latlong2`, and `flutter_riverpod` are the only application-level packages approved for the P0 workload (plus Flutter itself / transitive dependencies).
 
-Follow this existing MVP shape. The standard files created by `flutter create` and generated package files are permitted; do not invent other architectural layers or folders.
+## 2. Model artifacts and decision gate
+
+### Primary approved model
+
+- **Name:** MobileNetV3 Small **Image Embedder** (Google MediaPipe).
+- **Official download:** https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite
+- **Local APK asset:** `assets/models/landmark_embedder.tflite`.
+- **Model role:** Image → numerical embedding used for similarity to supported reference photos. It does **not** infer coordinates or provide walking directions.
+- **Runtime:** `tflite_flutter` with explicitly validated RGB input, tensor layout/shape/type, preprocessing, output dimensions and normalization. MediaPipe's high-level Tasks API handles preprocessing automatically, but raw TFLite does not. Copying a guess from a different MobileNet variant is unacceptable.
+
+### Alternative source — documentation only, not part of P0 implementation
+
+- **Name:** Community MobileCLIP-S1 TFLite checkpoint.
+- **Hugging Face:** https://huggingface.co/anton96vice/mobileclip2_tflite
+- **Candidate artifact:** `mobileclip_s1_datacompdr_last.tflite` (approximately 340 MB as listed by the repository).
+- **Important provenance:** A **community conversion** of MobileCLIP S1. Apple's **MobileCLIP2-S0** at https://huggingface.co/apple/MobileCLIP2-S0 is a different official **PyTorch** checkpoint and is **not** plug-and-play `.tflite`.
+- **Decision:** Do not download, bundle, initialize or expose a model selector for MobileCLIP as part of P0. Explicit approval to **replace** the model is required if accuracy is inadequate. A replacement must satisfy a working Android TFLite embedding-output test and regenerate the whole reference index. Do not combine vectors from two checkpoints.
+
+## 3. Approved code tree — no speculative modules
 
 ```text
 tunton/
@@ -89,59 +67,66 @@ tunton/
 ├── assets/
 │   ├── models/
 │   │   └── landmark_embedder.tflite
+│   ├── landmarks/
+│   │   ├── landmarks.json
+│   │   └── reference_embeddings.json
 │   ├── maps/
 │   │   └── intramuros_graph.json
 │   ├── tiles/
 │   │   └── {z}/{x}/{y}.png
-│   ├── landmarks/
-│   │   ├── landmarks.json
-│   │   └── reference_embeddings.json
 │   └── images/
-│       └── [bundled, licensed landmark photos]
+│       └── [licensed reference landmark images]
 ├── tools/
 │   └── prepare_dataset.py
-├── android/                  # Flutter-generated
-├── ios/                      # Flutter-generated; not a hackathon demo target
+├── android/                # generated by Flutter
 └── pubspec.yaml
 ```
 
-`tools/prepare_dataset.py` is a **build-time-only** helper for normalizing/validating downloaded OSM pedestrian data, landmark IDs, coordinates, and precomputed embeddings. No new Python runtime, second backend, database, or agent modules.
+The standard project/test/build artifacts created by `flutter create` are fine. No extra app folders, alternative backend, persistence layer, analytics pipeline or second runtime are permitted.
 
-## 4. Fixed local data contracts
+## 4. Fixed data contracts
 
 ### `assets/landmarks/landmarks.json`
 
-Each landmark record has:
+Use real verified data; never ship placeholders like `0.0` below:
 
 ```json
-{
-  "id": "landmark-001",
-  "name": "Verified landmark name",
-  "lat": 0.0,
-  "lon": 0.0,
-  "route_node_id": "n001"
-}
+[
+  {
+    "id": "landmark-001",
+    "name": "Verified place name",
+    "lat": 0.0,
+    "lon": 0.0,
+    "route_node_id": "n001"
+  }
+]
 ```
 
-**Rules:** `lat`/`lon` are verified in the pilot region; `route_node_id` corresponds to a valid pedestrian graph vertex near a walkable entrance. Example numbers are schema placeholders only. Use unique IDs and actual prepared coordinates.
+Each ID is unique, coordinates lie inside the pilot area, and `route_node_id` references a **walkable entrance or connected graph node**, not an arbitrary building centroid.
 
 ### `assets/landmarks/reference_embeddings.json`
 
 ```json
 {
   "model_id": "bundled-mobilenetv3-small-embedder",
-  "dimension": 128,
+  "dimension": 0,
   "references": [
     {
       "landmark_id": "landmark-001",
       "image_asset": "assets/images/example-01.jpg",
-      "vector": [0.0, 0.0]
+      "vector": []
     }
   ]
 }
 ```
 
-**Schema illustration only:** The vector shown is truncated and the `dimension` is a placeholder. Use the **actual** TFLite output dimension and store complete finite, normalized vectors. Match each reference to a known `landmark_id`. The model used to produce the reference vectors **must be exactly the model included in the APK**, with the same preprocessing. Fail early if model ID, tensor shape, or vector dimension does not match.
+This is a **schema illustration only**, not usable data. In the real file:
+
+- `dimension` equals **the actual output tensor embedding length**.
+- `vector` contains that exact number of finite values and is nonzero and L2-normalized.
+- `model_id` and model checksum correspond to the bundled checkpoint. Checksum may be recorded in docs; do **not** add an unapproved runtime field unless necessary to prevent mismatch.
+- `landmark_id` exists in `landmarks.json` and the reference photo is properly licensed.
+- Every vector is computed using **identical model weights and identical image preprocessing** as the phone app.
 
 ### `assets/maps/intramuros_graph.json`
 
@@ -155,91 +140,83 @@ Each landmark record has:
     {
       "from": "n001",
       "to": "n002",
-      "length_m": 45.0,
+      "length_m": 50.0,
       "geometry": [[0.0, 0.0], [0.0, 0.0]]
     }
   ]
 }
 ```
 
-**Rules:** Coordinates in graph JSON use `[latitude, longitude]`, then convert to `LatLng` for Flutter; never swap with GeoJSON's `[longitude, latitude]` convention. Use real geometry, positive lengths, verified pedestrian-only connections, and explicit directionality where applicable. Dijkstra should preserve edge geometry instead of inventing straight lines between geographically distant vertices.
+**Coordinate convention:** `nodes` and `geometry` in this contract use **[latitude, longitude]** as stated; GeoJSON uses **[longitude, latitude]** and must be transformed during preparation, not silently interchanged.
 
-### `assets/tiles/{z}/{x}/{y}.png`
+- `length_m` must be finite and greater than zero; edge `geometry` must match the real mapped pedestrian path.
+- Edges represent **permitted walking transitions**. Preserve one-way restrictions where available. Do not automatically treat all edges as bidirectional without checking semantics.
+- The graph must have connected walkable paths for selected demo landmark pairs.
+- Dijkstra uses `length_m`; reconstruct result from stored edge geometries, not just node-to-node straight line segments.
 
-- Ship raster tiles only for the chosen Intramuros coverage and zoom range.
-- Register all relevant asset directories in `pubspec.yaml`; `AssetTileProvider` requires correct asset registration.
-- No fallback to network tile providers or online fonts/labels.
-- Show OSM attribution and comply with licensing and tile-source redistribution rights.
-- Tiles, graph nodes, and landmarks must describe the **same coverage area**.
+### Bundled tiles: `assets/tiles/{z}/{x}/{y}.png`
 
-## 5. On-device inference sequence
+- One small Intramuros coverage area with enough registered zoom levels for the demo.
+- Keep tiles, POIs, path graph and test landmarks spatially aligned.
+- `AssetTileProvider` reads assets; no online tiles or fonts as fallback.
+- Use an authorized offline tile archive/source and **© OpenStreetMap contributors** attribution. Do not bulk-fetch from prohibited public OSM tile services.
 
-1. User selects a single photo via `image_picker`.
-2. Decode and resize using Dart `image`, applying the bundled model's exact expected RGB layout, input type, normalization, and dimensions.
-3. Load the model once through `tflite_flutter`. Inspect tensors and verify supported input/output configuration.
-4. Run inference on one image. Extract the **embedding output tensor**, not generic ImageNet classification labels.
-5. L2-normalize the query embedding; reject malformed or zero vectors.
-6. Compute cosine similarity against the stored normalized vectors.
-7. Aggregate per-landmark (e.g., best reference similarity) and return top three **different landmarks**, never multiple entries for the same place.
-8. Apply a rejection rule established using held-out examples; if no reliable result, display **Not recognized**. Similarity scores are ranking signals, **not calibrated location confidence percentages**.
-9. User confirms a candidate; `landmarks.json` provides its **verified** coordinates and mapped route node.
+## 5. Behavior contracts by existing files
 
-**Integration risk:** A MediaPipe task model can contain metadata/preprocessing assumptions. Using the raw TFLite interpreter bypasses MediaPipe task preprocessing. Verify the actual tensor layout and normalization instead of assuming a particular RGB normalization or output size. Test one known reference-vs-query pair before integrating the UI.
+| File | One responsibility | P0 |
+|---|---|---|
+| `photo_screen.dart` | Choose or capture one photo, show preview/error | P0-01 |
+| `embedding_service.dart` | Load one checkpoint, inspect tensors, preprocess, infer one image, normalize vector | P0-02 |
+| `landmark_matcher.dart` | Read reference index, compare cosine scores, aggregate per distinct landmark, reject unreliable input | P0-03, P0-04 |
+| `recognition_screen.dart` | Present up to three candidates, require confirmation | P0-05 |
+| `landmark.dart` | Model verified local ID, name, lat/lon, route-node ID | P0-08 |
+| `offline_map_screen.dart` | Render bundled map, selected destination and manual start | P0-06, P0-07 |
+| `landmark_markers.dart` | Render supported POI markers from catalog | P0-06 |
+| `routing_service.dart` | Read graph; run Dijkstra; reconstruct actual edge path; compute distance and estimated ETA | P0-09, P0-10 |
+| `route_result.dart` | Hold route points, distance, ETA and route-unavailable state | P0-09, P0-10, P0-12 |
+| `navigation_screen.dart` | Show route line, distance/ETA or unavailable state | P0-10, P0-12 |
+| `app.dart` / `main.dart` | Wire the single flow and current Riverpod state | P0-01–P0-12 |
+| `tools/prepare_dataset.py` | Build-time dataset normalization/precomputation/validation only | Input preparation |
 
-## 6. Route computation sequence
+## 6. Visual embedding algorithm contract
 
-1. Destination is the user-confirmed landmark's `route_node_id`.
-2. User selects one valid start landmark/graph-backed marker on the map.
-3. Read the corresponding origin route node and reject unknown IDs/out-of-bounds selection.
-4. Run Dijkstra using `length_m` as edge weight on the bundled pedestrian graph.
-5. If no valid connected path exists, respond **Route unavailable**; do not substitute a straight line.
-6. Reconstruct the graph edge geometry into an ordered polyline; render with `flutter_map`.
-7. Sum the actual edge lengths for total distance. Estimate walk time = `distance_m / 75` minutes (4.5 km/h), rounded for display.
-8. Show that route information is preloaded and **not based on live closures, traffic, or GPS tracking**.
+1. Decode one chosen photo; reject decode failure and unsupported large input before allocating unnecessary memory.
+2. Inspect actual TFLite input/output tensor shapes/types and metadata. Verify the preprocessing (RGB channels, resize/crop, pixel scale, normalization); do not guess.
+3. Load exactly one interpreter and reuse it. Default to CPU compatibility; acceleration is not a P0 dependency.
+4. Compute one embedding; verify finite nonzero values and expected length; L2-normalize.
+5. Compare query embedding with each stored normalized reference vector using cosine similarity (dot product for normalized vectors).
+6. Reduce to **best similarity per landmark**, sort, and keep top 3 *distinct IDs*.
+7. Use held-out true/unknown examples to choose a **conservative rejection rule**, not an arbitrary fabricated accuracy percentage. Unclear image yields **Not recognized** or candidates requiring confirmation.
+8. Resolve confirmed ID through `landmarks.json`. Never let ML outputs generate coordinates.
 
-## 7. UI boundaries
+## 7. Pedestrian routing contract
 
-Only these app states/screens are needed:
+1. Confirmed photo match becomes destination ID and `route_node_id`.
+2. User manually picks a known graph-backed start location.
+3. Reject unknown/out-of-region start or destination.
+4. Run Dijkstra across permitted directed edges, weighted by `length_m`.
+5. If no route, display **Route unavailable**, not a straight line.
+6. Reconstruct ordered stored geometries; use `latlong2` LatLng points for Flutter map route overlay.
+7. Distance is sum of traversed `length_m`, ETA minutes = distance meters / **75 m/min** (4.5 km/h), with an explicit estimate label.
+8. No GPS guidance, navigation rerouting, current closure data or travel-time guarantees.
 
-- **Photo screen:** camera/gallery choice, image preview, loading, invalid-image error.
-- **Recognition screen:** up to three candidate landmarks, user confirmation, explicit unknown result.
-- **Offline map screen:** local map tiles, selected destination marker, manual start selection, bundled POI markers.
-- **Navigation screen:** plotted walking path, distance, walking ETA, unavailable-route message.
+## 8. Readiness gates
 
-No authentication, onboarding wizard, settings system, dashboards, chat tab, or multi-day journey features.
+- **Gate A: Model:** Flutter loads the true image embedder, outputs correct nonzero embeddings, and matches a held-out landmark photo on real Android.
+- **Gate B: Data:** Six real landmark locations, matching reference embeddings, licensed images, valid graph-backed nodes, legal offline tile source.
+- **Gate C: Routing:** One genuine connected walking path and a disconnected-path error both behave correctly.
+- **Gate D: Offline:** Installed release APK cold-starts and completes full P0 flow in airplane mode **without Mac connection**.
+- **Gate E: Device:** Measure inference latency, route latency and actual memory on an 8 GB device, or state compatibility remains unverified.
 
-## 8. Data and device readiness gates
+## 9. Explicit exclusions
 
-**Before integration:**
-- Bundled model loads on an Android phone and produces a stable embedding.
-- The reference index is produced with the same model and preprocessing, and at least one held-out photo matches meaningfully.
-- The map has offline tiles for the chosen location.
-- The graph connects at least one known pair of landmarks and produces a real non-straight edge path.
+No OCR, GPS/EXIF, cloud, HTTP, server, Qwen/Gemma/GLM, multi-model runtime, downloadable maps, state framework changes, database, live turn-by-turn assistance, or generated mock coordinates/routes as product evidence. If a P0 fix appears to require architecture expansion, ask for approval first.
 
-**Before judging:**
-- Cold-launch in airplane mode and complete the full user journey.
-- Run an unknown-photo test and a disconnected-route test.
-- Measure recognition inference time, route calculation time, and peak memory on target hardware.
-- Confirm the app does not require a laptop, local HTTP service, or internet after installation.
+## 10. References
 
-## 9. Failure/edge state contract
-
-| Condition | Required UI behavior |
-|---|---|
-| Model absent or incompatible | Recognition unavailable; explain local model problem; no fake matches. |
-| Invalid/unreadable photo | Request a different photo. |
-| Unknown or ambiguous image | Show **Not recognized** or candidate list requiring explicit selection. |
-| No start point chosen | Do not calculate route; prompt for manual start. |
-| Selected points outside supported map | Explain map coverage limit. |
-| Graph nodes disconnected | Show **Route unavailable**; do not draw a direct line. |
-| Tiles missing | Surface incomplete offline map error; never silently call a network tile service. |
-
-## 10. Scope gate
-
-Any implementation decision that adds cloud/network services, a new backend, another vision model, OCR, live tracking, alternate routing modes, or data beyond Intramuros is **rejected** unless the user explicitly changes the PRD. Do not add speculative abstractions, new code folders, or future-facing modules.
-
-**References:**
-- https://pub.dev/packages/tflite_flutter
-- https://docs.fleaflet.dev/tile-servers/offline-mapping
-- https://github.com/google-ai-edge/mediapipe-samples-web/blob/main/src/tasks/image-embedder.ts
-- https://operations.osmfoundation.org/policies/tiles/
+- Image embedder: https://developers.google.com/edge/mediapipe/solutions/vision/image_embedder
+- Official model download: https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite
+- MobileCLIP alternative (not bundled): https://huggingface.co/anton96vice/mobileclip2_tflite
+- TFLite Flutter: https://pub.dev/packages/tflite_flutter
+- Offline mapping: https://docs.fleaflet.dev/tile-servers/offline-mapping
+- OSM tile usage: https://operations.osmfoundation.org/policies/tiles/
