@@ -1,6 +1,6 @@
 # TUNTON development map
 
-This is a navigation guide to the existing implementation and the approved P0 target. It does not authorize new features, packages, APIs, or code paths. `PRD.md` and `ARD.md` remain authoritative.
+This is a navigation guide to the existing implementation and the approved P0 target. It does not authorize new features, packages, APIs, or code paths. [`PRD.md`](PRD.md) and [`ARD.md`](ARD.md) remain authoritative.
 
 ## Current checkout
 
@@ -14,11 +14,11 @@ test/
 └── widget_test.dart
 ```
 
-The `app/`, feature, model, and asset paths below are defined by `ARD.md`; they are not all present yet. Do not treat this guide as evidence that a feature is implemented or verified.
+The `app/`, feature, model, and asset paths below are defined by [`ARD.md`](ARD.md); they are not all present yet. Do not treat this guide as evidence that a feature is implemented or verified.
 
 ## Approved Flutter structure
 
-Use the feature-oriented tree already specified in `ARD.md`. Add only the files needed for an identified P0 requirement, in their approved locations.
+Use the feature-oriented tree already specified in [`ARD.md`](ARD.md). Add only the files needed for an identified P0 requirement, in their approved locations.
 
 ```text
 lib/

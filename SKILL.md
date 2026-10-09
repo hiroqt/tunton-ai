@@ -7,12 +7,12 @@ description: Implement and validate the scope-locked TUNTON Flutter Android MVP 
 
 ## Purpose
 
-This skill is a **task procedure**, not permission to create new features or architecture. Apply it only to the existing TUNTON Flutter MVP. Read repository-root `PRD.md` and `ARD.md` before editing code; follow `AGENTS.md` scope limits.
+This skill is a **task procedure**, not permission to create new features or architecture. Apply it only to the existing TUNTON Flutter MVP. Read `docs/PRD.md` and `docs/ARD.md` before editing code; follow `AGENTS.md` scope limits.
 
 ## Preconditions
 
-- The task maps to a specific **P0** requirement in `PRD.md`.
-- The implementation can be contained in existing files listed in `ARD.md`.
+- The task maps to a specific **P0** requirement in `docs/PRD.md`.
+- The implementation can be contained in existing files listed in `docs/ARD.md`.
 - A physical Android device is available for final release-build/offline demonstration.
 - One supported district (Intramuros), verified POI coordinates, a licensed small map asset set, and a connected walking graph are prepared or explicitly identified as blockers.
 - The MobileNetV3 Small **image embedder** model is bundled; do not use a classifier-output model as a substitute.
@@ -30,8 +30,8 @@ This skill is a **task procedure**, not permission to create new features or arc
 
 ### Step 1 — Check scope
 
-- Identify the exact `P0-xx` criterion in `PRD.md`.
-- Identify the existing target file(s) in `ARD.md`.
+- Identify the exact `P0-xx` criterion in `docs/PRD.md`.
+- Identify the existing target file(s) in `docs/ARD.md`.
 - Reject new modules, packages, backends, model families, GPS features, or map regions not explicitly approved.
 
 ### Step 2 — Validate bundled assets

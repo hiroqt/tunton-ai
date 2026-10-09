@@ -147,7 +147,7 @@ All core processing occurs in the Flutter app:
 
 ## Getting started
 
-> **For co-developers:** [`SETUP.md`](SETUP.md) is the authoritative, step-by-step environment and asset-preparation guide. The quick-start below is intentionally shorter and **does not replace** the asset validation instructions.
+> **For co-developers:** [`docs/SETUP.md`](docs/SETUP.md) is the authoritative, step-by-step environment and asset-preparation guide. The quick-start below is intentionally shorter and **does not replace** the asset validation instructions.
 
 ### Prerequisites
 
@@ -222,13 +222,13 @@ The reference index includes `model_id`, `dimension`, and `references` with `lan
 
 Prepare the **walking** graph on the Mac before the demo, using the existing `tools/prepare_dataset.py` preparation responsibility and, where useful, OSMnx. The app consumes only the exported bundled JSON and does not need OSMnx on the phone.
 
-Graph geometry uses **`[latitude, longitude]`** pairs as specified in `ARD.md`; this differs from GeoJSON's usual `[longitude, latitude]`. Each edge needs a real mapped pedestrian geometry and a positive `length_m` value. Confirm a connected test route between two catalog landmarks.
+Graph geometry uses **`[latitude, longitude]`** pairs as specified in [`docs/ARD.md`](docs/ARD.md); this differs from GeoJSON's usual `[longitude, latitude]`. Each edge needs a real mapped pedestrian geometry and a positive `length_m` value. Confirm a connected test route between two catalog landmarks.
 
 **Tile licensing is critical:** Do **not** mass-download tiles from the standard `tile.openstreetmap.org` public server for offline bundling. Instead, obtain a permitted redistributable offline tile set, or generate raster tiles from properly licensed source geographic data. Keep map attribution visible.
 
 ### Flutter asset registration
 
-Declare the real model, JSON, image, and **actual nested leaf tile directories** under the single existing `flutter: assets:` section in `pubspec.yaml`. Declaring only `assets/tiles/` is not sufficient for arbitrarily nested tile folders. See [`SETUP.md`](SETUP.md#4-register-bundled-assets-in-pubspecyaml) for the exact procedure.
+Declare the real model, JSON, image, and **actual nested leaf tile directories** under the single existing `flutter: assets:` section in `pubspec.yaml`. Declaring only `assets/tiles/` is not sufficient for arbitrarily nested tile folders. See [`docs/SETUP.md`](docs/SETUP.md#4-register-bundled-assets-in-pubspecyaml) for the exact procedure.
 
 A valid build must ship the **model, reference index, verified catalog, walking graph, and all needed tiles** inside the APK.
 
@@ -261,19 +261,20 @@ The resulting route is a **preview based on a preloaded pedestrian graph**, not 
 
 ## Repository structure
 
-Use the exact, scope-locked MVP shape from [`ARD.md`](ARD.md). Standard Flutter-generated configuration/build files may also exist. Do not add architecture folders merely because they would be typical for a larger application.
+Use the exact, scope-locked MVP shape from [`docs/ARD.md`](docs/ARD.md). Standard Flutter-generated configuration/build files may also exist. Do not add architecture folders merely because they would be typical for a larger application.
 
 ```text
 tunton/
 ├── README.md
 ├── AGENTS.md
+├── SKILL.md
 ├── docs/
 │   ├── README.md
-│   └── DEVELOPMENT_MAP.md
-├── SKILL.md
-├── ARD.md
-├── PRD.md
-├── SETUP.md
+│   ├── DEVELOPMENT_MAP.md
+│   ├── PRD.md
+│   ├── ARD.md
+│   ├── ARCHITECTURE.md
+│   └── SETUP.md
 ├── lib/
 │   ├── main.dart
 │   ├── app/app.dart
@@ -382,7 +383,7 @@ Sample during relevant stages. `dumpsys meminfo` gives **snapshots**, not an aut
 | App fails in airplane mode | Find the unbundled asset or forbidden network dependency; do **not** insert a cloud fallback. |
 | Memory is excessive | Keep one TFLite interpreter and one photo inference at a time; shrink assets to the pilot region. |
 
-The full setup and troubleshooting details are in [`SETUP.md`](SETUP.md).
+The full setup and troubleshooting details are in [`docs/SETUP.md`](docs/SETUP.md).
 
 ## One-day delivery plan
 
@@ -408,8 +409,8 @@ The full setup and troubleshooting details are in [`SETUP.md`](SETUP.md).
 
 **Before making a code change:**
 
-1. Read [`PRD.md`](PRD.md) for the P0 acceptance criterion.
-2. Read [`ARD.md`](ARD.md) for the designated files/data contracts.
+1. Read [`docs/PRD.md`](docs/PRD.md) for the P0 acceptance criterion.
+2. Read [`docs/ARD.md`](docs/ARD.md) for the designated files/data contracts.
 3. Apply [`AGENTS.md`](AGENTS.md) to reject out-of-scope work.
 4. Follow [`SKILL.md`](SKILL.md) for the relevant implementation/test procedure.
 5. Never claim a test passed if it was not executed.
@@ -468,11 +469,12 @@ These files are the governing project references; this README is an entry point,
 
 | File | Purpose |
 |---|---|
-| [`PRD.md`](PRD.md) | **Source of truth for P0 product requirements, boundaries, and acceptance** |
-| [`ARD.md`](ARD.md) | Approved architecture, repository structure, and bundled data contracts |
+| [`docs/PRD.md`](docs/PRD.md) | **Source of truth for P0 product requirements, boundaries, and acceptance** |
+| [`docs/ARD.md`](docs/ARD.md) | Approved architecture, repository structure, and bundled data contracts |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Visual runtime boundaries and data flow |
+| [`docs/SETUP.md`](docs/SETUP.md) | Complete developer onboarding, model/map preparation, Android build, and offline test guide |
 | [`AGENTS.md`](AGENTS.md) | Strict coding-agent scope and change rules |
 | [`SKILL.md`](SKILL.md) | On-device vision/map/routing implementation and verification procedure |
-| [`SETUP.md`](SETUP.md) | Complete developer onboarding, model/map preparation, Android build, and offline test guide |
 | [`docs/README.md`](docs/README.md) | Documentation index and reading order |
 | [`docs/DEVELOPMENT_MAP.md`](docs/DEVELOPMENT_MAP.md) | Current checkout versus approved Flutter code tree and P0 ownership map |
 

@@ -3,10 +3,10 @@
 ## Start here
 
 - Use [`docs/README.md`](docs/README.md) as the documentation index and [`docs/DEVELOPMENT_MAP.md`](docs/DEVELOPMENT_MAP.md) for the current versus approved Flutter tree.
-- Product scope remains in `PRD.md`; file/package contracts remain in `ARD.md`; runtime flow remains in `ARCHITECTURE.md`. The docs index does not override them.
-- The tree documented in `ARD.md` is the approved target, not a claim that every file or feature exists in the current checkout.
+- Product scope remains in [`docs/PRD.md`](docs/PRD.md); file/package contracts remain in [`docs/ARD.md`](docs/ARD.md); runtime flow remains in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The docs index does not override them.
+- The tree documented in [`docs/ARD.md`](docs/ARD.md) is the approved target, not a claim that every file or feature exists in the current checkout.
 
-> **MANDATORY for any coding agent or co-developer.** The project is a **one-day Flutter Android MVP**. Implement **only** what is enumerated as `P0` in `PRD.md`, using existing files and packages defined by `ARD.md`. Consult `ARCHITECTURE.md` for the current data flow. Do not reinterpret this as permission to make a complete Google Maps clone.
+> **MANDATORY for any coding agent or co-developer.** The project is a **one-day Flutter Android MVP**. Implement **only** what is enumerated as `P0` in [`docs/PRD.md`](docs/PRD.md), using existing files and packages defined by [`docs/ARD.md`](docs/ARD.md). Consult [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the current data flow. Do not reinterpret this as permission to make a complete Google Maps clone.
 
 ## 1. Mission
 
@@ -18,11 +18,11 @@ The output is a **working Android APK** with an **airplane-mode** live demo on p
 
 ## 2. Source-of-truth hierarchy
 
-1. `PRD.md`: product requirements and hard exclusions.
-2. `ARD.md`: exact files, assets, dependencies and schema contracts.
-3. `ARCHITECTURE.md`: visual runtime boundaries / sequencing.
-4. `SETUP.md`, `SKILL.md`: install instructions, approved tools and task procedure.
-5. `README.md`: summary for users/judges, **not authority to expand scope**.
+1. [`docs/PRD.md`](docs/PRD.md): product requirements and hard exclusions.
+2. [`docs/ARD.md`](docs/ARD.md): exact files, assets, dependencies and schema contracts.
+3. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): visual runtime boundaries / sequencing.
+4. [`docs/SETUP.md`](docs/SETUP.md), `SKILL.md`: install instructions, approved tools and task procedure.
+5. [`README.md`](README.md): summary for users/judges, **not authority to expand scope**.
 
 If documentation differs, **do not silently improvise**. Keep P0 strict, fix inconsistencies only in the affected source-of-truth docs after explicit approval.
 
@@ -75,11 +75,11 @@ Do **not**:
 - Reuse MobileNet reference embeddings with a different model, preprocess or output dimension.
 - Add Qwen2.5, Qwen-VL, Gemma, GLM, Ollama, cloud VLMs, OCR or new inference services.
 
-If MobileNet performance is inadequate on **held-out** photos, **report evidence and request explicit team approval** before replacing it. On approval, update `PRD.md` / `ARD.md` / `ARCHITECTURE.md` / relevant setup instructions, choose **one** replacement checkpoint, re-index every reference photo, re-test actual Android inference. Model replacement is a deliberate scope-change decision, not an automatic fallback.
+If MobileNet performance is inadequate on **held-out** photos, **report evidence and request explicit team approval** before replacing it. On approval, update `docs/PRD.md` / `docs/ARD.md` / `docs/ARCHITECTURE.md` / relevant setup instructions, choose **one** replacement checkpoint, re-index every reference photo, re-test actual Android inference. Model replacement is a deliberate scope-change decision, not an automatic fallback.
 
 ## 6. Approved code ownership; no invented abstractions
 
-Only edit existing files listed in `ARD.md`:
+Only edit existing files listed in `docs/ARD.md`:
 
 ```text
 lib/main.dart
