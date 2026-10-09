@@ -1,19 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
-import 'package:tuntun/main.dart';
+import 'package:tuntun/app/app.dart';
+import 'package:tuntun/features/camera/photo_screen.dart';
 
 void main() {
-  patrolTest('counter smoke test with Patrol', ($) async {
-    await $.pumpWidgetAndSettle(const MyApp());
-
-    // Verify initial counter value is 0
-    expect($('0'), findsOneWidget);
-
-    // Tap the increment floating action button
-    await $(Icons.add).tap();
-
-    // Verify counter increments to 1
-    expect($('1'), findsOneWidget);
+  patrolTest('Tunton photo entry smoke test', ($) async {
+    await $.pumpWidgetAndSettle(const TuntonApp(home: PhotoScreen()));
+    expect($('Take a photo'), findsOneWidget);
+    expect($('Choose from gallery'), findsOneWidget);
+    expect($('Intramuros'), findsOneWidget);
   });
 }
