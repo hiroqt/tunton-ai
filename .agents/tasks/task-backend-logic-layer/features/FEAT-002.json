@@ -1,0 +1,25 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Recognition matcher (P0-03, P0-04): LandmarkMatcher reads reference_embeddings.json, ranks query embedding by cosine similarity (dot product of L2-normalized vectors), aggregates best score per distinct landmark, returns up to 3 distinct candidates or a first-class Not-recognized state. Dependency-free math. Independent of FEAT-003; does not import the shared models but relies on the same style and the real asset data confirmed in context.json.",
+  "status": "completed",
+  "steps": [
+    "Read .agents/tasks/plan.md 'landmark_matcher.dart' API block and the reference_embeddings.json contract in context.json. Do NOT re-explore assets — context.json states the shape (dimension 1024, 23 refs, norms approx 1.0).",
+    "Create lib/features/recognition/landmark_matcher.dart with: class LandmarkCandidate(String landmarkId,double score) const; class MatchResult(List<LandmarkCandidate> candidates) with bool get isRecognized and LandmarkCandidate? get top; class LandmarkMatcher with static const referenceAsset='assets/landmarks/reference_embeddings.json', static const double defaultScoreThreshold=0.55, private fields _dimension/_refsByLandmark(Map<String,List<List<double>>>)/scoreThreshold.",
+    "Add factory LandmarkMatcher.fromDecodedJson(Map<String,dynamic> json,{double scoreThreshold=defaultScoreThreshold}) validating dimension is positive int, references non-empty, each vector length==dimension and all finite, landmark_id non-blank — FormatException otherwise; group vectors by landmark_id.",
+    "Add factory LandmarkMatcher.fromJsonString(String,{scoreThreshold}) delegating to fromDecodedJson, and static Future<LandmarkMatcher> load({scoreThreshold}) using rootBundle.loadString(referenceAsset) (import package:flutter/services.dart).",
+    "Add MatchResult match(List<double> query,{int maxCandidates=3}): throw FormatException if query.length!=dimension or any non-finite; for each landmark compute MAX dot-product similarity across its reference vectors (no re-normalization — both sides already L2-normalized); sort landmarks by best score descending; drop below scoreThreshold; keep at most maxCandidates DISTINCT ids; return MatchResult (empty==Not recognized). Imports: dart:convert, package:flutter/services.dart only.",
+    "Create test/landmark_matcher_test.dart: synthetic small-dimension cases via fromDecodedJson for max-per-landmark aggregation, descending sort, top-3-distinct cap with 4+ landmarks, below-threshold => isRecognized==false, query wrong length => throwsFormatException, query with NaN => throwsFormatException; REAL case loading assets/landmarks/reference_embeddings.json via dart:io File(...), feeding a stored reference vector as query, asserting its own landmark is top.landmarkId with score close to 1.0."
+  ],
+  "acceptance_criteria": [
+    "flutter analyze lib/features/recognition/landmark_matcher.dart reports no errors",
+    "flutter test test/landmark_matcher_test.dart passes all synthetic cases AND the real-asset self-match case (stored reference vector ranks its own landmark #1 with score ~1.0)",
+    "Not-recognized is a first-class result (empty candidates / isRecognized==false), and scores are raw cosine similarities, not a fabricated percentage"
+  ],
+  "verification": [
+    "flutter analyze lib/features/recognition/landmark_matcher.dart",
+    "flutter test test/landmark_matcher_test.dart"
+  ],
+  "blocked_reason": null,
+  "findings": "Created lib/features/recognition/landmark_matcher.dart and test/landmark_matcher_test.dart. Exported names: LandmarkCandidate(landmarkId:String, score:double), MatchResult(candidates:List<LandmarkCandidate>; isRecognized getter; top getter), LandmarkMatcher (static const referenceAsset='assets/landmarks/reference_embeddings.json', static const defaultScoreThreshold=0.55, dimension getter, factory fromDecodedJson, factory fromJsonString, static Future<LandmarkMatcher> load, MatchResult match(List<double> query,{int maxCandidates=3})). Cosine similarity is plain dot product (no re-normalization); max-per-landmark; sorted desc; dropped below scoreThreshold; capped at maxCandidates distinct ids; Not-recognized is a first-class empty MatchResult. Query validated for length==dimension and finiteness (FormatException). Imports only dart:convert and package:flutter/services.dart. Verified from repo root: 'flutter analyze lib/features/recognition/landmark_matcher.dart' => No issues found; 'flutter test test/landmark_matcher_test.dart' => All tests passed (9/9), including real-asset self-match (dimension 1024, stored reference vector ranks its own landmark #1 with score ~1.0)."
+}
