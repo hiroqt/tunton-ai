@@ -13,12 +13,14 @@ class OfflineMapScreen extends StatefulWidget {
     required this.destination,
     this.startPoints = const [],
     required this.onStartConfirmed,
+    this.loadZooms,
   });
   final Landmark destination;
 
   /// Only catalog points whose route nodes have been verified by the data layer.
   final List<Landmark> startPoints;
   final ValueChanged<Landmark> onStartConfirmed;
+  final Future<List<int>> Function()? loadZooms;
 
   @override
   State<OfflineMapScreen> createState() => _OfflineMapScreenState();
@@ -109,7 +111,11 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          OfflineLandmarkMap(destination: widget.destination, origin: _start),
+          OfflineLandmarkMap(
+            destination: widget.destination,
+            origin: _start,
+            loadZooms: widget.loadZooms,
+          ),
           const SizedBox(height: 24),
           Text(
             'DESTINATION',
@@ -167,17 +173,20 @@ class OfflineLandmarkMap extends StatefulWidget {
     required this.destination,
     this.origin,
     this.route,
+    this.loadZooms,
   });
   final Landmark destination;
   final Landmark? origin;
   final RouteResult? route;
+  final Future<List<int>> Function()? loadZooms;
 
   @override
   State<OfflineLandmarkMap> createState() => _OfflineLandmarkMapState();
 }
 
 class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
-  late final Future<List<int>> _zooms = _loadZooms();
+  late final Future<List<int>> _zooms =
+      widget.loadZooms != null ? widget.loadZooms!() : _loadZooms();
   bool _tileError = false;
 
   Future<List<int>> _loadZooms() async {

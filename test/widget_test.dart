@@ -269,6 +269,7 @@ void main() {
         home: OfflineMapScreen(
           destination: destination,
           onStartConfirmed: (_) {},
+          loadZooms: () async => const [],
         ),
       ),
     );
