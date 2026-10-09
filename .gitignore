@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Miscellaneous
 *.class
 *.log
@@ -46,3 +47,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+=======
+.DS_Store
+*.DS_Store
+>>>>>>> a6dc7dc665674012fea27cf7c7cb669c42370755
