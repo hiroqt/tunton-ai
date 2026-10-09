@@ -1,0 +1,31 @@
+{
+  "project_type": "Flutter Android-first offline MVP (one-day hackathon). Pure-Dart on-device logic layer; no server, no network, no database.",
+  "language": "Dart (SDK ^3.12.2 — records and pattern matching available)",
+  "build_system": "Flutter 3.44.8 stable. pubspec package name is `tuntun` (pre-existing typo) — all intra-project imports MUST be `package:tuntun/...`. Do NOT rename the package.",
+  "test_framework": "flutter_test with plain top-level test(...)/expect(...). Dart tests are test/*_test.dart. Python prepare_dataset_*.py tests are a separate pipeline and OUT of scope for this task.",
+  "build_command": "flutter pub get && flutter analyze",
+  "test_command": "flutter test test/<file>_test.dart (run the specific new file); full gate is flutter analyze + flutter test on the four new Dart test files plus pre-existing ones.",
+  "verification_instructions": "After each file: `flutter analyze <path>` clean. After each test file: `flutter test test/<file>` all pass. Final (per AGENTS.md §9): `flutter pub get`, `flutter analyze` (no new issues), `flutter test test/landmark_test.dart test/route_result_test.dart test/landmark_matcher_test.dart test/routing_service_test.dart` all pass. Commands are verification obligations; only report results that actually ran.",
+  "snapshot_or_generated_files": null,
+  "environment_constraints": "Approved packages ONLY: flutter, image, tflite_flutter, cupertino_icons. Do NOT add latlong2, flutter_map, flutter_riverpod, image_picker, or any other package. No new directories beyond the approved ARD §3 file paths. No network/server/database/second-model/OCR/GPS code. Tests read assets via dart:io File(repo-relative path) like the existing preprocessing_parity_test.dart, so NO pubspec flutter:assets change is needed and scope stays additive. rootBundle (package:flutter/services.dart) is Flutter itself, not a new package, and is allowed for the async load() convenience loaders.",
+  "contribution_requirements": "Root AGENTS.md hard scope gate: implement ONLY the enumerated P0 files; smallest local change; no invented abstractions; never fabricate outputs/benchmarks; do not mark a build tested unless it ran. Source-of-truth order: PRD.md > ARD.md > ARCHITECTURE.md. Only create the exact files listed; do NOT create or modify the four UI screens, app.dart, or main.dart.",
+  "key_patterns": "Mirror lib/features/recognition/embedding_service.dart: plain Dart classes, static factory load() for IO, List<double> embeddings already L2-normalized, FormatException for bad data / StateError for bad lifecycle, const constructors, List<...>.filled(..., growable:false). No Riverpod, no code-gen. Tests mirror test/embedding_service_test.dart (plain test(...), throwsFormatException) and read real assets like test/preprocessing_parity_test.dart.",
+  "relevant_files": [
+    ".agents/tasks/plan.md",
+    "lib/features/recognition/embedding_service.dart",
+    "test/embedding_service_test.dart",
+    "test/preprocessing_parity_test.dart",
+    "assets/landmarks/landmarks.json",
+    "assets/landmarks/reference_embeddings.json",
+    "assets/maps/intramuros_graph.json",
+    "docs/PRD.md",
+    "docs/ARD.md",
+    "docs/ARCHITECTURE.md"
+  ],
+  "directory_structure": "lib/shared/models/ (landmark.dart, route_result.dart — to create), lib/features/recognition/ (embedding_service.dart exists, landmark_matcher.dart to create), lib/features/navigation/ (routing_service.dart to create), test/ (new *_test.dart files). assets/landmarks/ and assets/maps/ hold the three verified JSON data files.",
+  "data_contracts": {
+    "landmarks.json": "JSON array of 6 objects, each {id:String,name:String,lat:double,lon:double,route_node_id:String}. First id fort-santiago route_node_id 1034882636. All 6 route_node_ids resolve to real graph nodes.",
+    "reference_embeddings.json": "{model_id:'bundled-mobilenetv3-small-embedder',dimension:1024,references:[{landmark_id:String,image_asset:String,vector:[1024 doubles L2-normalized]}]}. 23 refs: 4 each except puerta-real has 3. All landmark_id values exist in landmarks.json. Norms approx 1.0.",
+    "intramuros_graph.json": "{nodes:[{id:String,lat:double,lon:double}],edges:[{from:String,to:String,length_m:double,geometry:[[lat,lon],...]}]}. 3268 nodes, 7245 DIRECTED edges (5 one-way-only pairs). Coordinate convention [latitude,longitude]. All length_m finite and >0 (min approx 0.175)."
+  }
+}
