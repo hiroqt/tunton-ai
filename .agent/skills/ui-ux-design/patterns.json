@@ -1,0 +1,610 @@
+[
+  {
+    "category": "content",
+    "title": "Empty States",
+    "slug": "empty-states",
+    "source": "https://designmotionhq.com/patterns/empty-states",
+    "catalog_summary": "Your empty state is your first impression. Most apps waste it.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "content",
+    "title": "Serial Position",
+    "slug": "serial-position",
+    "source": "https://designmotionhq.com/patterns/serial-position",
+    "catalog_summary": "Strongest first, strongest last: people forget the middle.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "content",
+    "title": "Microcopy",
+    "slug": "microcopy",
+    "source": "https://designmotionhq.com/patterns/microcopy",
+    "catalog_summary": "Same form. Different words. One converts.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "content",
+    "title": "Landing Page Skeleton",
+    "slug": "landing-page-skeleton",
+    "source": "https://designmotionhq.com/patterns/landing-page-skeleton",
+    "catalog_summary": "Every landing page that converts follows the same 5-section skeleton.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "feedback",
+    "title": "Doherty Threshold",
+    "slug": "doherty-threshold",
+    "source": "https://designmotionhq.com/patterns/doherty-threshold",
+    "catalog_summary": "Cross 400ms and your user checks out. Perceived speed is a design choice.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "feedback",
+    "title": "Error States",
+    "slug": "error-states",
+    "source": "https://designmotionhq.com/patterns/error-states",
+    "catalog_summary": "Same error. Better recovery.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "feedback",
+    "title": "Loading States System",
+    "slug": "loading-states-system",
+    "source": "https://designmotionhq.com/patterns/loading-states-system",
+    "catalog_summary": "Stop using skeletons for everything. Loading is a system, not a default.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "feedback",
+    "title": "Notification System",
+    "slug": "notification-system",
+    "source": "https://designmotionhq.com/patterns/notification-system",
+    "catalog_summary": "Notifications are a system. Pick the wrong surface and users tune out.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "feedback",
+    "title": "Toast Notifications",
+    "slug": "toast-notifications",
+    "source": "https://designmotionhq.com/patterns/toast-notifications",
+    "catalog_summary": "Toasts done right: five rules for notifications that inform without blocking.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "feedback",
+    "title": "Zeigarnik Effect",
+    "slug": "zeigarnik-effect",
+    "source": "https://designmotionhq.com/patterns/zeigarnik-effect",
+    "catalog_summary": "Your brain forgets what's finished, and won't stop nagging about what's not.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "feedback",
+    "title": "Undo UX",
+    "slug": "undo-ux",
+    "source": "https://designmotionhq.com/patterns/undo-ux",
+    "catalog_summary": "Deleted. You have five seconds.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "feedback",
+    "title": "Optimistic UI",
+    "slug": "optimistic-ui",
+    "source": "https://designmotionhq.com/patterns/optimistic-ui",
+    "catalog_summary": "Click like. One waits. One feels instant.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "feedback",
+    "title": "Skeleton Loading",
+    "slug": "skeleton-loading",
+    "source": "https://designmotionhq.com/patterns/skeleton-loading",
+    "catalog_summary": "Your loading spinner is making the wait feel longer",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "forms",
+    "title": "Settings System",
+    "slug": "settings-system",
+    "source": "https://designmotionhq.com/patterns/settings-system",
+    "catalog_summary": "Your settings page is harmless until the last section. Settings is a system.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "forms",
+    "title": "Autosave",
+    "slug": "autosave-ux",
+    "source": "https://designmotionhq.com/patterns/autosave-ux",
+    "catalog_summary": "Saved. It wasn't. Your wifi died mid-word.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "forms",
+    "title": "Date Pickers",
+    "slug": "date-pickers",
+    "source": "https://designmotionhq.com/patterns/date-pickers",
+    "catalog_summary": "Same date. Six clicks. Or one. The picker that respects your users' time.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "forms",
+    "title": "Form Field States",
+    "slug": "form-field-states",
+    "source": "https://designmotionhq.com/patterns/form-field-states",
+    "catalog_summary": "Six field states, one system. Miss one and you ship a bug.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "forms",
+    "title": "Input Masking",
+    "slug": "input-masking",
+    "source": "https://designmotionhq.com/patterns/input-masking",
+    "catalog_summary": "Type 16 digits. Watch them become a card.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "forms",
+    "title": "Range Sliders",
+    "slug": "range-sliders",
+    "source": "https://designmotionhq.com/patterns/range-sliders",
+    "catalog_summary": "Drag to 47. Or 48? Your finger can't tell.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "forms",
+    "title": "Stepper Wizard",
+    "slug": "stepper-wizard",
+    "source": "https://designmotionhq.com/patterns/stepper-wizard",
+    "catalog_summary": "Twelve fields, one wall. Four steps, one path.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "forms",
+    "title": "Toggle Anatomy",
+    "slug": "toggle-anatomy",
+    "source": "https://designmotionhq.com/patterns/toggle-anatomy",
+    "catalog_summary": "Two toggles. One snaps. One morphs, and the difference is everything.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "forms",
+    "title": "Form Validation Timing",
+    "slug": "form-validation-timing",
+    "source": "https://designmotionhq.com/patterns/form-validation-timing",
+    "catalog_summary": "The error fires while you're still typing.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "forms",
+    "title": "File Upload UX",
+    "slug": "file-upload-ux",
+    "source": "https://designmotionhq.com/patterns/file-upload-ux",
+    "catalog_summary": "Same file. One upload feels broken. One feels safe.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "forms",
+    "title": "Password Field UX",
+    "slug": "password-field-ux",
+    "source": "https://designmotionhq.com/patterns/password-field-ux",
+    "catalog_summary": "Eight characters, one symbol: still weak. Strength lives in real-time feedback.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "forms",
+    "title": "OTP Input",
+    "slug": "otp-input",
+    "source": "https://designmotionhq.com/patterns/otp-input",
+    "catalog_summary": "Your OTP input is a system, not six boxes.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "CSS Has Selector",
+    "slug": "css-has-selector",
+    "source": "https://designmotionhq.com/patterns/css-has-selector",
+    "catalog_summary": "One line of CSS. The whole card reacts to its own checkbox.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Bulk Actions",
+    "slug": "bulk-actions",
+    "source": "https://designmotionhq.com/patterns/bulk-actions",
+    "catalog_summary": "Bulk actions are a system, not a lone checkbox.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Disabled Buttons",
+    "slug": "disabled-buttons",
+    "source": "https://designmotionhq.com/patterns/disabled-buttons",
+    "catalog_summary": "The button is disabled, and nobody tells you why.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Hover Trap",
+    "slug": "hover-trap",
+    "source": "https://designmotionhq.com/patterns/hover-trap",
+    "catalog_summary": "Hover works on your laptop but is dead on mobile.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Behind the Button",
+    "slug": "behind-the-button",
+    "source": "https://designmotionhq.com/patterns/behind-the-button",
+    "catalog_summary": "Six things happen before the spinner stops.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Inline Editing",
+    "slug": "inline-editing",
+    "source": "https://designmotionhq.com/patterns/inline-editing",
+    "catalog_summary": "Click the title. It's an input now, and nothing moved.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Live Cursors",
+    "slug": "live-cursors",
+    "source": "https://designmotionhq.com/patterns/live-cursors",
+    "catalog_summary": "Three cursors land on your canvas. None of them are yours.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Destructive Actions",
+    "slug": "destructive-actions",
+    "source": "https://designmotionhq.com/patterns/destructive-actions",
+    "catalog_summary": "Dangerous actions are a design language, not just a red button.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Context Menu",
+    "slug": "context-menu",
+    "source": "https://designmotionhq.com/patterns/context-menu",
+    "catalog_summary": "A context menu is a system, not just a list of actions.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Drag and Drop",
+    "slug": "drag-and-drop",
+    "source": "https://designmotionhq.com/patterns/drag-and-drop",
+    "catalog_summary": "The board does the thinking: moving a card is moving state.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Dropdown Design",
+    "slug": "dropdown-design",
+    "source": "https://designmotionhq.com/patterns/dropdown-design",
+    "catalog_summary": "Your dropdown is broken. Five rules separate cheap from premium.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Peak-End Rule",
+    "slug": "peak-end-rule",
+    "source": "https://designmotionhq.com/patterns/peak-end-rule",
+    "catalog_summary": "Users don't average an experience. They remember its peak and its end.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Search Experience System",
+    "slug": "search-experience-system",
+    "source": "https://designmotionhq.com/patterns/search-experience-system",
+    "catalog_summary": "Search is a system. Five parts. Most apps skip them.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Star Rating",
+    "slug": "star-rating",
+    "source": "https://designmotionhq.com/patterns/star-rating",
+    "catalog_summary": "Five stars looks trivial. Hover, half-fills, and honest averages are where it breaks.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Tooltip Design",
+    "slug": "tooltip-design",
+    "source": "https://designmotionhq.com/patterns/tooltip-design",
+    "catalog_summary": "Your tooltip is annoying. Five rules that make it feel premium.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Swipe Actions",
+    "slug": "swipe-actions",
+    "source": "https://designmotionhq.com/patterns/swipe-actions",
+    "catalog_summary": "Your swipe actions are killing your UX",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Bottom Sheets",
+    "slug": "bottom-sheets",
+    "source": "https://designmotionhq.com/patterns/bottom-sheets",
+    "catalog_summary": "Your thumb can't reach that menu.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Color Picker UX",
+    "slug": "color-picker-ux",
+    "source": "https://designmotionhq.com/patterns/color-picker-ux",
+    "catalog_summary": "Pick a color. Your whole UI answers.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "interaction",
+    "title": "Command Palette",
+    "slug": "command-palette",
+    "source": "https://designmotionhq.com/patterns/command-palette",
+    "catalog_summary": "⌘K is a system, not a search box.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Filter Chips",
+    "slug": "filter-chips",
+    "source": "https://designmotionhq.com/patterns/filter-chips",
+    "catalog_summary": "200 results. Three taps. 12 left.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Accordion Disclosure",
+    "slug": "accordion-disclosure",
+    "source": "https://designmotionhq.com/patterns/accordion-disclosure",
+    "catalog_summary": "One accordion glides open, the other jumps. Four small rules separate them.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Data Table",
+    "slug": "data-table",
+    "source": "https://designmotionhq.com/patterns/data-table",
+    "catalog_summary": "Your data table feels cheap because it's a grid of divs, not a system.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "interaction",
+    "title": "Modal Hierarchy",
+    "slug": "modal-hierarchy",
+    "source": "https://designmotionhq.com/patterns/modal-hierarchy",
+    "catalog_summary": "5 overlays. Most apps pick the wrong one.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "motion",
+    "title": "Animation Timing",
+    "slug": "animation-timing",
+    "source": "https://designmotionhq.com/patterns/animation-timing",
+    "catalog_summary": "Same modal, two timings: one feels premium, one feels broken. It's all milliseconds.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "motion",
+    "title": "Easing Curves",
+    "slug": "easing-curves",
+    "source": "https://designmotionhq.com/patterns/easing-curves",
+    "catalog_summary": "Same distance, different feel: the easing curve is what decides how motion reads.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "motion",
+    "title": "Card Hover Anatomy",
+    "slug": "card-hover-anatomy",
+    "source": "https://designmotionhq.com/patterns/card-hover-anatomy",
+    "catalog_summary": "Same card. One feels alive, three stay dead. Four rules separate them.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "motion",
+    "title": "Scroll-Driven Animations",
+    "slug": "scroll-driven-animations",
+    "source": "https://designmotionhq.com/patterns/scroll-driven-animations",
+    "catalog_summary": "Same scroll: one feels dead, the other comes alive. Pure CSS, zero JavaScript.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "navigation",
+    "title": "Navigation Patterns",
+    "slug": "navigation-patterns",
+    "source": "https://designmotionhq.com/patterns/navigation-patterns",
+    "catalog_summary": "Five nav patterns, one system: mobile = tabs, desktop = sidebar.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "navigation",
+    "title": "Tabs System",
+    "slug": "tabs-system",
+    "source": "https://designmotionhq.com/patterns/tabs-system",
+    "catalog_summary": "Tabs aren't a widget. They're a system. Stop letting them jump.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "navigation",
+    "title": "Focus States",
+    "slug": "focus-states",
+    "source": "https://designmotionhq.com/patterns/focus-states",
+    "catalog_summary": "Press Tab. Where did the focus go?",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "navigation",
+    "title": "Pagination",
+    "slug": "pagination",
+    "source": "https://designmotionhq.com/patterns/pagination",
+    "catalog_summary": "Add one row and your pagination breaks.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "De-AI Landing Hero",
+    "slug": "de-ai-landing-hero",
+    "source": "https://designmotionhq.com/patterns/de-ai-landing-hero",
+    "catalog_summary": "Your landing page looks AI-made. Five tells. Five fixes.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "visual",
+    "title": "Reverse-Engineered Linear",
+    "slug": "reverse-engineered-linear",
+    "source": "https://designmotionhq.com/patterns/reverse-engineered-linear",
+    "catalog_summary": "Why does Linear feel expensive? Five decisions. None need a designer.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "visual",
+    "title": "Charts That Lie",
+    "slug": "charts-that-lie",
+    "source": "https://designmotionhq.com/patterns/charts-that-lie",
+    "catalog_summary": "Same data, opposite stories: how you draw a chart decides which truth people see.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "visual",
+    "title": "Design System Kit",
+    "slug": "design-system-kit",
+    "source": "https://designmotionhq.com/patterns/design-system-kit",
+    "catalog_summary": "Random hex and eyeballed pixels don't scale. A token system does.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "visual",
+    "title": "Golden Ratio",
+    "slug": "golden-ratio",
+    "source": "https://designmotionhq.com/patterns/golden-ratio",
+    "catalog_summary": "One layout looks cheap, the other expensive. The difference is 1.618.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "visual",
+    "title": "Grid System",
+    "slug": "grid-system",
+    "source": "https://designmotionhq.com/patterns/grid-system",
+    "catalog_summary": "Align everything to a 12-column grid, then break it on purpose.",
+    "verification": "direct-page"
+  },
+  {
+    "category": "visual",
+    "title": "Proximity Rule",
+    "slug": "proximity-rule",
+    "source": "https://designmotionhq.com/patterns/proximity-rule",
+    "catalog_summary": "Close = related, far = separate: spacing alone groups your UI, no borders needed.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Shadow Elevation",
+    "slug": "shadow-elevation",
+    "source": "https://designmotionhq.com/patterns/shadow-elevation",
+    "catalog_summary": "Shadows aren't decoration. They encode hierarchy and depth.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Visual Hierarchy",
+    "slug": "visual-hierarchy",
+    "source": "https://designmotionhq.com/patterns/visual-hierarchy",
+    "catalog_summary": "Five rules that decide what your users see first, and what they skip.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Z-Index Mastery",
+    "slug": "z-index-mastery",
+    "source": "https://designmotionhq.com/patterns/z-index-mastery",
+    "catalog_summary": "z-index lies: a bigger number won't win if the element isn't positioned.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Gradient Design",
+    "slug": "gradient-design",
+    "source": "https://designmotionhq.com/patterns/gradient-design",
+    "catalog_summary": "Why your gradients look cheap",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Icon Design Rules",
+    "slug": "icon-design-rules",
+    "source": "https://designmotionhq.com/patterns/icon-design-rules",
+    "catalog_summary": "Your icons look cheap. 5 rules turn them premium.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Design Tokens",
+    "slug": "design-tokens",
+    "source": "https://designmotionhq.com/patterns/design-tokens",
+    "catalog_summary": "47 changes, or just one. Design tokens change everything.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Color Accessibility",
+    "slug": "color-accessibility",
+    "source": "https://designmotionhq.com/patterns/color-accessibility",
+    "catalog_summary": "Same text, same color: one is invisible. The contrast ratio nobody checks.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Gestalt Laws",
+    "slug": "gestalt-laws",
+    "source": "https://designmotionhq.com/patterns/gestalt-laws",
+    "catalog_summary": "Same elements. One is chaos. The other clicks instantly.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Border Radius",
+    "slug": "border-radius",
+    "source": "https://designmotionhq.com/patterns/border-radius",
+    "catalog_summary": "Same card. One looks off, one looks expensive. The gap is one CSS rule.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Dark Mode",
+    "slug": "dark-mode",
+    "source": "https://designmotionhq.com/patterns/dark-mode",
+    "catalog_summary": "Same app, one inverts colors. The other feels premium.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Von Restorff Effect",
+    "slug": "von-restorff-effect",
+    "source": "https://designmotionhq.com/patterns/von-restorff-effect",
+    "catalog_summary": "Three identical pricing cards, nobody clicks. Isolate one: 3× more conversions.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Perfect Card",
+    "slug": "perfect-card",
+    "source": "https://designmotionhq.com/patterns/perfect-card",
+    "catalog_summary": "One card looks free. The other costs $1000. Four CSS changes.",
+    "verification": "catalog-only"
+  },
+  {
+    "category": "visual",
+    "title": "Depth Layers",
+    "slug": "depth-layers",
+    "source": "https://designmotionhq.com/patterns/depth-layers",
+    "catalog_summary": "Same layout, same colors: three properties turn flat cards into real depth.",
+    "verification": "catalog-only"
+  }
+]
