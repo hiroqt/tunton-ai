@@ -41,6 +41,8 @@ class LandmarkMatcher {
     this._dimension,
     this._refsByLandmark,
     this.scoreThreshold,
+    this.minTopMargin,
+    this.strongMatchThreshold,
     this.modelId,
     this.modelSha256,
     this.preprocessingVersion,
@@ -49,11 +51,59 @@ class LandmarkMatcher {
   static const String referenceAsset =
       'assets/landmarks/reference_embeddings.json';
 
-  /// Conservative default rejection THRESHOLD (a ranking signal, not a
-  /// probability). A true held-out match of these L2-normalized MobileNetV3
-  /// embeddings scores well above this, while unrelated photos fall below.
-  /// Tunable against held-out evidence.
-  static const double defaultScoreThreshold = 0.55;
+  /// Absolute rejection THRESHOLD on raw cosine similarity (a ranking signal,
+  /// NOT a calibrated probability — never present as a percentage).
+  ///
+  /// Chosen from measured data, not guessed: see
+  /// `.agents/tasks/recognition-threshold/analysis.md`. The reference-vs-
+  /// reference INTRA (correct) and INTER (wrong-landmark) cosine distributions
+  /// overlap heavily (INTER median ~0.66, INTRA p25 ~0.69), so no absolute
+  /// cutoff alone separates correct from wrong. Real on-device held-out photos
+  /// were observed at raw cosine 0.36–0.68, far below reference-to-reference
+  /// scores, so a high absolute gate would reject genuine matches. 0.40 sits
+  /// just above the noise floor while keeping the real-photo band; the
+  /// [defaultMinTopMargin] gate — not this threshold — is the primary
+  /// ambiguity filter.
+  static const double defaultScoreThreshold = 0.40;
+
+  /// Minimum required gap between the top-1 and top-2 landmark scores for a
+  /// result to be accepted (a ranking signal, NOT a probability).
+  ///
+  /// Chosen from measured data, not guessed: see
+  /// `.agents/tasks/recognition-threshold/analysis.md`. A genuine match has a
+  /// landmark score that clearly beats the runner-up; an ambiguous photo sits
+  /// near-equally close to two landmarks (small margin). The measured margin
+  /// distribution (median ~0.10, p25 ~0.044) shows 0.05 rejects the bottom
+  /// ~31% near-tie cases as "Not recognized" while keeping the ~69% with a
+  /// clear winner — stricter than the old single-gate behavior for exactly the
+  /// cases that confused users.
+  ///
+  /// Widened from 0.05 to 0.07 on 2026-10-10 for the "more aggressive"
+  /// rejection the user requested: from the measured margin trade-off, m=0.07
+  /// keeps the ~58.8% of refs with a clear winner (the genuine median margin
+  /// 0.10 still clears 0.07) while rejecting the extra ~10% near-tie band that
+  /// 0.05 still admitted. See analysis.md.
+  static const double defaultMinTopMargin = 0.07;
+
+  /// Higher absolute THRESHOLD a LONE top candidate must clear when it is the
+  /// SOLE landmark above [defaultScoreThreshold] (a ranking signal, NOT a
+  /// calibrated probability — never present as a percentage).
+  ///
+  /// Chosen from measured data, not guessed: see
+  /// `.agents/tasks/recognition-threshold/analysis.md`. The ≥2-candidate path
+  /// relies on the [defaultMinTopMargin] gate to reject ambiguity, but a photo
+  /// that weakly matches EXACTLY ONE landmark above the 0.40 floor has no
+  /// runner-up to trip the margin — an observed synthetic image leaked through
+  /// at cosine 0.4951 as a lone confident #1. This stronger gate closes that
+  /// hole: a lone candidate is accepted only when its score ≥ 0.55.
+  ///
+  /// 0.55 is the most defensible aggressive setting: strictly above the
+  /// measured 0.4951 lone false hit, below the 0.36–0.68 real on-device
+  /// photo band so a genuine dominant real match in ~0.55–0.68 still passes,
+  /// and just below INTRA p10 (0.5362) so it keeps the bulk of correct
+  /// reference-grade matches (INTRA kept at 0.55 ≈ 84.3%). It stays an
+  /// accept/reject ranking decision, never a probability.
+  static const double defaultStrongMatchThreshold = 0.55;
 
   final int _dimension;
 
@@ -62,6 +112,8 @@ class LandmarkMatcher {
   final Map<String, List<List<double>>> _refsByLandmark;
 
   final double scoreThreshold;
+  final double minTopMargin;
+  final double strongMatchThreshold;
   final String modelId;
   final String? modelSha256;
   final String? preprocessingVersion;
@@ -78,6 +130,8 @@ class LandmarkMatcher {
   factory LandmarkMatcher.fromDecodedJson(
     Map<String, dynamic> json, {
     double scoreThreshold = defaultScoreThreshold,
+    double minTopMargin = defaultMinTopMargin,
+    double strongMatchThreshold = defaultStrongMatchThreshold,
   }) {
     final rawDimension = json['dimension'];
     if (rawDimension is! int || rawDimension <= 0) {
@@ -157,6 +211,8 @@ class LandmarkMatcher {
       dimension,
       refsByLandmark,
       scoreThreshold,
+      minTopMargin,
+      strongMatchThreshold,
       modelId,
       modelSha256 as String?,
       preprocessingVersion as String?,
@@ -167,6 +223,8 @@ class LandmarkMatcher {
   factory LandmarkMatcher.fromJsonString(
     String jsonString, {
     double scoreThreshold = defaultScoreThreshold,
+    double minTopMargin = defaultMinTopMargin,
+    double strongMatchThreshold = defaultStrongMatchThreshold,
   }) {
     final decoded = jsonDecode(jsonString);
     if (decoded is! Map<String, dynamic>) {
@@ -177,6 +235,8 @@ class LandmarkMatcher {
     return LandmarkMatcher.fromDecodedJson(
       decoded,
       scoreThreshold: scoreThreshold,
+      minTopMargin: minTopMargin,
+      strongMatchThreshold: strongMatchThreshold,
     );
   }
 
@@ -184,11 +244,15 @@ class LandmarkMatcher {
   /// (package:flutter/services.dart is Flutter itself, not a new package).
   static Future<LandmarkMatcher> load({
     double scoreThreshold = defaultScoreThreshold,
+    double minTopMargin = defaultMinTopMargin,
+    double strongMatchThreshold = defaultStrongMatchThreshold,
   }) async {
     final jsonString = await rootBundle.loadString(referenceAsset);
     return LandmarkMatcher.fromJsonString(
       jsonString,
       scoreThreshold: scoreThreshold,
+      minTopMargin: minTopMargin,
+      strongMatchThreshold: strongMatchThreshold,
     );
   }
 
@@ -199,7 +263,27 @@ class LandmarkMatcher {
   /// across its reference vectors is computed (no re-normalization — both sides
   /// are already L2-normalized); landmarks are sorted by that best score
   /// descending; any below [scoreThreshold] are dropped; at most [maxCandidates]
-  /// DISTINCT ids are kept. Returns a [MatchResult] (empty == Not recognized).
+  /// DISTINCT ids are kept.
+  ///
+  /// NET ACCEPT RULE (P0-04): a result is RECOGNIZED only if the best landmark
+  /// clears the appropriate absolute threshold AND is unambiguous:
+  /// - **Sole above-floor candidate:** accept only if its score ≥
+  ///   [strongMatchThreshold] (the stronger lone-match gate). A single
+  ///   0.40–0.55 match is rejected → *Not recognized*. This closes the
+  ///   lone-candidate hole where a weak one-landmark hit (observed at 0.4951)
+  ///   leaked through as a confident #1 with no runner-up to trip the margin.
+  /// - **≥2 above-floor candidates:** accept the top only if top1 − top2 ≥
+  ///   [minTopMargin]; otherwise reject the whole result.
+  /// Everything else (nothing clears [scoreThreshold], a lone candidate below
+  /// the strong gate, or a near-tie) → empty [MatchResult] = *Not recognized*.
+  ///
+  /// The measured reference distributions overlap too much for the absolute
+  /// threshold alone to reject wrong-landmark matches, so the margin gate (for
+  /// the ≥2 case) and the strong-match gate (for the lone case) — not
+  /// [scoreThreshold] — are the real ambiguity filters (see analysis.md). This
+  /// stays an accept/reject ranking decision, never a calibrated probability.
+  ///
+  /// Returns a [MatchResult] (empty == Not recognized).
   MatchResult match(List<double> query, {int maxCandidates = 3}) {
     if (query.length != _dimension) {
       throw FormatException(
@@ -238,12 +322,71 @@ class LandmarkMatcher {
     }
 
     candidates.sort((a, b) => b.score.compareTo(a.score));
+
+    // Nothing cleared the absolute floor → Not recognized.
+    if (candidates.isEmpty) {
+      if (kDebugMode) {
+        debugPrint(
+          '[TUNTON_RECOG] REJECT gate=below_threshold '
+          'threshold=${scoreThreshold.toStringAsFixed(2)} => Not recognized',
+        );
+      }
+      return const MatchResult(<LandmarkCandidate>[]);
+    }
+
+    // LONE-CANDIDATE GATE (P0-04): with exactly one landmark above the floor
+    // there is no runner-up for the margin gate to catch, so a weak lone hit
+    // (observed at 0.4951) would otherwise leak through as a confident #1.
+    // Require the stronger [strongMatchThreshold] in that case.
+    if (candidates.length == 1) {
+      if (candidates[0].score < strongMatchThreshold) {
+        if (kDebugMode) {
+          debugPrint(
+            '[TUNTON_RECOG] REJECT gate=lone_below_strong '
+            'top1=${candidates[0].landmarkId}(${candidates[0].score.toStringAsFixed(4)}) '
+            '< strongMatchThreshold=${strongMatchThreshold.toStringAsFixed(2)} '
+            '=> Not recognized',
+          );
+        }
+        return const MatchResult(<LandmarkCandidate>[]);
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '[TUNTON_RECOG] ACCEPT gate=accept_strong_single '
+          'candidate=${candidates[0].landmarkId} '
+          'score=${candidates[0].score.toStringAsFixed(4)} '
+          '>= strongMatchThreshold=${strongMatchThreshold.toStringAsFixed(2)}',
+        );
+      }
+      return MatchResult(List<LandmarkCandidate>.unmodifiable(candidates));
+    }
+
+    // AMBIGUITY GATE (P0-04): a near-tie between the top two landmarks means the
+    // photo does not clearly depict one landmark. Reject the whole result to
+    // "Not recognized" rather than present a misleading confident #1.
+    final margin = candidates[0].score - candidates[1].score;
+    if (margin < minTopMargin) {
+      if (kDebugMode) {
+        debugPrint(
+          '[TUNTON_RECOG] REJECT gate=ambiguous_margin '
+          'top1=${candidates[0].landmarkId}(${candidates[0].score.toStringAsFixed(4)}) '
+          'top2=${candidates[1].landmarkId}(${candidates[1].score.toStringAsFixed(4)}) '
+          'margin=${margin.toStringAsFixed(4)} < minTopMargin=${minTopMargin.toStringAsFixed(2)} '
+          '=> Not recognized',
+        );
+      }
+      return const MatchResult(<LandmarkCandidate>[]);
+    }
+
     final kept = candidates.length > maxCandidates
         ? candidates.sublist(0, maxCandidates)
         : candidates;
     if (kDebugMode) {
       debugPrint(
-        '[TUNTON_RECOG] candidates=${kept.map((candidate) => candidate.landmarkId).join(',')}',
+        '[TUNTON_RECOG] ACCEPT gate=accept_margin_ok '
+        'candidates=${kept.map((candidate) => candidate.landmarkId).join(',')} '
+        'margin=${margin.toStringAsFixed(4)}>=${minTopMargin.toStringAsFixed(2)} '
+        'threshold=${scoreThreshold.toStringAsFixed(2)}',
       );
     }
     return MatchResult(List<LandmarkCandidate>.unmodifiable(kept));

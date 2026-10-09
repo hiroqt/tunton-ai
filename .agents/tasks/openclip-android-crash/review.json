@@ -1,0 +1,16 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    {
+      "label": "Unrelated README rewrite bundled in the crash-fix diff",
+      "severity": "non-blocking",
+      "detail": "README's map-stack description was rewritten (Mapbox -> flutter_map/AssetTileProvider) in the same change. It is in-scope as an AGENTS.md section-6 approved file and adds no false claims (no 'verified on Android' text), but it is unrelated to the OpenCLIP crash fix and would ideally travel in its own change."
+    },
+    {
+      "label": "Correctness depends on R8 staying disabled, verified only by recorded dex inspection",
+      "severity": "non-blocking",
+      "detail": "The native SIGABRT is uncatchable, so the fix is correct only if the ORT JNI symbols survive stripping. This review relies on the coder's recorded apkanalyzer dex output rather than an independent dex check or on-device inference. On-device install/inference is correctly deferred to a later step; android_verified stays false."
+    }
+  ],
+  "reviewDoc": "/Users/arnel/tunton-ai/.agents/tasks/openclip-android-crash/review.md"
+}

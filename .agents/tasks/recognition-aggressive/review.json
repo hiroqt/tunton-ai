@@ -1,0 +1,12 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    {
+      "severity": "informational",
+      "label": "README map contract drift",
+      "confidence": "possible",
+      "detail": "Bundled README edits describe a flutter_map/AssetTileProvider tile map that diverges from the Mapbox SDK offline-region contract in docs/PRD.md. Pre-existing, self-flagged in the README, and unrelated to this recognition task. Non-blocking; reconcile separately if desired."
+    }
+  ],
+  "reviewDoc": "/Users/arnel/tunton-ai/.agents/tasks/recognition-aggressive/review.md"
+}

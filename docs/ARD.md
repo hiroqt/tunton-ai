@@ -173,7 +173,7 @@ This is a **schema illustration only**, not usable data. In the real file:
 | `photo_screen.dart` | Choose or capture one photo, show preview/error | P0-01 |
 | `embedding_service.dart` | Preprocess one image and call the native ONNX embedding MethodChannel | P0-02 |
 | `landmark_matcher.dart` | Read reference index, compare cosine scores, aggregate per distinct landmark, reject unreliable input | P0-03, P0-04 |
-| `recognition_screen.dart` | Present up to three candidates, require confirmation | P0-05 |
+| `recognition_screen.dart` | Present up to three candidates, require confirmation *(Scope change (user-approved) 2026-10-10: recognition now auto-accepts the single best passing match; the candidate list and Confirm step were removed per the 2026-10-10 user decision, superseding P0-05's confirmation wording.)* | P0-05 |
 | `landmark.dart` | Model verified POI ID, name, coordinates, area, optional route-node ID | P0-08 |
 | `offline_map_screen.dart` | Download/verify the fixed Mapbox offline region while connected; render it offline, selected destination and manual or optional GPS-snapped start | P0-06, P0-07 |
 | `landmark_markers.dart` | Render supported POI markers from catalog | P0-06 |
@@ -191,7 +191,7 @@ This is a **schema illustration only**, not usable data. In the real file:
 4. Compute one embedding; verify finite nonzero values and expected length; L2-normalize.
 5. Compare query embedding with each stored normalized reference vector using cosine similarity (dot product for normalized vectors).
 6. Reduce to **best similarity per landmark**, sort, and keep top 3 *distinct IDs*.
-7. Use held-out true/unknown examples to choose a **conservative rejection rule**, not an arbitrary fabricated accuracy percentage. Unclear image yields **Not recognized** or candidates requiring confirmation.
+7. Use held-out true/unknown examples to choose a **conservative rejection rule**, not an arbitrary fabricated accuracy percentage. Unclear image yields **Not recognized** or candidates requiring confirmation. *(Scope change (user-approved) 2026-10-10: the single best passing match is now accepted automatically — a sole candidate must clear the stronger strong-match threshold, or the top must beat the runner-up by the margin — and the manual confirmation step was removed per the 2026-10-10 user decision. The rejection rule remains a ranking accept/reject decision, never a calibrated probability.)*
 8. Resolve confirmed ID through `landmarks.json`. Never let ML outputs generate coordinates.
 
 ## 7. Pedestrian routing contract

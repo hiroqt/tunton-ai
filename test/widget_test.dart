@@ -225,12 +225,19 @@ void main() {
       TuntonApp(
         home: RecognitionScreen(
           photoBytes: photo,
-          recognize: () async => [destination, destination, origin],
+          // The matcher now yields a single accepted best; the screen consumes
+          // only the first element.
+          recognize: () async => [destination],
           onConfirm: (value) => confirmed = value,
         ),
       ),
     );
     await tester.pumpAndSettle();
+    // No manual selection or per-candidate confirmation UI exists.
+    expect(find.widgetWithText(FilledButton, 'Confirm destination'), findsNothing);
+    expect(find.text('Ranked suggestions'), findsNothing);
+    // The best match was auto-selected and onConfirm fired exactly once.
+    expect(confirmed, destination);
     expect(find.text('Fixture destination'), findsOneWidget);
     expect(find.text('Fixture start'), findsNothing);
     expect(find.text('Ranked suggestions'), findsNothing);

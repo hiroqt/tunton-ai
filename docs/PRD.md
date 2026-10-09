@@ -19,7 +19,7 @@ A visitor has a photo of a named Philippine place but doesn't know its name. TUN
 3. Run **one** on-device OpenCLIP ViT-B/32 image encoder through native Android ONNX Runtime.
 4. Compare the resulting vector with precomputed local reference-photo embeddings.
 5. Display **up to three different landmark candidates**, or **Not recognized**.
-6. Require the user to confirm a candidate.
+6. Require the user to confirm a candidate. *(Scope change (user-approved) 2026-10-10: manual confirmation removed; the app now automatically accepts the single best match that passes the aggressive recognition gate — a sole candidate ≥ the strong-match threshold, or a top candidate that beats the runner-up by the margin. This supersedes the earlier "require confirmation" wording at the user's explicit request on 2026-10-10.)*
 7. For a non-Intramuros POI, show its verified catalog identity and end the journey. For Intramuros, continue to the existing route flow.
 8. User selects a known graph-backed start manually, or explicitly requests a current GPS fix that is snapped to the nearest Intramuros graph node. Permission or location failure leaves manual selection available.
 9. Run on-device Dijkstra shortest-path search along actual pedestrian graph edges.
@@ -33,7 +33,7 @@ A visitor has a photo of a named Philippine place but doesn't know its name. TUN
 | P0-02 | Run on-device visual model | Single packaged OpenCLIP ViT-B/32 LAION-2B image tower runs through native Android ONNX Runtime without network calls. |
 | P0-03 | Match supported POIs | Inference vector compared with same-model, precomputed local embeddings for catalog POIs; results represent max. **3 distinct** POIs. |
 | P0-04 | Handle uncertainty | Unknown/ambiguous input can yield **Not recognized**; no invented GPS or fake confidence percentage. |
-| P0-05 | Confirm a destination | No route destination is chosen unless the user confirms a candidate. |
+| P0-05 | Confirm a destination | No route destination is chosen unless the user confirms a candidate. *(Scope change (user-approved) 2026-10-10: superseded — the app automatically accepts the single best passing match; the manual confirmation step was removed at the user's explicit request on 2026-10-10.)* |
 | P0-06 | Prepare and load Mapbox offline map | While connected, download the Mapbox style and fixed Intramuros region through the SDK. After download completes, the map and POI markers render in airplane mode from SDK-managed local storage; no network basemap fallback. Mapbox map data is not bundled or redistributed in the APK. |
 | P0-07 | Select a graph-backed origin | User can choose a mapped start manually or opt in to GPS; GPS is snapped to the nearest Intramuros graph node and never used as a destination. |
 | P0-08 | Resolve correct coordinates | Confirmed landmark's verified coordinates and route node come only from packaged landmark catalog. |
@@ -71,7 +71,7 @@ A visitor has a photo of a named Philippine place but doesn't know its name. TUN
 | Screen | Allowed user controls | Required result |
 |---|---|---|
 | Photo | Take / Choose / Retry | Image preview, inference loading or invalid-image message |
-| Recognition | See up to 3 candidates; confirm / retry | Clear candidate or **Not recognized** state |
+| Recognition | Retry only — the single best passing match is accepted automatically | Auto-selected match card or **Not recognized** state *(Scope change (user-approved) 2026-10-10: manual candidate selection and the Confirm step were removed in favor of automatic single-best acceptance, superseding "see up to 3 candidates; confirm".)* |
 | Offline map | Download fixed Mapbox region while connected; view marker; choose manual or optional GPS-snapped start | Download completion is confirmed before offline use; verified destination and graph-backed origin shown; approximate GPS connector disclosed |
 | Navigation | View route / choose another supported start | Polyline, distance, ETA, or **Route unavailable** |
 

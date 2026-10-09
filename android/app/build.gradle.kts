@@ -41,6 +41,15 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // ONNX Runtime's NodeInfo/TensorInfo/ValueInfo and related classes are
+            // instantiated only from native JNI code (libonnxruntime4j_jni.so) via
+            // GetMethodID. The ORT 1.23.2 AAR ships no consumer keep rules, so R8
+            // (minify + resource shrinking) strips/renames those symbols and the JNI
+            // lookup aborts the process (SIGABRT, NoSuchMethodError) before inference.
+            // Disabling R8 for release removes that failure class for ORT and every
+            // other native/JNI-backed plugin. A native abort cannot be caught in Kotlin.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

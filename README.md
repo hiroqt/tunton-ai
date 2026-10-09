@@ -6,7 +6,7 @@
 > **Platform:** Flutter / Android-first  
 > **Pilot region:** Intramuros, Manila, Philippines  
 > **Minimum device target:** 8 GB RAM (requires testing on actual target hardware)  
-> **Offline requirement:** Download the fixed Mapbox region while connected after installation. The photo-to-route demo then runs without internet, cloud AI, or laptop/server connection.
+> **Current map implementation:** Bundled raster PNG tiles rendered by `flutter_map` and `AssetTileProvider`. There is no remote map SDK or map-download flow in the current app; this differs from the approved target in `docs/PRD.md`.
 
 ## Contents
 
@@ -33,13 +33,13 @@
 
 ## Overview
 
-**TUNTON AI** is a small, offline-first mobile proof of concept for identifying **supported, recognizable landmarks in photographs** and previewing a walkable route to the selected landmark. A lightweight vision model operates **on the Android device**; a finite catalog connects landmark matches to verified coordinates; a prepackaged pedestrian graph provides walking paths without calling an online directions service. The Mapbox style and Intramuros region are downloaded once while connected and then rendered offline from SDK-managed storage.
+**TUNTON AI** is a small, offline-first mobile proof of concept for identifying **supported, recognizable landmarks in photographs** and previewing a walkable route to the selected landmark. A local vision model operates **on the Android device**; a finite catalog connects landmark matches to verified coordinates; a prepackaged pedestrian graph provides walking paths without calling an online directions service. The current map widget reads bundled PNG tiles from `assets/tiles/` using `flutter_map`'s `AssetTileProvider`.
 
-A visitor might have a photo of an Intramuros landmark but not know the name or where it appears on a map. In the supported pilot area, TUNTON helps that visitor identify a likely landmark, confirm it, choose a manual start or explicitly request a GPS start snapped to the walking graph, and preview a route — after the Mapbox region has been downloaded and Wi-Fi and mobile data are turned off.
+A visitor might have a photo of an Intramuros landmark but not know the name or where it appears on a map. In the supported pilot area, TUNTON helps that visitor identify a likely landmark, confirm it, choose a manual start or explicitly request a GPS start snapped to the walking graph, and preview a route over the bundled tile map.
 
 ### Core promise
 
-**Download Mapbox region while connected → photo → local AI matches → user confirms destination → offline map → manual or GPS-snapped start → walking-route preview.**
+**Photo → local AI matches → user confirms destination → bundled offline tile map → manual or GPS-snapped start → walking-route preview.**
 
 **Precision boundary:** Image matching identifies the *landmark depicted in the photograph*, **not the location where the photographer stood**. TUNTON does not infer a live current position from the photo.
 
@@ -56,7 +56,7 @@ A bundled **MobileNetV3 Small image embedder** produces a numerical vector from 
 | Landmark retrieval | Rank **up to three distinct** supported landmarks | P0 |
 | Uncertainty | Return **Not recognized** when a photo cannot be matched reliably | P0 |
 | Confirmation | Require the user to confirm a landmark before routing | P0 |
-| Offline map | Download a fixed Mapbox offline region while connected; render it with landmark markers offline | P0 |
+| Current map | Render bundled raster PNG tiles from `assets/tiles/` using `flutter_map` | Implemented locally; does not meet the map-provider target in `docs/PRD.md` |
 | Starting point | Choose a manual graph-backed start or explicitly request a GPS start snapped to the graph | P0 |
 | Route preview | Calculate a shortest connected pedestrian route on-device | P0 |
 | Route result | Display path geometry, distance, and estimated walking duration | P0 |
@@ -74,21 +74,21 @@ The following are **out of scope for the hackathon** and must not be quietly add
 - EXIF GPS interpretation, OCR, sign reading, geocoding, and additional map regions beyond the fixed P0 Intramuros region.
 - Driving/cycling directions, wheelchair-accessibility guarantees, or safety-certified navigation.
 - Chatbots, large language models, a second AI model, or model training/fine-tuning.
-- Hosted app servers, FastAPI, cloud AI/directions APIs, remote databases, user authentication/accounts, app-owned analytics, or syncing. Mapbox is used only for the fixed offline map setup/update and its SDK telemetry terms apply.
+- Hosted app servers, FastAPI, cloud AI/directions APIs, remote databases, user authentication/accounts, app-owned analytics, or syncing.
 - iOS-specific demo work during the Android-first one-day build.
 
 Do not add extra screens, architecture layers, or dependencies “for future scalability.” The single P0 user journey is the product.
 
 ## User journey
 
-1. While connected, download the fixed Mapbox Intramuros style/region and confirm it is ready.
+1. The current build reads its bundled raster tiles locally; it has no map-download step.
 2. Enable airplane mode and cold-launch TUNTON.
 3. Select **Take Photo** or **Choose Photo**.
 4. The phone preprocesses the picture and runs the embedded TFLite vision model.
 5. TUNTON compares the resulting embedding against bundled landmark reference vectors.
 6. The screen displays up to three **different** potential landmark matches or **Not recognized**.
 7. The user confirms one potential landmark as the **destination**.
-8. The Mapbox offline map places a marker at that landmark's **verified stored coordinates**.
+8. The local tile map places a marker at that landmark's **verified stored coordinates**.
 9. The user selects a valid starting landmark or requests a GPS start snapped to a graph node.
 10. The on-device routing engine calculates the shortest connected **walking** path.
 11. The app displays the route polyline, distance, and **estimated** walking duration.
@@ -97,7 +97,7 @@ If the image is not recognized, the app does **not** fabricate coordinates. If t
 
 ## Architecture
 
-The release APK bundles the model, recognition data, and pedestrian graph. The Mapbox style and offline region are downloaded from Mapbox to the SDK-managed device store while connected and are not packaged in the APK. Python may be used **beforehand** to prepare the pedestrian graph and reference data on a developer's Mac; there is **no Python or application server in the deployed Android app**.
+The app bundles the model, recognition data, pedestrian graph, and raster map tiles under `assets/tiles/`. The current map is rendered by `flutter_map` from local PNG assets; the repository does not implement the SDK-managed offline-region target described in `docs/PRD.md`. Python may be used **beforehand** to prepare the pedestrian graph and reference data on a developer's Mac; there is **no Python or application server in the deployed Android app**.
 
 ```mermaid
 flowchart TD
@@ -113,7 +113,7 @@ flowchart TD
     H --> I[User confirms destination]
     L[(Verified landmark catalog)] --> I
     I --> J[Offline map / destination marker]
-    T[(Mapbox SDK offline store)] --> J
+    T[(Bundled PNG map tiles)] --> J
     J --> K[User selects manual or GPS-snapped start]
     K --> N[Dart Dijkstra routing]
     W[(Bundled pedestrian graph)] --> N
@@ -125,9 +125,9 @@ flowchart TD
 All core processing occurs in the Flutter app:
 
 - **Recognition:** Dart preprocessing → `tflite_flutter` inference → Dart cosine-similarity ranking.
-- **Mapping:** `mapbox_maps_flutter` with one SDK-managed style and offline region downloaded while connected.
+- **Mapping:** `flutter_map` with `AssetTileProvider` reading bundled PNG raster tiles.
 - **Routing:** A compact pedestrian graph plus a pure-Dart Dijkstra traversal over actual edge lengths and geometry.
-- **Data:** Read-only bundled model, JSON, images, and graph; Mapbox map data stays in the SDK-managed device store.
+- **Data:** Read-only bundled model, JSON, images, graph, and raster map tiles.
 
 ## Technology stack
 
@@ -139,9 +139,9 @@ All core processing occurs in the Flutter app:
 | Preprocessing | Dart `image` | Decode, orient, resize, and prepare tensors as required by the checkpoint |
 | Model/runtime | **MobileNetV3 Small Image Embedder** `.tflite` + `tflite_flutter` | Device-local image embeddings |
 | Similarity | Dart cosine similarity | Rank bundled reference vectors by landmark |
-| Map display | `mapbox_maps_flutter` | Download the Mapbox style/region while connected; render markers and route geometry offline |
+| Map display | `flutter_map` + `AssetTileProvider` | Render bundled `assets/tiles/{z}/{x}/{y}.png` tiles, markers, and route geometry |
 | Route computation | Pure Dart Dijkstra | Shortest connected pedestrian path |
-| App assets | Bundled JSON, photos, `.tflite`; Mapbox region in SDK-managed storage | Read-only local resources after connected map setup |
+| App assets | Bundled JSON, photos, model, and raster tiles | Read-only local resources; no map download step in the current app |
 | Preparation only | Python + OSMnx | Convert/validate pedestrian data before bundling APK |
 
 **No Ollama, TensorFlow server, OpenCLIP runtime, vector database, Firebase, Supabase, or Google Maps API is required or approved for this MVP.**
@@ -154,8 +154,8 @@ All core processing occurs in the Flutter app:
 
 - MacBook Air M5 or other supported development computer with **Flutter**, **Dart**, **Git**, **Android Studio**, and **Android SDK Platform-Tools** installed.
 - A physical Android phone for the demo, with USB debugging enabled; **8 GB RAM target** and an Android API level compatible with the selected `tflite_flutter` package (the current setup document specifies **API level 26+**).
-- Internet during initial tool/model/data preparation and the Mapbox offline-region download.
-- Properly sourced images, a prepackaged Intramuros pedestrian graph, and a Mapbox account/public token for the fixed offline-region download.
+- Internet during initial tool/model/data preparation; the current app map reads bundled tiles locally.
+- Properly sourced images, a prepackaged Intramuros pedestrian graph, and the bundled raster tiles.
 
 Check your environment:
 
@@ -183,7 +183,7 @@ cd tunton
 Add only the already approved runtime dependencies:
 
 ```bash
-flutter pub add tflite_flutter image_picker image mapbox_maps_flutter flutter_riverpod
+flutter pub add tflite_flutter image_picker image flutter_map flutter_riverpod
 flutter pub get
 ```
 
@@ -198,7 +198,7 @@ Place the governing Markdown documents in the repo root, and place the **actual*
 | Visual index | `assets/landmarks/reference_embeddings.json` | Reference embeddings generated with the **same** checkpoint and preprocessing |
 | Photo references | `assets/images/` | Properly licensed, labeled landmark images |
 | Route graph | `assets/maps/intramuros_graph.json` | Verified pedestrian nodes, edge lengths, and geometry |
-| Mapbox offline map | SDK-managed device storage, downloaded while connected | Style and map coverage limited to the Intramuros pilot area |
+| Current raster map | `assets/tiles/{z}/{x}/{y}.png` | Bundled PNG tiles read by `flutter_map`'s `AssetTileProvider` |
 
 ### Bundled image model
 
@@ -219,19 +219,19 @@ The fixed `landmarks.json` fields are `id`, `name`, `lat`, `lon`, and `route_nod
 
 The reference index includes `model_id`, `dimension`, and `references` with `landmark_id`, `image_asset`, and a complete vector. **Generate these vectors with exactly the bundled model and its runtime preprocessing**, normalize them, and validate they are finite and have the actual model output dimension. Do not use random vectors or placeholder coordinates in the released APK.
 
-### Walking network and map provider
+### Walking network and current map
 
-Prepare the **walking** graph on the Mac before the demo, using the existing `tools/prepare_dataset.py` preparation responsibility and, where useful, OSMnx. The app consumes only the exported bundled JSON and does not need OSMnx on the phone. OSM remains the pedestrian graph data source; Mapbox is the map renderer/basemap.
+Prepare the **walking** graph on the Mac before the demo, using the existing `tools/prepare_dataset.py` preparation responsibility and, where useful, OSMnx. The app consumes only the exported bundled JSON and does not need OSMnx on the phone. The map screen currently uses `flutter_map` with `AssetTileProvider` to read raster PNG tiles packaged under `assets/tiles/`; it also displays markers and the pedestrian graph route overlay.
 
 Graph geometry uses **`[latitude, longitude]`** pairs as specified in [`docs/ARD.md`](docs/ARD.md); this differs from GeoJSON's usual `[longitude, latitude]`. Each edge needs a real mapped pedestrian geometry and a positive `length_m` value. Confirm a connected test route between two catalog landmarks.
 
-**Mapbox offline data is not distributable:** download the style and fixed region through `mapbox_maps_flutter` and store them only in the SDK-managed device store. Do not place these files in the APK or repository. Keep Mapbox SDK attribution visible and retain **© OpenStreetMap contributors** for the separate OSM-derived pedestrian graph. Configure a scoped public token at build time, never commit it, and check current Mapbox usage pricing/limits before release.
+The current map implementation bundles raster tiles as assets and reads them locally; it has no remote map SDK, token, or basemap network fallback. Keep **© OpenStreetMap contributors** attribution visible. Verify the tile source and redistribution terms before public release; repository presence alone does not establish licensing permission.
 
 ### Flutter asset registration
 
-Declare the real model, JSON, and image files under the single existing `flutter: assets:` section in `pubspec.yaml`; Mapbox data is managed by its SDK and must not be registered as an app asset. See [`docs/SETUP.md`](docs/SETUP.md#4-register-bundled-assets-in-pubspecyaml) for the exact procedure.
+Declare the real model, JSON, image, and tile files under the single existing `flutter: assets:` section in `pubspec.yaml`. See [`docs/SETUP.md`](docs/SETUP.md#4-register-bundled-assets-in-pubspecyaml) for the exact procedure.
 
-A valid build must ship the **model, reference index, verified catalog, and walking graph** inside the APK. The fixed Mapbox region must be downloaded and verified on the device before the airplane-mode run.
+A current build includes the **model, reference index, verified catalog, walking graph, and raster tile assets** in the app bundle. Confirm map coverage and airplane-mode behavior on the target device; a successful build alone does not prove them.
 
 ## How photo recognition works
 
@@ -316,7 +316,7 @@ From the Flutter project root, with a connected and authorized physical Android 
 flutter pub get
 flutter analyze
 flutter devices
-flutter run -d <android-device-id> --dart-define=ACCESS_TOKEN="$MAPBOX_ACCESS_TOKEN"
+flutter run -d <android-device-id>
 ```
 
 Replace `<android-device-id>` with a real device identifier. **Run only after mandatory assets are present.**
@@ -325,7 +325,7 @@ For the final standalone Android demo:
 
 ```bash
 flutter analyze
-flutter build apk --release --dart-define=ACCESS_TOKEN="$MAPBOX_ACCESS_TOKEN"
+flutter build apk --release
 adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 
@@ -344,11 +344,11 @@ The expected Flutter output path is `build/app/outputs/flutter-apk/app-release.a
 - [ ] An **unseen** photo of a supported landmark gives plausible distinct candidates.
 - [ ] An unsupported/ambiguous photo can produce **Not recognized**.
 - [ ] User explicitly confirms a candidate destination.
-- [ ] The Mapbox offline region, labels, and markers render after download and airplane-mode cold launch.
+- [ ] The bundled raster tiles, labels, and markers render in airplane mode after a cold launch.
 - [ ] Manual or GPS-snapped start resolves to a valid pedestrian graph node.
 - [ ] A connected route follows real pedestrian edges and shows distance/ETA.
 - [ ] An unconnected route returns **Route unavailable**.
-- [ ] No Mac, server, or internet dependency is needed during the journey after the fixed Mapbox region download.
+- [ ] No Mac, server, or internet dependency is needed during the journey to load the bundled map tiles.
 - [ ] Actual device model, Android version, memory use, and timings are recorded.
 
 ### Performance evidence to record
@@ -378,7 +378,7 @@ Sample during relevant stages. `dumpsys meminfo` gives **snapshots**, not an aut
 | Phone missing or unauthorized | Verify USB debugging, cable, authorization prompt, `flutter devices`, and `adb devices`. |
 | Model fails to load | Check `.tflite` file, asset registration, platform compatibility, and Android logs. |
 | Matches appear random | Check model tensor preprocessing/output, reference checkpoint consistency, vector normalization, and unseen test photos. |
-| App has a blank map offline | Verify Mapbox offline region/style download, local store persistence, coverage, and attribution. |
+| App has a blank map offline | Verify tile paths exist in the Flutter asset bundle and the camera stays within bundled tile coverage. |
 | Route is a straight line or missing | Check mapped entrance nodes, edge geometry, coordinate order, connectivity, and path reconstruction. |
 | App fails in airplane mode | Find the unbundled asset or forbidden network dependency; do **not** insert a cloud fallback. |
 | Memory is excessive | Keep one TFLite interpreter and one photo inference at a time; shrink assets to the pilot region. |
@@ -403,7 +403,7 @@ The full setup and troubleshooting details are in [`docs/SETUP.md`](docs/SETUP.m
 | Workstream | Expected handoff |
 |---|---|
 | Vision | Verified MobileNetV3 embedder, real tensor contract, reference embeddings, held-out example result |
-| Map and data | Verified six-landmark catalog, completed Mapbox offline-region coverage, connected pedestrian graph with real geometry |
+| Map and data | Verified landmark catalog, bundled raster tile coverage, connected pedestrian graph with real geometry |
 | Flutter UI/integration | Photo, candidate confirmation, offline map, manual/GPS-snapped start, and route preview screens |
 | QA/demo | Release APK, airplane-mode cold-run evidence, unsupported-input checks, real measurements |
 
@@ -429,13 +429,13 @@ Remaining blocker:
 
 ## Privacy, data provenance, and attribution
 
-- **Photo privacy:** Photos and inference stay on the phone; they are never uploaded. TUNTON has no app-owned analytics. The Mapbox SDK may send de-identified usage/location telemetry under its terms; keep its attribution control visible so users can access the telemetry opt-out.
+- **Photo privacy:** Photos and inference stay on the phone; they are never uploaded. TUNTON has no app-owned analytics.
 - **Data provenance:** Supported landmarks have verified names/coordinates and legitimate reference-image rights. Vector files are generated from the matching, approved local model.
 - **Geographic integrity:** Pedestrian graph paths use actual verified walking connections, not AI-invented coordinates or roads.
-- **Map/tile redistribution:** Use the Mapbox SDK-managed download and storage. Never package or redistribute Mapbox map data. The pedestrian graph remains OSM-derived; do not scrape the public OSM tile server for tiles.
-- **Attribution:** Keep the Mapbox SDK attribution control visible (including its telemetry opt-out) and show **© OpenStreetMap contributors** for the separate pedestrian graph data.
+- **Map/tile source and rights:** The current implementation bundles raster PNG tiles under `assets/tiles/`. Verify their source and redistribution rights before public release.
+- **Attribution:** Show **© OpenStreetMap contributors** for the locally rendered map and pedestrian graph data.
 
-See [Mapbox Flutter offline maps](https://docs.mapbox.com/flutter/maps/examples/offline/), [Mapbox offline-data restrictions](https://docs.mapbox.com/ios/maps/guides/offline/concepts/), and [Mapbox installation/token setup](https://docs.mapbox.com/flutter/maps/guides/install/).
+The current map uses `flutter_map` and local assets; it has no remote basemap service or map token configuration.
 
 ## Limitations and safety
 
@@ -446,23 +446,23 @@ TUNTON is a **bounded hackathon proof of concept**:
 - Foreground GPS may show the current location or provide an explicitly requested snapped start. It does not provide automatic off-route detection, rerouting, traffic, closure information, or real-time pedestrian access checks.
 - Mapped paths may be outdated, closed, gated, or inaccessible. The app must not present a calculated route as guaranteed safe.
 - Routes and walking times are approximate **previews**, not safety-critical navigation instructions.
-- Missing photos, unknown landmarks, graph disconnections, or missing/incomplete Mapbox offline data must produce transparent failure states.
+- Missing photos, unknown landmarks, missing tile assets, or graph disconnections must produce transparent failure states.
 - Compatibility with 8 GB RAM Android devices is a **target pending device testing**, not a guaranteed result.
 
 ## Demo walkthrough
 
-1. **Prepare the map once.** While connected, download the Mapbox style/Intramuros region and confirm SDK completion.
+1. **Use the bundled map.** The current app reads its raster tiles from assets and has no map-download step.
 2. **Start offline.** Put the phone in airplane mode, confirm Wi-Fi/mobile data are off, and cold-launch the release APK.
 3. **Choose a new photo.** Select a held-out photograph of one supported Intramuros landmark.
 4. **Show on-device recognition.** Let TUNTON rank candidates and confirm the intended destination.
 5. **Display the local map.** Show the destination marker and choose a valid manual start or explicitly request a GPS-snapped start.
 6. **Calculate the walk.** Present the route along real pedestrian geometry with distance and approximate ETA.
 7. **Show a limitation honestly.** Test an unsupported image (**Not recognized**) or disconnected pair (**Route unavailable**).
-8. **Close with evidence.** Report observed inference/route timings, device RAM, and the initial Mapbox network setup separately from offline runtime.
+8. **Close with evidence.** Report observed inference/route timings, device RAM, and that the current basemap is bundled locally.
 
 **Suggested pitch:**
 
-> *What if a photo were enough to find a familiar destination, even when cloud AI and connectivity disappear? After a one-time Mapbox region download, TUNTON runs visual landmark recognition directly on the phone, connects confirmed places to verified offline map data, and previews a walking route without internet.*
+> *What if a photo were enough to find a familiar destination, even when cloud AI and connectivity disappear? TUNTON runs visual landmark recognition directly on the phone, connects confirmed places to local map and pedestrian data, and previews a walking route without internet.*
 
 ## Documentation
 
@@ -484,12 +484,9 @@ These files are the governing project references; this README is an entry point,
 
 - [Flutter documentation](https://docs.flutter.dev/)
 - [`tflite_flutter` package](https://pub.dev/packages/tflite_flutter)
-- [Mapbox Maps SDK for Flutter](https://docs.mapbox.com/flutter/maps/guides/)
-- [Mapbox Flutter offline maps](https://docs.mapbox.com/flutter/maps/examples/offline/)
 - [MediaPipe Image Embedder example](https://github.com/google-ai-edge/mediapipe-samples-web/blob/main/src/tasks/image-embedder.ts)
 - [OSMnx documentation](https://osmnx.readthedocs.io/)
-- [Mapbox offline-data constraints](https://docs.mapbox.com/ios/maps/guides/offline/concepts/)
 
 ---
 
-**Scope statement:** One Flutter Android app, one bundled MobileNetV3 Small image embedder, one verified Intramuros landmark catalog, one Mapbox offline region prepared while connected, and one local pedestrian graph for the photo-to-walking-route preview. **No runtime server or cloud AI.**
+**Current implementation:** One Flutter Android app, one local image-embedding model, one verified landmark catalog, bundled raster PNG map tiles rendered through `flutter_map`, and one local pedestrian graph for the photo-to-walking-route preview. **No runtime server or cloud AI.** The map target in `docs/PRD.md` is not implemented by the current map widget.

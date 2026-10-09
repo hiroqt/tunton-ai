@@ -1,0 +1,9 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Non-blocking: the margin gate omits the task spec's 'and the top is not strongly above threshold' escape clause, rejecting unconditionally on count>=2 && margin<minTopMargin. Justified by the measured INTER distribution (wrong-landmark matches cluster at high absolute cosine), consistent with analysis.md, and strictly stricter; worth a one-line note that the spec parenthetical was intentionally dropped.",
+    "Non-blocking: at threshold 0.40 the absolute gate accepts ~98% of wrong-landmark reference pairs, so all ambiguity discrimination rests on the 0.05 margin gate. Openly documented in analysis.md; flagged so future tuning targets the margin, not the threshold.",
+    "Minor: the near-tie test uses an exact tie (margin=0.0000), so the strict-inequality boundary at margin == minTopMargin (should be accepted) is not directly asserted. Low risk; a boundary case at margin == 0.05 would pin the < vs <= contract."
+  ],
+  "reviewDoc": "/Users/arnel/tunton-ai/.agents/tasks/recognition-threshold/review.md"
+}

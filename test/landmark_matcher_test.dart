@@ -106,12 +106,14 @@ void main() {
   });
 
   test('caps the result at 3 distinct ids when 4+ landmarks pass', () {
+    // alpha is a clear winner (margin to beta well above the default), and the
+    // other three stay above threshold so the 3-candidate cap is exercised.
     final matcher = LandmarkMatcher.fromDecodedJson(
       _decoded(2, [
-        ('alpha', [1.0, 0.0]),
-        ('beta', [0.9999, 0.0141]),
-        ('gamma', [0.9998, 0.02]),
-        ('delta', [0.9997, 0.0245]),
+        ('alpha', [1.0, 0.0]), // cosine 1.0 vs query
+        ('beta', [0.70710678, 0.70710678]), // cosine ~0.707
+        ('gamma', [0.6, 0.8]), // cosine 0.6
+        ('delta', [0.55, 0.83516]), // cosine ~0.55
       ]),
       scoreThreshold: 0.0,
     );
@@ -120,6 +122,132 @@ void main() {
     final ids = result.candidates.map((c) => c.landmarkId).toSet();
     expect(ids.length, 3);
     expect(ids.contains('alpha'), isTrue);
+  });
+
+  test(
+    'ambiguity gate: two near-equal top scores within the margin => Not recognized',
+    () {
+      // alpha and beta are both ~0.707 to the query (a diagonal), a near-tie
+      // well inside the default margin, so the result must be rejected.
+      final matcher = LandmarkMatcher.fromDecodedJson(
+        _decoded(2, [
+          ('alpha', [1.0, 0.0]),
+          ('beta', [0.0, 1.0]),
+        ]),
+        // Above the absolute threshold so only the MARGIN gate can reject.
+        scoreThreshold: 0.4,
+        minTopMargin: 0.05,
+      );
+      final result = matcher.match([0.70710678, 0.70710678]);
+      expect(result.isRecognized, isFalse);
+      expect(result.candidates, isEmpty);
+      expect(result.top, isNull);
+    },
+  );
+
+  test(
+    'ambiguity gate: a clear dominant winner beyond the margin is recognized',
+    () {
+      final matcher = LandmarkMatcher.fromDecodedJson(
+        _decoded(2, [
+          ('alpha', [1.0, 0.0]), // cosine 1.0 vs query
+          ('beta', [0.6, 0.8]), // cosine 0.6 vs query (margin 0.4 >> 0.05)
+        ]),
+        scoreThreshold: 0.4,
+        minTopMargin: 0.05,
+      );
+      final result = matcher.match([1.0, 0.0]);
+      expect(result.isRecognized, isTrue);
+      expect(result.top!.landmarkId, 'alpha');
+      expect(result.candidates.length, 2);
+    },
+  );
+
+  test(
+    'below the absolute threshold stays Not recognized even without a tie',
+    () {
+      final matcher = LandmarkMatcher.fromDecodedJson(
+        _decoded(2, [
+          ('alpha', [1.0, 0.0]),
+        ]),
+        scoreThreshold: 0.4,
+        minTopMargin: 0.05,
+      );
+      // cosine ~0.30 < 0.40 absolute threshold.
+      final result = matcher.match([0.3, 0.95393920]);
+      expect(result.isRecognized, isFalse);
+      expect(result.candidates, isEmpty);
+    },
+  );
+
+  test('a lone candidate at or above the strong gate is accepted', () {
+    final matcher = LandmarkMatcher.fromDecodedJson(
+      _decoded(2, [
+        ('alpha', [1.0, 0.0]),
+      ]),
+      scoreThreshold: 0.4,
+      minTopMargin: 0.07,
+      strongMatchThreshold: 0.55,
+    );
+    // cosine 1.0 >= 0.55 strong gate.
+    final result = matcher.match([1.0, 0.0]);
+    expect(result.isRecognized, isTrue);
+    expect(result.top!.landmarkId, 'alpha');
+    expect(result.candidates.length, 1);
+  });
+
+  test(
+    'lone weak match between floor and strong gate is rejected (0.40-0.55 hole)',
+    () {
+      final matcher = LandmarkMatcher.fromDecodedJson(
+        _decoded(2, [
+          ('alpha', [1.0, 0.0]),
+        ]),
+        scoreThreshold: 0.4,
+        minTopMargin: 0.07,
+        strongMatchThreshold: 0.55,
+      );
+      // Query chosen so cosine with [1,0] is ~0.4951 (the observed lone false
+      // hit): above the 0.40 floor but below the 0.55 strong gate.
+      const cos = 0.4951;
+      final result = matcher.match([cos, 0.868819]);
+      expect(result.top, isNull);
+      expect(result.isRecognized, isFalse);
+      expect(result.candidates, isEmpty);
+    },
+  );
+
+  test('lone strong match in the real-photo band is accepted', () {
+    final matcher = LandmarkMatcher.fromDecodedJson(
+      _decoded(2, [
+        ('alpha', [1.0, 0.0]),
+      ]),
+      scoreThreshold: 0.4,
+      minTopMargin: 0.07,
+      strongMatchThreshold: 0.55,
+    );
+    // cosine ~0.60 with [1,0] — a dominant mid-band real-photo match.
+    final result = matcher.match([0.60, 0.8]);
+    expect(result.isRecognized, isTrue);
+    expect(result.top!.landmarkId, 'alpha');
+    expect(result.candidates.length, 1);
+  });
+
+  test('defaults use the measured threshold, margin and strong gate', () {
+    final matcher = LandmarkMatcher.fromDecodedJson(
+      _decoded(2, [
+        ('alpha', [1.0, 0.0]),
+      ]),
+    );
+    expect(matcher.scoreThreshold, LandmarkMatcher.defaultScoreThreshold);
+    expect(matcher.minTopMargin, LandmarkMatcher.defaultMinTopMargin);
+    expect(
+      matcher.strongMatchThreshold,
+      LandmarkMatcher.defaultStrongMatchThreshold,
+    );
+    expect(LandmarkMatcher.defaultScoreThreshold, 0.40);
+    expect(LandmarkMatcher.defaultMinTopMargin, 0.07);
+    expect(LandmarkMatcher.defaultStrongMatchThreshold, 0.55);
   });
 
   test('returns a first-class Not-recognized result below threshold', () {

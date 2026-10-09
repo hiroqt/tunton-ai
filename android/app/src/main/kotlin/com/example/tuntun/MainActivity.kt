@@ -7,6 +7,9 @@ import ai.onnxruntime.OrtSession
 import ai.onnxruntime.TensorInfo
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.FileOutputStream
@@ -16,6 +19,7 @@ import java.util.concurrent.Executors
 
 class MainActivity : FlutterActivity() {
     private val executor = Executors.newSingleThreadExecutor()
+    private val mainHandler = Handler(Looper.getMainLooper())
     private val environment by lazy { OrtEnvironment.getEnvironment() }
     private var session: OrtSession? = null
     private var inputName: String? = null
@@ -34,19 +38,27 @@ class MainActivity : FlutterActivity() {
                                 call.argument<String>("sha256") ?: error("Missing model checksum"),
                                 call.argument<Int>("dimension") ?: error("Missing embedding dimension"),
                             )
-                        }.onSuccess(result::success)
-                            .onFailure { result.error("MODEL_UNAVAILABLE", "The local image model could not be loaded.", null) }
+                        }.onSuccess { value -> reply { result.success(value) } }
+                            .onFailure { error ->
+                                Log.w(TAG, "initialize failed", error)
+                                reply { result.error("MODEL_UNAVAILABLE", "The local image model could not be loaded.", null) }
+                            }
                     }
                     "embed" -> executor.execute {
                         runCatching {
                             embed(call.argument<FloatArray>("tensor") ?: error("Missing image tensor"))
-                        }.onSuccess { result.success(it) }
-                            .onFailure { result.error("INFERENCE_FAILED", "Local image recognition failed.", null) }
+                        }.onSuccess { value -> reply { result.success(value) } }
+                            .onFailure { error ->
+                                Log.w(TAG, "inference failed", error)
+                                reply { result.error("INFERENCE_FAILED", "Local image recognition failed.", null) }
+                            }
                     }
                     else -> result.notImplemented()
                 }
             }
     }
+
+    private fun reply(block: () -> Unit) = mainHandler.post(block)
 
     private fun initialize(expectedSha256: String, expectedDimension: Int): Map<String, Any> {
         session?.let {
@@ -66,6 +78,7 @@ class MainActivity : FlutterActivity() {
             check(temporary.renameTo(modelFile)) { "Could not prepare the local model" }
         }
 
+        val loadStart = System.nanoTime()
         val loaded = environment.createSession(modelFile.absolutePath, OrtSession.SessionOptions())
         try {
             val inName = loaded.inputNames.single()
@@ -80,6 +93,12 @@ class MainActivity : FlutterActivity() {
             outputName = outName
             loadedSha256 = expectedSha256
             session = loaded
+            val loadMs = (System.nanoTime() - loadStart) / 1_000_000
+            Log.i(
+                TAG,
+                "session loaded in ${loadMs}ms input=$inName${inInfo.shape.toList()} " +
+                    "output=$outName${outInfo.shape.toList()}",
+            )
             return mapOf("dimension" to outputSize)
         } catch (error: Throwable) {
             loaded.close()
@@ -92,6 +111,7 @@ class MainActivity : FlutterActivity() {
         val active = checkNotNull(session) { "Model is not initialized" }
         val name = checkNotNull(inputName)
         val output = checkNotNull(outputName)
+        val inferStart = System.nanoTime()
         val tensor = OnnxTensor.createTensor(environment, FloatBuffer.wrap(data), INPUT_SHAPE)
         tensor.use {
             active.run(mapOf(name to tensor)).use { results ->
@@ -100,6 +120,8 @@ class MainActivity : FlutterActivity() {
                     val values = FloatArray(outputSize)
                     it.floatBuffer.get(values)
                     check(values.all { it.isFinite() } && values.any { value -> value != 0f })
+                    val inferMs = (System.nanoTime() - inferStart) / 1_000_000
+                    Log.i(TAG, "inference completed in ${inferMs}ms dim=$outputSize")
                     return values.map { it.toDouble() }
                 }
             }
@@ -126,6 +148,7 @@ class MainActivity : FlutterActivity() {
     }
 
     companion object {
+        private const val TAG = "TUNTON_ORT"
         private const val CHANNEL = "com.tunton/vision"
         private const val MODEL_FILE = "openclip_vit_b32_laion2b_int8.onnx"
         private const val INPUT_SIZE = 3 * 224 * 224

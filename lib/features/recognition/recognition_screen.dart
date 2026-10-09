@@ -22,7 +22,10 @@ class RecognitionScreen extends StatefulWidget {
 
 class _RecognitionScreenState extends State<RecognitionScreen> {
   Future<List<Landmark>>? _matches;
-  Landmark? _selected;
+
+  // Guards the automatic advance so onConfirm fires exactly once even as the
+  // FutureBuilder rebuilds.
+  bool _advanced = false;
 
   @override
   void initState() {
@@ -63,7 +66,7 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Choose the landmark in your photo, then confirm your destination.',
+            'Matching your photo on this device, then continuing automatically.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -99,53 +102,21 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
                   );
                 }
                 if (snapshot.hasError) return _unavailable();
-                final ids = <String>{};
-                final candidates = (snapshot.data ?? [])
-                    .where((place) => ids.add(place.id))
-                    .take(3)
-                    .toList();
-                if (candidates.isEmpty) return _unavailable(unknown: true);
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Ranked suggestions',
-                      style: theme.textTheme.labelMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    for (var index = 0; index < candidates.length; index++) ...[
-                      _CandidateTile(
-                        landmark: candidates[index],
-                        rank: index + 1,
-                        selected: _selected?.id == candidates[index].id,
-                        onTap: () =>
-                            setState(() => _selected = candidates[index]),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    const SizedBox(height: 8),
-                    FilledButton.icon(
-                      onPressed: _selected == null || widget.onConfirm == null
-                          ? null
-                          : () => widget.onConfirm!(_selected!),
-                      icon: const Icon(Icons.check_rounded),
-                      label: const Text('Confirm destination'),
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _retry,
-                      icon: const Icon(Icons.photo_library_outlined),
-                      label: const Text('Try another photo'),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Suggestions are visual matches. Please confirm the place before continuing.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                );
+                final matches = snapshot.data ?? const <Landmark>[];
+                // The screen consumes ONLY the single accepted best match. An
+                // empty list is a first-class "Not recognized" result; never
+                // fabricate a match when there is no top candidate.
+                if (matches.isEmpty) return _unavailable(unknown: true);
+                final best = matches.first;
+                // Automatically proceed with the single best match once the
+                // frame settles — no candidate list, no manual Confirm.
+                if (!_advanced && widget.onConfirm != null) {
+                  _advanced = true;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) widget.onConfirm!(best);
+                  });
+                }
+                return _AutoMatchCard(landmark: best, onRetry: _retry);
               },
             ),
         ],
@@ -154,50 +125,40 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
   }
 }
 
-class _CandidateTile extends StatelessWidget {
-  const _CandidateTile({
-    required this.landmark,
-    required this.rank,
-    required this.selected,
-    required this.onTap,
-  });
+/// Non-blocking card naming the landmark that was auto-selected. It does NOT
+/// gate the flow (the automatic advance has already fired); it keeps the user
+/// informed and keeps the honesty disclaimer visible, with a retry affordance.
+class _AutoMatchCard extends StatelessWidget {
+  const _AutoMatchCard({required this.landmark, required this.onRetry});
   final Landmark landmark;
-  final int rank;
-  final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: Material(
-        color: colors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: selected ? colors.primary : colors.outlineVariant,
-            width: selected ? 2 : 1,
-          ),
+    final area =
+        landmark.areaId[0].toUpperCase() + landmark.areaId.substring(1);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text('Match found', style: theme.textTheme.labelMedium),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
+        const SizedBox(height: 12),
+        Material(
+          color: colors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: colors.primary, width: 2),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                SizedBox(
-                  width: 28,
-                  child: Text(
-                    '$rank',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: colors.primary,
-                    ),
-                  ),
-                ),
+                Icon(Icons.check_circle_rounded, color: colors.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -206,8 +167,7 @@ class _CandidateTile extends StatelessWidget {
                       Text(landmark.name, style: theme.textTheme.titleMedium),
                       const SizedBox(height: 4),
                       Text(
-                        landmark.areaId[0].toUpperCase() +
-                            landmark.areaId.substring(1),
+                        area,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
@@ -215,18 +175,24 @@ class _CandidateTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Icon(
-                  selected
-                      ? Icons.check_circle_rounded
-                      : Icons.radio_button_unchecked_rounded,
-                  color: selected ? colors.primary : colors.onSurfaceVariant,
-                ),
               ],
             ),
           ),
         ),
-      ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: onRetry,
+          icon: const Icon(Icons.photo_library_outlined),
+          label: const Text('Try another photo'),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Suggestions are visual matches. Please verify the place before continuing.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }
