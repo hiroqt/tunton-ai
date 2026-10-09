@@ -267,6 +267,9 @@ Use the exact, scope-locked MVP shape from [`ARD.md`](ARD.md). Standard Flutter-
 tunton/
 ├── README.md
 ├── AGENTS.md
+├── docs/
+│   ├── README.md
+│   └── DEVELOPMENT_MAP.md
 ├── SKILL.md
 ├── ARD.md
 ├── PRD.md
@@ -470,6 +473,8 @@ These files are the governing project references; this README is an entry point,
 | [`AGENTS.md`](AGENTS.md) | Strict coding-agent scope and change rules |
 | [`SKILL.md`](SKILL.md) | On-device vision/map/routing implementation and verification procedure |
 | [`SETUP.md`](SETUP.md) | Complete developer onboarding, model/map preparation, Android build, and offline test guide |
+| [`docs/README.md`](docs/README.md) | Documentation index and reading order |
+| [`docs/DEVELOPMENT_MAP.md`](docs/DEVELOPMENT_MAP.md) | Current checkout versus approved Flutter code tree and P0 ownership map |
 
 ### Official technical references
 
