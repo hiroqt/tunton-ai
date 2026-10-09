@@ -69,6 +69,7 @@ flutter:
     - assets/landmarks/landmarks.json
     - assets/landmarks/reference_embeddings.json
     - assets/maps/intramuros_graph.json
+    - assets/images/
     - assets/images/baluarte-san-diego/
     - assets/images/casa-manila/
     - assets/images/fort-santiago/

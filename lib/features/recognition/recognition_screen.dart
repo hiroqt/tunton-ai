@@ -36,14 +36,14 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
     icon: unknown
         ? Icons.image_not_supported_outlined
         : Icons.travel_explore_rounded,
-    title: unknown ? 'Not recognized' : 'Recognition unavailable',
+    title: unknown ? 'NOT RECOGNIZED' : 'RECOGNITION UNAVAILABLE',
     message: unknown
-        ? 'This photo did not match a supported landmark. Try a clearer view or another photo.'
-        : 'Landmark recognition is not available on this build. You can go back and choose another photo.',
+        ? 'THIS PHOTO DID NOT MATCH A SUPPORTED LANDMARK. TRY A CLEARER VIEW OR ANOTHER PHOTO.'
+        : 'LANDMARK RECOGNITION IS NOT AVAILABLE ON THIS BUILD. YOU CAN GO BACK AND CHOOSE ANOTHER PHOTO.',
     action: FilledButton.icon(
       onPressed: _retry,
       icon: const Icon(Icons.photo_library_outlined),
-      label: const Text('Try another photo'),
+      label: const Text('TRY ANOTHER PHOTO'),
     ),
   );
 
@@ -52,25 +52,41 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
     final theme = Theme.of(context);
     return TuntonScaffold(
       step: 1,
-      backLabel: 'Your photo',
+      backLabel: 'YOUR PHOTO',
       onBack: _retry,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(
             header: true,
-            child: Text('Look familiar?', style: theme.textTheme.headlineLarge),
+            child: Text(
+              'LOOK FAMILIAR?',
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2.0,
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Choose the landmark in your photo, then confirm your destination.',
+            'CHOOSE THE LANDMARK IN YOUR PHOTO, THEN CONFIRM YOUR DESTINATION.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 24),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.colorScheme.onSurface, width: 4),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.onSurface,
+                  offset: const Offset(6, 6),
+                ),
+              ],
+            ),
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: Image.memory(
@@ -79,7 +95,7 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
                 cacheWidth: 1024,
                 semanticLabel: 'Photo being matched',
                 errorBuilder: (_, _, _) =>
-                    const Center(child: Text('Photo preview unavailable')),
+                    const Center(child: Text('PHOTO PREVIEW UNAVAILABLE')),
               ),
             ),
           ),
@@ -93,8 +109,8 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return JourneyMessage(
                     icon: Icons.travel_explore_rounded,
-                    title: 'Finding the landmark…',
-                    message: 'Matching your photo on this device.',
+                    title: 'FINDING THE LANDMARK…',
+                    message: 'MATCHING YOUR PHOTO ON THIS DEVICE.',
                     action: const LinearProgressIndicator(),
                   );
                 }
@@ -109,8 +125,11 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Ranked suggestions',
-                      style: theme.textTheme.labelMedium,
+                      'RANKED SUGGESTIONS',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     for (var index = 0; index < candidates.length; index++) ...[
@@ -129,19 +148,20 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
                           ? null
                           : () => widget.onConfirm!(_selected!),
                       icon: const Icon(Icons.check_rounded),
-                      label: const Text('Confirm destination'),
+                      label: const Text('CONFIRM DESTINATION'),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
                       onPressed: _retry,
                       icon: const Icon(Icons.photo_library_outlined),
-                      label: const Text('Try another photo'),
+                      label: const Text('TRY ANOTHER PHOTO'),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Suggestions are visual matches. Please confirm the place before continuing.',
+                      'SUGGESTIONS ARE VISUAL MATCHES. PLEASE CONFIRM THE PLACE BEFORE CONTINUING.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -173,16 +193,20 @@ class _CandidateTile extends StatelessWidget {
     return Semantics(
       selected: selected,
       button: true,
-      child: Material(
-        color: colors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: selected ? colors.primary : colors.outlineVariant,
-            width: selected ? 2 : 1,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.surface,
+          border: Border.all(
+            color: selected ? colors.primary : colors.onSurface,
+            width: selected ? 4 : 2,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: selected ? colors.primary : colors.onSurface,
+              offset: const Offset(4, 4),
+            ),
+          ],
         ),
-        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Padding(
@@ -194,7 +218,8 @@ class _CandidateTile extends StatelessWidget {
                   child: Text(
                     '$rank',
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: colors.primary,
+                      color: selected ? colors.primary : colors.onSurface,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -203,12 +228,19 @@ class _CandidateTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(landmark.name, style: theme.textTheme.titleMedium),
+                      Text(
+                        landmark.name.toUpperCase(),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
-                        'Intramuros',
+                        'INTRAMUROS',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.0,
                         ),
                       ),
                     ],
@@ -217,8 +249,8 @@ class _CandidateTile extends StatelessWidget {
                 const SizedBox(width: 12),
                 Icon(
                   selected
-                      ? Icons.check_circle_rounded
-                      : Icons.radio_button_unchecked_rounded,
+                      ? Icons.check_box_rounded
+                      : Icons.check_box_outline_blank_rounded,
                   color: selected ? colors.primary : colors.onSurfaceVariant,
                 ),
               ],

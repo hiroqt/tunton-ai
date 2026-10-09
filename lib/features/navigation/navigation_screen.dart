@@ -90,12 +90,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Widget _unavailable([RouteResult? result]) => JourneyMessage(
     icon: Icons.route_outlined,
-    title: 'Route unavailable',
-    message: result?.unavailableReason ?? 'Walking routes are not available on this build. Go back and choose another start.',
+    title: 'ROUTE UNAVAILABLE',
+    message: result?.unavailableReason?.toUpperCase() ?? 'WALKING ROUTES ARE NOT AVAILABLE ON THIS BUILD. GO BACK AND CHOOSE ANOTHER START.',
     action: FilledButton.icon(
       onPressed: _changeStart,
       icon: const Icon(Icons.place_outlined),
-      label: const Text('Choose another start'),
+      label: const Text('CHOOSE ANOTHER START'),
     ),
   );
 
@@ -104,7 +104,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     final theme = Theme.of(context);
     return TuntonScaffold(
       step: 3,
-      backLabel: 'Change start',
+      backLabel: 'CHANGE START',
       onBack: _changeStart,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -112,15 +112,20 @@ class _NavigationScreenState extends State<NavigationScreen> {
           Semantics(
             header: true,
             child: Text(
-              'Your walking route',
-              style: theme.textTheme.headlineMedium,
+              'YOUR WALKING ROUTE',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2.0,
+              ),
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'A walking preview through Intramuros.',
+            'A WALKING PREVIEW THROUGH INTRAMUROS.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 24),
@@ -133,8 +138,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return const JourneyMessage(
                     icon: Icons.route_outlined,
-                    title: 'Finding a walking path…',
-                    message: 'Checking the paths stored on this device.',
+                    title: 'FINDING A WALKING PATH…',
+                    message: 'CHECKING THE PATHS STORED ON THIS DEVICE.',
                     action: LinearProgressIndicator(),
                   );
                 }
@@ -145,8 +150,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 if (!result.isAvailable) return _unavailable(result);
                 final distance = result.distanceMeters;
                 final distanceLabel = distance < 1000
-                    ? '${distance.round()} m'
-                    : '${(distance / 1000).toStringAsFixed(1)} km';
+                    ? '${distance.round()} M'
+                    : '${(distance / 1000).toStringAsFixed(1)} KM';
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -168,8 +173,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     ),
                     const SizedBox(height: 16),
                     _Endpoint(
-                      label: 'Destination',
-                      place: widget.destination.name,
+                      label: 'DESTINATION',
+                      place: widget.destination.name.toUpperCase(),
                       icon: Icons.flag_outlined,
                     ),
                     const SizedBox(height: 24),
@@ -180,9 +185,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surface,
                           border: Border.all(
-                            color: theme.colorScheme.outlineVariant,
+                            color: theme.colorScheme.onSurface,
+                            width: 4,
                           ),
-                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.colorScheme.onSurface,
+                              offset: const Offset(6, 6),
+                            ),
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,16 +238,17 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Walking estimate at 4.5 km/h. Gates and access may change.',
+                      'WALKING ESTIMATE AT 4.5 KM/H. GATES AND ACCESS MAY CHANGE.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 24),
                     OutlinedButton.icon(
                       onPressed: _changeStart,
                       icon: const Icon(Icons.place_outlined),
-                      label: const Text('Choose another start'),
+                      label: const Text('CHOOSE ANOTHER START'),
                     ),
                   ],
                 );
@@ -272,10 +284,17 @@ class _Endpoint extends StatelessWidget {
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
               ),
             ),
             const SizedBox(height: 4),
-            Text(place, style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              place,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ],
         ),
       ),
@@ -292,12 +311,20 @@ class _RouteMetric extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(value, style: Theme.of(context).textTheme.headlineMedium),
+      Text(
+        value,
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          fontWeight: FontWeight.w900,
+        ),
+      ),
       const SizedBox(height: 4),
       Text(
         label,
-        style: Theme.of(context).textTheme.bodySmall
-            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.0,
+        ),
       ),
     ],
   );

@@ -197,8 +197,10 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Choose your start',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    'CHOOSE YOUR START',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),
@@ -229,10 +231,15 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
                           horizontal: 24,
                           vertical: 8,
                         ),
-                        title: Text(place.name),
+                        title: Text(
+                          place.name.toUpperCase(),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         leading: Icon(
                           _start?.id == place.id
-                              ? Icons.check_circle_rounded
+                              ? Icons.check_box_rounded
                               : Icons.place_outlined,
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -259,7 +266,7 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
         .toList();
     return TuntonScaffold(
       step: 2,
-      backLabel: 'Your destination',
+      backLabel: 'YOUR DESTINATION',
       onBack: () => Navigator.of(context).pop(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -267,8 +274,11 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
           Semantics(
             header: true,
             child: Text(
-              'Where will you start?',
-              style: theme.textTheme.headlineMedium,
+              'WHERE WILL YOU START?',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2.0,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -276,6 +286,8 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
             'Choose where your walk begins using GPS or a landmark.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 24),
@@ -290,10 +302,17 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
             'DESTINATION',
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 8),
-          Text(widget.destination.name, style: theme.textTheme.titleLarge),
+          Text(
+            widget.destination.name.toUpperCase(),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: 24),
           Text('Starting point', style: theme.textTheme.titleMedium),
           const SizedBox(height: 12),
@@ -329,9 +348,10 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
             Semantics(
               liveRegion: true,
               child: Text(
-                'Start points unavailable. Go back and try another destination.',
+                'START POINTS UNAVAILABLE. GO BACK AND TRY ANOTHER DESTINATION.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -342,13 +362,14 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
                 ? null
                 : () => widget.onStartConfirmed(_start!),
             icon: const Icon(Icons.directions_walk_rounded),
-            label: const Text('Preview walking route'),
+            label: const Text('PREVIEW WALKING ROUTE'),
           ),
           const SizedBox(height: 16),
           Text(
-            'Select a supported start to continue.',
+            'SELECT A SUPPORTED START TO CONTINUE.',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -412,8 +433,8 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
         (widget.origin != null && !widget.origin!.hasValidLocation)) {
       return const JourneyMessage(
         icon: Icons.place_outlined,
-        title: 'Location unavailable',
-        message: 'This location could not be loaded. Go back and choose another destination.',
+        title: 'LOCATION UNAVAILABLE',
+        message: 'THIS LOCATION COULD NOT BE LOADED. GO BACK AND CHOOSE ANOTHER DESTINATION.',
       );
     }
     return FutureBuilder<List<int>>(
@@ -422,8 +443,8 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
         if (snapshot.connectionState != ConnectionState.done) {
           return const JourneyMessage(
             icon: Icons.map_outlined,
-            title: 'Opening the offline map…',
-            message: 'Loading map data from this device.',
+            title: 'OPENING THE OFFLINE MAP…',
+            message: 'LOADING MAP DATA FROM THIS DEVICE.',
             action: LinearProgressIndicator(),
           );
         }
@@ -432,13 +453,21 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
             _tileError) {
           return const JourneyMessage(
             icon: Icons.map_outlined,
-            title: 'Offline map unavailable',
-            message: 'The map for this area could not be loaded. Go back and try another destination.',
+            title: 'OFFLINE MAP UNAVAILABLE',
+            message: 'THE MAP FOR THIS AREA COULD NOT BE LOADED. GO BACK AND TRY ANOTHER DESTINATION.',
           );
         }
         final zooms = snapshot.data!;
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: theme.colorScheme.onSurface, width: 4),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.onSurface,
+                offset: const Offset(6, 6),
+              ),
+            ],
+          ),
           child: SizedBox(
             height: 300,
             child: Stack(
@@ -501,14 +530,22 @@ class _OfflineLandmarkMapState extends State<OfflineLandmarkMap> {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: Container(
-                      color: theme.colorScheme.surface,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        border: Border.all(
+                          color: theme.colorScheme.onSurface,
+                          width: 2,
+                        ),
+                      ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
                       ),
                       child: Text(
-                        '© OpenStreetMap contributors',
-                        style: theme.textTheme.bodySmall,
+                        '© OPENSTREETMAP CONTRIBUTORS',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),

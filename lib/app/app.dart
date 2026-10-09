@@ -103,34 +103,48 @@ class TuntonApp extends StatelessWidget {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size(double.infinity, 64),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          textStyle: text.labelLarge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+          textStyle: text.labelLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2.0,
           ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+            side: BorderSide(color: scheme.onSurface, width: 4),
+          ),
+          elevation: 0,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size(double.infinity, 64),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           foregroundColor: scheme.onSurface,
-          side: BorderSide(color: scheme.outlineVariant),
-          textStyle: text.labelLarge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+          backgroundColor: scheme.surface,
+          side: BorderSide(color: scheme.onSurface, width: 4),
+          textStyle: text.labelLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2.0,
           ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          elevation: 0,
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: scheme.surface,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+          side: BorderSide(width: 4),
+        ),
       ),
       dividerTheme: DividerThemeData(
-        color: scheme.outlineVariant,
-        thickness: 1,
+        color: scheme.onSurface,
+        thickness: 4,
       ),
     );
   }
@@ -155,6 +169,7 @@ class TuntonScaffold extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     return Scaffold(
+      backgroundColor: colors.surfaceContainerLow,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         toolbarHeight: 80,
@@ -162,24 +177,27 @@ class TuntonScaffold extends StatelessWidget {
         title: Row(
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: colors.primary,
-                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.onSurface, width: 3),
+                boxShadow: [
+                  BoxShadow(color: colors.onSurface, offset: const Offset(4, 4)),
+                ],
               ),
-              child: Icon(
-                Icons.route_rounded,
-                color: colors.onPrimary,
-                size: 22,
+              child: Image.asset(
+                'assets/images/logo.png',
+                fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 16),
             Text(
-              'tunton',
+              'TUNTON',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.8,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2.0,
+                color: colors.onSurface,
               ),
             ),
           ],
@@ -187,10 +205,17 @@ class TuntonScaffold extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 24),
-            child: Icon(
-              Icons.location_on_outlined,
-              color: colors.primary,
-              size: 20,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                border: Border.all(color: colors.onSurface, width: 3),
+                color: colors.surface,
+              ),
+              child: Icon(
+                Icons.location_on,
+                color: colors.onSurface,
+                size: 20,
+              ),
             ),
           ),
         ],
@@ -210,13 +235,17 @@ class TuntonScaffold extends StatelessWidget {
                   if (onBack != null) ...[
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 48),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
                         onPressed: onBack,
-                        icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                        label: Text(backLabel ?? 'Back'),
+                        icon: const Icon(Icons.arrow_back, size: 20),
+                        label: Text(backLabel?.toUpperCase() ?? 'BACK'),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                   ],
                   child,
                 ],
@@ -232,7 +261,7 @@ class TuntonScaffold extends StatelessWidget {
 class _JourneyProgress extends StatelessWidget {
   const _JourneyProgress({required this.step});
   final int step;
-  static const labels = ['Photo', 'Confirm', 'Start', 'Route'];
+  static const labels = ['PHOTO', 'CONFIRM', 'START', 'ROUTE'];
 
   @override
   Widget build(BuildContext context) {
@@ -253,17 +282,20 @@ class _JourneyProgress extends StatelessWidget {
                     4,
                     (index) => Expanded(
                       child: Padding(
-                        padding: EdgeInsets.only(right: index == 3 ? 0 : 6),
+                        padding: EdgeInsets.only(right: index == 3 ? 0 : 8),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              height: 3,
+                              height: 8,
                               decoration: BoxDecoration(
                                 color: index <= step
                                     ? colors.primary
-                                    : colors.outlineVariant,
-                                borderRadius: BorderRadius.circular(2),
+                                    : colors.surface,
+                                border: Border.all(
+                                  color: colors.onSurface,
+                                  width: 2,
+                                ),
                               ),
                             ),
                             if (!compact) ...[
@@ -272,8 +304,10 @@ class _JourneyProgress extends StatelessWidget {
                                 labels[index],
                                 style: Theme.of(context).textTheme.labelMedium
                                     ?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1.0,
                                       color: index == step
-                                          ? colors.primary
+                                          ? colors.onSurface
                                           : colors.onSurfaceVariant,
                                     ),
                               ),
@@ -288,7 +322,9 @@ class _JourneyProgress extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     '${step + 1} / 4 · ${labels[step]}',
-                    style: Theme.of(context).textTheme.labelMedium,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ],
               ],
@@ -316,29 +352,42 @@ class JourneyMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Semantics(
       liveRegion: true,
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          border: Border.all(color: theme.colorScheme.outlineVariant),
-          borderRadius: BorderRadius.circular(20),
+          color: colors.surface,
+          border: Border.all(color: colors.onSurface, width: 4),
+          boxShadow: [
+            BoxShadow(
+              color: colors.onSurface,
+              offset: const Offset(6, 6),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: theme.colorScheme.primary, size: 28),
+            Icon(icon, color: colors.onSurface, size: 36),
             const SizedBox(height: 16),
-            Text(title, style: theme.textTheme.titleLarge),
-            const SizedBox(height: 8),
+            Text(
+              title.toUpperCase(),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 12),
             Text(
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
+                color: colors.onSurfaceVariant,
               ),
             ),
-            if (action != null) ...[const SizedBox(height: 20), action!],
+            if (action != null) ...[const SizedBox(height: 24), action!],
           ],
         ),
       ),

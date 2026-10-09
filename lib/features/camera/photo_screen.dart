@@ -8,8 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import '../../app/app.dart';
 import '../../shared/models/landmark.dart';
 import '../../shared/models/route_result.dart';
-import '../map/offline_map_screen.dart';
-import '../navigation/navigation_screen.dart';
 import '../recognition/recognition_screen.dart';
 
 class PhotoScreen extends StatefulWidget {
@@ -143,26 +141,8 @@ class _PhotoScreenState extends State<PhotoScreen> {
   }
 
   void _confirmDestination(Landmark destination) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => OfflineMapScreen(
-          destination: destination,
-          startPoints: widget.startPoints,
-          findNearestNode: widget.findNearestNode,
-          onStartConfirmed: (origin) => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (context) => NavigationScreen(
-                destination: destination,
-                origin: origin,
-                calculateRoute: widget.calculateRoute == null
-                    ? null
-                    : () => widget.calculateRoute!(origin, destination),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    Navigator.of(context).pop();
+    Navigator.of(context).pop(destination);
   }
 
   @override
@@ -191,18 +171,23 @@ class _PhotoScreenState extends State<PhotoScreen> {
             header: true,
             child: Text(
               _photo == null
-                  ? 'Your next stop,\none photo away.'
-                  : 'A picture becomes\na place.',
-              style: theme.textTheme.headlineLarge,
+                  ? 'YOUR NEXT STOP,\nONE PHOTO AWAY.'
+                  : 'A PICTURE BECOMES\nA PLACE.',
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2.0,
+              ),
             ),
           ),
           const SizedBox(height: 12),
           Text(
             _photo == null
-                ? 'Snap a landmark. Find your way through the walled city.'
-                : 'Check that the landmark is clear before finding a match.',
+                ? 'SNAP A LANDMARK. FIND YOUR WAY THROUGH THE WALLED CITY.'
+                : 'CHECK THAT THE LANDMARK IS CLEAR BEFORE FINDING A MATCH.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: colors.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 24),
@@ -212,9 +197,10 @@ class _PhotoScreenState extends State<PhotoScreen> {
             Semantics(
               liveRegion: true,
               child: Text(
-                _error!,
+                _error!.toUpperCase(),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colors.error,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -223,7 +209,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
           if (_busy) ...[
             Semantics(
               liveRegion: true,
-              child: const Text('Opening your photo…'),
+              child: const Text('OPENING YOUR PHOTO…'),
             ),
             const SizedBox(height: 12),
             const LinearProgressIndicator(),
@@ -233,7 +219,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
             FilledButton.icon(
               onPressed: _busy ? null : _recognize,
               icon: const Icon(Icons.travel_explore_rounded),
-              label: const Text('Find the landmark'),
+              label: const Text('FIND THE LANDMARK'),
             ),
             const SizedBox(height: 12),
           ],
@@ -241,7 +227,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
             FilledButton.icon(
               onPressed: _busy ? null : () => _pick(ImageSource.camera),
               icon: const Icon(Icons.camera_alt_outlined),
-              label: const Text('Take a photo'),
+              label: const Text('TAKE A PHOTO'),
             ),
             const SizedBox(height: 12),
           ],
@@ -249,7 +235,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
             onPressed: _busy ? null : () => _pick(ImageSource.gallery),
             icon: const Icon(Icons.photo_library_outlined),
             label: Text(
-              _photo == null ? 'Choose from gallery' : 'Choose another photo',
+              _photo == null ? 'CHOOSE FROM GALLERY' : 'CHOOSE ANOTHER PHOTO',
             ),
           ),
           if (_photo != null) ...[
@@ -257,7 +243,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
             TextButton.icon(
               onPressed: _busy ? null : () => _pick(ImageSource.camera),
               icon: const Icon(Icons.camera_alt_outlined, size: 18),
-              label: const Text('Take a new photo'),
+              label: const Text('TAKE A NEW PHOTO'),
             ),
           ],
           const SizedBox(height: 24),
@@ -293,8 +279,15 @@ class _PhotoPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+    final colors = theme.colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border.all(color: colors.onSurface, width: 4),
+        boxShadow: [
+          BoxShadow(color: colors.onSurface, offset: const Offset(6, 6)),
+        ],
+      ),
       child: photo != null
           ? AspectRatio(
               aspectRatio: 4 / 3,
@@ -304,16 +297,12 @@ class _PhotoPreview extends StatelessWidget {
                 cacheWidth: 1024,
                 semanticLabel: 'Selected landmark photo',
                 errorBuilder: (_, _, _) =>
-                    const Center(child: Text('Photo preview unavailable')),
+                    const Center(child: Text('PHOTO PREVIEW UNAVAILABLE')),
               ),
             )
           : Container(
               constraints: const BoxConstraints(minHeight: 220),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerLow,
-                border: Border.all(color: theme.colorScheme.outlineVariant),
-                borderRadius: BorderRadius.circular(24),
-              ),
+              color: colors.surfaceContainerLow,
               padding: const EdgeInsets.all(24),
               child: Center(
                 child: Column(
@@ -321,21 +310,25 @@ class _PhotoPreview extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.crop_free_rounded,
-                      size: 48,
-                      color: theme.colorScheme.primary,
+                      size: 64,
+                      color: colors.onSurface,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Frame a landmark',
+                      'FRAME A LANDMARK',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.0,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Use a clear view of the building.',
+                      'USE A CLEAR VIEW OF THE BUILDING.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.bold,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   ],
