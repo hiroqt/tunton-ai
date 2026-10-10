@@ -116,7 +116,10 @@ void main() {
       'assets/landmarks/landmarks.json',
     ).readAsStringSync();
     final landmarks = Landmark.listFromJsonString(jsonString);
-    expect(landmarks.length, 15);
+    // 17 after SM Makati (makati) and MRT EDSA Station (pasay) were added as
+    // recognition-only POIs. See test/new_landmarks_test.dart for the detailed
+    // registration assertions on the two new entries.
+    expect(landmarks.length, 17);
     expect(landmarks.first.id, 'fort-santiago');
     expect(landmarks.first.routeNodeId, '1034882636');
   });

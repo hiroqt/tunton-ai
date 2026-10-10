@@ -479,6 +479,7 @@ These files are the governing project references; this README is an entry point,
 | [`SKILL.md`](SKILL.md) | On-device vision/map/routing implementation and verification procedure |
 | [`docs/README.md`](docs/README.md) | Documentation index and reading order |
 | [`docs/DEVELOPMENT_MAP.md`](docs/DEVELOPMENT_MAP.md) | Current checkout versus approved Flutter code tree and P0 ownership map |
+| [`docs/KNOWN_LANDMARK_GAPS.md`](docs/KNOWN_LANDMARK_GAPS.md) | Honest gaps for SM Makati and MRT EDSA Station: registered + mapped, but recognition and basemap tiles are not yet in place |
 
 ### Official technical references
 

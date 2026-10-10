@@ -113,5 +113,19 @@
     "lat": 14.6002054,
     "lon": 120.9746985,
     "area_id": "manila"
+  },
+  {
+    "id": "sm-makati",
+    "name": "SM Makati",
+    "lat": 14.5497868,
+    "lon": 121.0267042,
+    "area_id": "makati"
+  },
+  {
+    "id": "mrt-edsa",
+    "name": "MRT EDSA Station (Taft Avenue)",
+    "lat": 14.5375167,
+    "lon": 121.0014056,
+    "area_id": "pasay"
   }
 ]
