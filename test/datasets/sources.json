@@ -1868,6 +1868,246 @@
         "basis": "Commons file description and visually reviewed image identify Binondo Church, Manila, Philippines."
       },
       "sha256": "5e2043320f93ae1e31d351ee094df7bfa4f1a77ffdd23e4996ceba592f86873c"
+    },
+    {
+      "path": "assets/images/mrt-edsa/1.png",
+      "landmark_id": "mrt-edsa",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Taft_Avenue_station_(MRT)_01.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/0/01/Taft_Avenue_station_%28MRT%29_01.jpg",
+      "author": "SJasminum",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "82b9b894c76e6a40134332a036f313424a728c098a67f9ded325be575493afd8",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Taft Avenue station (MRT) 01.jpg",
+      "location": "Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Taft_Avenue_station_(MRT)_01.jpg",
+        "basis": "Commons file description/category (Taft Avenue station / MRT-3) identifies the MRT-3 EDSA–Taft Avenue station in Metro Manila; visually reviewed against the named Philippine location Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines."
+      },
+      "sha256": "e70da1309f958ba26649220265509d4fe18d232db6ec0450f6bcbf8f479d34b3"
+    },
+    {
+      "path": "assets/images/mrt-edsa/2.png",
+      "landmark_id": "mrt-edsa",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Taft_Avenue_station_(MRT)_02.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Taft_Avenue_station_%28MRT%29_02.jpg",
+      "author": "SJasminum",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "ccdb933dac7816830caa780a97485eef79055fb102cd76480c56d077e249c678",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Taft Avenue station (MRT) 02.jpg",
+      "location": "Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Taft_Avenue_station_(MRT)_02.jpg",
+        "basis": "Commons file description/category (Taft Avenue station / MRT-3) identifies the MRT-3 EDSA–Taft Avenue station in Metro Manila; visually reviewed against the named Philippine location Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines."
+      },
+      "sha256": "71b791b708ee781ea4ad1ab164f08e753685dab281276189906e4c74787470a6"
+    },
+    {
+      "path": "assets/images/mrt-edsa/3.png",
+      "landmark_id": "mrt-edsa",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Taft_Avenue_MRT-3_2024-03-06.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/7/70/Taft_Avenue_MRT-3_2024-03-06.jpg",
+      "author": "LMP 2001",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "d43d01de388b4b3be1d72f0b55faf64d5e5b28bc00c60ea170dab29e6c2688f4",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Taft Avenue MRT-3 2024-03-06.jpg",
+      "location": "Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Taft_Avenue_MRT-3_2024-03-06.jpg",
+        "basis": "Commons file description/category (Taft Avenue station / MRT-3) identifies the MRT-3 EDSA–Taft Avenue station in Metro Manila; visually reviewed against the named Philippine location Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines."
+      },
+      "sha256": "de918bd1c10cb67551244530e0156ab7e50f2942d9da835750726660236b3459"
+    },
+    {
+      "path": "assets/images/mrt-edsa/4.png",
+      "landmark_id": "mrt-edsa",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:LRT-1_MRT-3_Walkway_EDSA_Station_Taft_Station.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/7/78/LRT-1_MRT-3_Walkway_EDSA_Station_Taft_Station.jpg",
+      "author": "Matthew Gan",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "original_sha256": "a0108269fc0f7221075675745d9d618f622ba4ddc5156ec85d5ac8fd6be6cd9a",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:LRT-1 MRT-3 Walkway EDSA Station Taft Station.jpg",
+      "location": "Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:LRT-1_MRT-3_Walkway_EDSA_Station_Taft_Station.jpg",
+        "basis": "Commons file description/category (Taft Avenue station / MRT-3) identifies the MRT-3 EDSA–Taft Avenue station in Metro Manila; visually reviewed against the named Philippine location Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines."
+      },
+      "sha256": "f95c686687d52197d06a90bb24243f1a49034577a9eb32fab9059ffb9f03aa05"
+    },
+    {
+      "path": "test/datasets/held_out/public/mrt-edsa/1.png",
+      "landmark_id": "mrt-edsa",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:MRT3-LRT1_Bridge.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/MRT3-LRT1_Bridge.jpg",
+      "author": "Mithril Cloud",
+      "license": "CC BY 2.5",
+      "license_url": "https://creativecommons.org/licenses/by/2.5",
+      "original_sha256": "3c2cd4b4f6993632e31d3ccb153ed8ed04858cee9dd222e584be4acdf78f9e0a",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:MRT3-LRT1 Bridge.jpg",
+      "location": "Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:MRT3-LRT1_Bridge.jpg",
+        "basis": "Commons file description/category (Taft Avenue station / MRT-3) identifies the MRT-3 EDSA–Taft Avenue station in Metro Manila; visually reviewed against the named Philippine location Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines."
+      },
+      "sha256": "c8c220a3d061188ba624a1fbfc6c883f559fe464d0922f68d94515eca9bc4c5f"
+    },
+    {
+      "path": "test/datasets/held_out/public/mrt-edsa/2.png",
+      "landmark_id": "mrt-edsa",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:MRT_Taft_Station_-_panoramio.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/MRT_Taft_Station_-_panoramio.jpg",
+      "author": "ChrisVillarin.com",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0",
+      "original_sha256": "6ad3acee8e94d303a70600843b778d7bf6d526d7549708ea74ce56b97c6c111f",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:MRT Taft Station - panoramio.jpg",
+      "location": "Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:MRT_Taft_Station_-_panoramio.jpg",
+        "basis": "Commons file description/category (Taft Avenue station / MRT-3) identifies the MRT-3 EDSA–Taft Avenue station in Metro Manila; visually reviewed against the named Philippine location Taft Avenue station (MRT-3), EDSA, Pasay, Metro Manila, Philippines."
+      },
+      "sha256": "f0e4ffa975806f90610411d548053087fe11b8208fd20da86f77b7c5576d3a82"
+    },
+    {
+      "path": "assets/images/sm-makati/1.png",
+      "landmark_id": "sm-makati",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Smmakatijf.JPG",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/a/af/Smmakatijf.JPG",
+      "author": "Ramon FVelasquez",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "original_sha256": "2c6bc076e1a200a8e453d9c9b1b64054865ec042c43cd5af884a92b4e3b4c31d",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:Smmakatijf.JPG",
+      "location": "SM Makati, Ayala Center, Makati, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:Smmakatijf.JPG",
+        "basis": "Commons file description/category (SM Makati / Makati Central Business District Landmarks) identifies SM Makati in the Ayala Center, Makati; visually reviewed against the named Philippine location SM Makati, Ayala Center, Makati, Metro Manila, Philippines."
+      },
+      "sha256": "1bf777c1e12c0a626642977a368ebfba55fcef1c9fcbd072d787ea42fc15e473"
+    },
+    {
+      "path": "assets/images/sm-makati/2.png",
+      "landmark_id": "sm-makati",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_07.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/4/42/9991Makati_Central_Business_District_Landmarks_07.jpg",
+      "author": "Judgefloro",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "original_sha256": "eb95e25b2b5c0d07d5156e0e12965d3bd61d7aa3cbf3812633860345a1255c46",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:9991Makati Central Business District Landmarks 07.jpg",
+      "location": "SM Makati, Ayala Center, Makati, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_07.jpg",
+        "basis": "Commons file description/category (SM Makati / Makati Central Business District Landmarks) identifies SM Makati in the Ayala Center, Makati; visually reviewed against the named Philippine location SM Makati, Ayala Center, Makati, Metro Manila, Philippines."
+      },
+      "sha256": "7c71aea27fdd2010c508c66ecec75cc4abbea82b9e31f50c388afe6dccb543d0"
+    },
+    {
+      "path": "assets/images/sm-makati/3.png",
+      "landmark_id": "sm-makati",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_08.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/81/9991Makati_Central_Business_District_Landmarks_08.jpg",
+      "author": "Judgefloro",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "original_sha256": "26484f6331a717c2d6ac82e7115e28b611a3f129656bed4172859dcef7510f15",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:9991Makati Central Business District Landmarks 08.jpg",
+      "location": "SM Makati, Ayala Center, Makati, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_08.jpg",
+        "basis": "Commons file description/category (SM Makati / Makati Central Business District Landmarks) identifies SM Makati in the Ayala Center, Makati; visually reviewed against the named Philippine location SM Makati, Ayala Center, Makati, Metro Manila, Philippines."
+      },
+      "sha256": "6ad5aa4371fde6fcf37626e4ba2fde7c508177123ae61858694c544d1769aee4"
+    },
+    {
+      "path": "assets/images/sm-makati/4.png",
+      "landmark_id": "sm-makati",
+      "split": "reference",
+      "page_url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_09.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/5e/9991Makati_Central_Business_District_Landmarks_09.jpg",
+      "author": "Judgefloro",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "original_sha256": "688cd55739adf288e584599344a40c49975aa19334fbb70ac1371c5ca03d7907",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:9991Makati Central Business District Landmarks 09.jpg",
+      "location": "SM Makati, Ayala Center, Makati, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_09.jpg",
+        "basis": "Commons file description/category (SM Makati / Makati Central Business District Landmarks) identifies SM Makati in the Ayala Center, Makati; visually reviewed against the named Philippine location SM Makati, Ayala Center, Makati, Metro Manila, Philippines."
+      },
+      "sha256": "da8e11d7ecaf0a4250df32eed05d64e2112427682e52c8d9023a944fc2def6b8"
+    },
+    {
+      "path": "test/datasets/held_out/public/sm-makati/1.png",
+      "landmark_id": "sm-makati",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_11.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/54/9991Makati_Central_Business_District_Landmarks_11.jpg",
+      "author": "Judgefloro",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "original_sha256": "0067634d9a63d0b6478e7bfb7809f4e3a5e4f79bfdec900c072ae68532403505",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:9991Makati Central Business District Landmarks 11.jpg",
+      "location": "SM Makati, Ayala Center, Makati, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_11.jpg",
+        "basis": "Commons file description/category (SM Makati / Makati Central Business District Landmarks) identifies SM Makati in the Ayala Center, Makati; visually reviewed against the named Philippine location SM Makati, Ayala Center, Makati, Metro Manila, Philippines."
+      },
+      "sha256": "a57c6cd97683d4ee505f9d94f1a9506c62bcaed89ed9fb9684e59620ce8be8bd"
+    },
+    {
+      "path": "test/datasets/held_out/public/sm-makati/2.png",
+      "landmark_id": "sm-makati",
+      "split": "held_out",
+      "page_url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_12.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/9991Makati_Central_Business_District_Landmarks_12.jpg",
+      "author": "Judgefloro",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "original_sha256": "66b92ff22b839d368ee233345bba44880e957441738f5363537c60caed3419f2",
+      "modifications": "EXIF orientation applied; converted to RGB; longest edge reduced to at most 1024 pixels using Pillow LANCZOS; lossless PNG with optimize=True; EXIF metadata omitted.",
+      "source_title": "File:9991Makati Central Business District Landmarks 12.jpg",
+      "location": "SM Makati, Ayala Center, Makati, Metro Manila, Philippines",
+      "country": "PH",
+      "geographic_evidence": {
+        "url": "https://commons.wikimedia.org/wiki/File:9991Makati_Central_Business_District_Landmarks_12.jpg",
+        "basis": "Commons file description/category (SM Makati / Makati Central Business District Landmarks) identifies SM Makati in the Ayala Center, Makati; visually reviewed against the named Philippine location SM Makati, Ayala Center, Makati, Metro Manila, Philippines."
+      },
+      "sha256": "84ddc37b294926844b5e82e2233a9c38e1c22cf76e56de28ffbc03c2289b4d11"
     }
   ],
   "notes": [

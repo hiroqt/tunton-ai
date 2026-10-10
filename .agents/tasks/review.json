@@ -1,5 +1,16 @@
 {
   "verdict": "APPROVED",
-  "summary": "All four backend files and tests match plan.md exactly; dot-product cosine with no re-normalization, max-per-landmark top-3-distinct with first-class Not-recognized, ETA /75.0, first-class RouteResult.unavailable() with no straight-line fallback, DIRECTED-only Dijkstra, approved packages only, UI/app/main untouched, and 31 tests (analyze clean) actually pass.",
-  "findings": []
+  "findings": [
+    {
+      "label": "Plan deviation: merge path instead of index run",
+      "blocking": false,
+      "detail": "Coder used targeted embed-and-merge rather than create_index/evaluate because validate() rejects pre-existing route-bearing POIs. Disclosed in the gap doc and independently verified honest: re-embedding two new PNGs through prepare_dataset.image_embedding reproduced the stored vectors exactly (max|delta|=0, cos=1.0). No action required."
+    },
+    {
+      "label": "Pre-existing unpushed commit ahead of origin",
+      "blocking": false,
+      "detail": "Commit 9ce4556 from the prior 'add e2e testing' step is 1 ahead of origin/main and unpushed. It predates the image files, contains no data files, and is not part of this data task; this task made no commit or push. Flag before any later push decision."
+    }
+  ],
+  "reviewDoc": "/Users/arnel/tunton-ai/.agents/tasks/review.md"
 }
